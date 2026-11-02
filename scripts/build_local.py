@@ -101,6 +101,9 @@ def main():
     info["MouseControlGitTag"] = tag
     info["OpenSnekBuildChannel"] = "release" if version else "dev"
     info_path.write_bytes(plistlib.dumps(info))
+    if version:
+        # Remove source/object paths from production binaries before sealing the signature.
+        run(["strip", "-S", str(bundle / "Contents/MacOS/MouseControl")])
     # Xcode only searches system keychains. Sign afterward so the development keychain
     # stays outside the system search list and no trust settings need to change.
     nested = [path for path in bundle.rglob("*") if not path.is_symlink() and path.suffix in {".dylib", ".framework", ".xpc", ".app"}]
