@@ -1,0 +1,863 @@
+import XCTest
+import OpenSnekCore
+
+/// Exercises device profiles behavior.
+final class DeviceProfilesTests: XCTestCase {
+    func testResolveUSBProfileForBasiliskV3X() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00B9, transport: .usb)
+        XCTAssertEqual(profile?.id, .basiliskV3XHyperspeed)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 96])
+        XCTAssertEqual(profile?.buttonLayout.documentedSlots.map(\.slot), [1, 2, 3, 4, 5, 6, 9, 10, 96])
+        XCTAssertEqual(profile?.buttonLayout.access(for: 6), .softwareReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.softwareReadOnlySlots.map(\.slot), [6])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, true)
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave, .reactive, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x01])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel"])
+        XCTAssertNil(profile?.softwareLightingFrameLayout)
+        XCTAssertEqual(profile?.supportedSoftwareLightingPresets, [])
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.passiveDPIInput?.usagePage, 0x01)
+        XCTAssertEqual(profile?.passiveDPIInput?.usage, 0x06)
+        XCTAssertEqual(profile?.passiveDPIInput?.reportID, 0x05)
+        XCTAssertEqual(profile?.passiveDPIInput?.subtype, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.maximumDPI, 18_000)
+        XCTAssertEqual(profile?.supportsScrollModeControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, false)
+        XCTAssertEqual(profile?.usesProjectedDPIStageWriteReadback, true)
+        XCTAssertEqual(profile?.onboardProfileCount, 1)
+    }
+
+    func testBasiliskV3XUSBAndBluetoothExposeSameButtonBindings() throws {
+        let usb = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00B9, transport: .usb))
+        let bluetooth = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00BA, transport: .bluetooth))
+
+        XCTAssertEqual(usb.buttonLayout.visibleSlots, bluetooth.buttonLayout.visibleSlots)
+        XCTAssertEqual(usb.buttonLayout.writableSlots, bluetooth.buttonLayout.writableSlots)
+        XCTAssertEqual(usb.buttonLayout.documentedSlots, bluetooth.buttonLayout.documentedSlots)
+        XCTAssertEqual(ButtonBindingSupport.availableButtonBindingKinds(profileID: usb.id), ButtonBindingSupport.availableButtonBindingKinds(profileID: bluetooth.id))
+    }
+
+    func testResolveUSBProfileForBasiliskV335K() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00CB, transport: .usb)
+        XCTAssertEqual(profile?.id, .basiliskV335K)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 52 })?.defaultKind, .scrollLeft)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 53 })?.defaultKind, .scrollRight)
+        XCTAssertEqual(profile?.buttonLayout.documentedSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 14, 15, 52, 53, 96, 106])
+        XCTAssertEqual(profile?.buttonLayout.access(for: 14), .protocolReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 15), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 106), .protocolReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.softwareReadOnlySlots.map(\.slot), [])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, true)
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave])
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x01, 0x04, 0x0A])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel", "logo", "underglow"])
+        XCTAssertEqual(profile?.softwareLightingFrameLayout, .basiliskV3ProUSB)
+        XCTAssertEqual(profile?.softwareLightingFrameLayout?.cellCount, 14)
+        XCTAssertEqual(profile?.supportedSoftwareLightingPresets, SoftwareLightingPresetID.animatedPresets)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.passiveDPIInput?.usagePage, 0x01)
+        XCTAssertEqual(profile?.passiveDPIInput?.usage, 0x06)
+        XCTAssertEqual(profile?.passiveDPIInput?.reportID, 0x05)
+        XCTAssertEqual(profile?.passiveDPIInput?.subtype, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.profileSwitchPrefixes, [[0x05, 0x39]])
+        XCTAssertEqual(profile?.passiveDPIInput?.maximumDPI, 35_000)
+        XCTAssertEqual(profile?.supportsIndependentXYDPI, true)
+        XCTAssertEqual(profile?.supportsScrollModeControls, true)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.usesProjectedDPIStageWriteReadback, false)
+        XCTAssertEqual(profile?.onboardProfileSupport, .mappedCore)
+        XCTAssertEqual(profile?.onboardProfileCount, 5)
+    }
+
+    func testBasiliskV335KSupportsDPIClutchBindings() {
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(profileID: .basiliskV335K).contains(.dpiClutch))
+        XCTAssertEqual(ButtonBindingSupport.defaultDPIClutchDPI(for: .basiliskV335K), 400)
+    }
+
+    func testResolveUSBProfileForBasiliskV3() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0099, transport: .usb)
+        XCTAssertEqual(profile?.id, .basiliskV3)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.documentedSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 14, 15, 52, 53, 96, 106])
+        XCTAssertEqual(profile?.buttonLayout.access(for: 14), .protocolReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 15), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 106), .protocolReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.softwareReadOnlySlots.map(\.slot), [])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, true)
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave])
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x01, 0x04, 0x0A])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel", "logo", "underglow"])
+        XCTAssertEqual(profile?.softwareLightingFrameLayout, .basiliskV3ProUSB)
+        XCTAssertEqual(profile?.softwareLightingFrameLayout?.cellCount, 14)
+        XCTAssertEqual(profile?.supportedSoftwareLightingPresets, SoftwareLightingPresetID.animatedPresets)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.passiveDPIInput?.usagePage, 0x01)
+        XCTAssertEqual(profile?.passiveDPIInput?.usage, 0x06)
+        XCTAssertEqual(profile?.passiveDPIInput?.reportID, 0x05)
+        XCTAssertEqual(profile?.passiveDPIInput?.subtype, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.profileSwitchPrefixes, [[0x05, 0x39]])
+        XCTAssertEqual(profile?.passiveDPIInput?.maximumDPI, 26_000)
+        XCTAssertEqual(profile?.supportsIndependentXYDPI, true)
+        XCTAssertEqual(profile?.supportsScrollModeControls, true)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.onboardProfileSupport, .mappedCore)
+        XCTAssertEqual(profile?.onboardProfileCount, 5)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+    }
+
+    func testBasiliskV3SupportsDPIClutchBindings() {
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(profileID: .basiliskV3).contains(.dpiClutch))
+        XCTAssertEqual(ButtonBindingSupport.defaultDPIClutchDPI(for: .basiliskV3), 400)
+    }
+
+    func testResolveUSBProfileForBasiliskV3Pro() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00AB, transport: .usb)
+        XCTAssertEqual(profile?.id, .basiliskV3Pro)
+        XCTAssertEqual(profile?.supportedProducts, [0x00AA, 0x00AB])
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 52 })?.defaultKind, .scrollLeft)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 53 })?.defaultKind, .scrollRight)
+        XCTAssertEqual(profile?.buttonLayout.documentedSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 14, 15, 52, 53, 96, 106])
+        XCTAssertEqual(profile?.buttonLayout.access(for: 14), .protocolReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 15), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 96), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 106), .protocolReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.softwareReadOnlySlots.map(\.slot), [])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, true)
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave])
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x01, 0x04, 0x0A])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel", "logo", "underglow"])
+        XCTAssertEqual(profile?.softwareLightingFrameLayout, .basiliskV3ProUSB)
+        XCTAssertEqual(profile?.softwareLightingFrameLayout?.cellCount, 14)
+        XCTAssertEqual(profile?.supportedSoftwareLightingPresets, SoftwareLightingPresetID.basiliskV3ProPresets)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.passiveDPIInput?.usagePage, 0x01)
+        XCTAssertEqual(profile?.passiveDPIInput?.usage, 0x06)
+        XCTAssertEqual(profile?.passiveDPIInput?.reportID, 0x05)
+        XCTAssertEqual(profile?.passiveDPIInput?.subtype, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.profileSwitchPrefixes, [[0x05, 0x39]])
+        XCTAssertEqual(profile?.passiveDPIInput?.profileSwitchPreludePrefixes, [])
+        XCTAssertEqual(profile?.passiveDPIInput?.maximumDPI, 30_000)
+        XCTAssertEqual(profile?.supportsIndependentXYDPI, true)
+        XCTAssertEqual(profile?.supportsScrollModeControls, true)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.onboardProfileSupport, .mappedCore)
+        XCTAssertEqual(profile?.onboardProfileCount, 5)
+    }
+
+    func testBasiliskV3USBFamilySharesMappedConfigurationProfile() throws {
+        let baseline = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00AB, transport: .usb))
+        let family = [("Basilisk V3", try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0099, transport: .usb))), ("Basilisk V3 Pro", baseline), ("Basilisk V3 35K", try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00CB, transport: .usb)))]
+
+        for (label, profile) in family {
+            XCTAssertEqual(profile.transport, baseline.transport, label)
+            XCTAssertEqual(profile.usbTransactionID, baseline.usbTransactionID, label)
+            XCTAssertEqual(profile.buttonLayout, baseline.buttonLayout, label)
+            XCTAssertEqual(profile.supportsAdvancedLightingEffects, baseline.supportsAdvancedLightingEffects, label)
+            XCTAssertEqual(profile.supportedLightingEffects, baseline.supportedLightingEffects, label)
+            XCTAssertEqual(profile.usbLightingLEDIDs, baseline.usbLightingLEDIDs, label)
+            XCTAssertEqual(profile.usbLightingZones, baseline.usbLightingZones, label)
+            XCTAssertEqual(profile.softwareLightingFrameLayout, baseline.softwareLightingFrameLayout, label)
+            XCTAssertEqual(profile.passiveDPIInput?.usagePage, baseline.passiveDPIInput?.usagePage, label)
+            XCTAssertEqual(profile.passiveDPIInput?.usage, baseline.passiveDPIInput?.usage, label)
+            XCTAssertEqual(profile.passiveDPIInput?.reportID, baseline.passiveDPIInput?.reportID, label)
+            XCTAssertEqual(profile.passiveDPIInput?.subtype, baseline.passiveDPIInput?.subtype, label)
+            XCTAssertEqual(profile.passiveDPIInput?.profileSwitchPrefixes, baseline.passiveDPIInput?.profileSwitchPrefixes, label)
+            XCTAssertEqual(profile.passiveDPIInput?.profileSwitchPreludePrefixes, baseline.passiveDPIInput?.profileSwitchPreludePrefixes, label)
+            XCTAssertEqual(profile.passiveDPIInput?.minInputReportSize, baseline.passiveDPIInput?.minInputReportSize, label)
+            XCTAssertEqual(profile.supportsIndependentXYDPI, baseline.supportsIndependentXYDPI, label)
+            XCTAssertEqual(profile.supportsScrollModeControls, baseline.supportsScrollModeControls, label)
+            XCTAssertEqual(profile.supportsLightingBrightnessControls, baseline.supportsLightingBrightnessControls, label)
+            XCTAssertEqual(profile.onboardProfileSupport, .mappedCore, label)
+            XCTAssertTrue(profile.supportsMappedOnboardProfileCRUD, label)
+            XCTAssertEqual(profile.onboardProfileCount, baseline.onboardProfileCount, label)
+        }
+    }
+
+    func testResolveUSBProfileForBasiliskV3ProWiredUSBPID() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00AA, transport: .usb)
+        XCTAssertEqual(profile?.id, .basiliskV3Pro)
+        XCTAssertEqual(profile?.productName, "Basilisk V3 Pro")
+        XCTAssertEqual(profile?.supportedProducts, [0x00AA, 0x00AB])
+        XCTAssertEqual(profile?.softwareLightingFrameLayout?.cellCount, 14)
+        XCTAssertTrue(profile?.supportedSoftwareLightingPresets.contains(.batteryMeter) == true)
+    }
+
+    func testBasiliskV3ProUSBLightingTargetsResolveAllZones() throws {
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00AB, transport: .usb))
+        let targets = try XCTUnwrap(profile.lightingTargets())
+        XCTAssertEqual(targets.map(\.zoneID), ["scroll_wheel", "logo", "underglow"])
+        XCTAssertEqual(targets.map(\.ledID), [0x01, 0x04, 0x0A])
+        XCTAssertEqual(profile.lightingLEDIDs(), [0x01, 0x04, 0x0A])
+    }
+
+    func testBasiliskV3ProUSBLightingTargetsResolveSpecificZone() throws {
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00AB, transport: .usb))
+        let targets = try XCTUnwrap(profile.lightingTargets(for: "logo"))
+        XCTAssertEqual(targets.map(\.zoneID), ["logo"])
+        XCTAssertEqual(targets.map(\.ledID), [0x04])
+        XCTAssertEqual(profile.lightingLEDIDs(for: "logo"), [0x04])
+        XCTAssertNil(profile.lightingTargets(for: "bogus"))
+        XCTAssertNil(profile.lightingLEDIDs(for: "bogus"))
+    }
+
+    func testResolveBluetoothProfileForBasiliskV3X() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00BA, transport: .bluetooth)
+        XCTAssertEqual(profile?.id, .basiliskV3XHyperspeed)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 96])
+        XCTAssertEqual(profile?.buttonLayout.documentedSlots.map(\.slot), [1, 2, 3, 4, 5, 6, 9, 10, 96])
+        XCTAssertEqual(profile?.buttonLayout.access(for: 6), .softwareReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.softwareReadOnlySlots.map(\.slot), [6])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, false)
+        XCTAssertEqual(profile?.passiveDPIInput?.usagePage, 0x01)
+        XCTAssertEqual(profile?.passiveDPIInput?.usage, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.reportID, 0x05)
+        XCTAssertEqual(profile?.passiveDPIInput?.subtype, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.maximumDPI, 18_000)
+        XCTAssertEqual(profile?.supportsScrollModeControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.onboardProfileCount, 1)
+    }
+
+    func testResolveBluetoothProfileForBasiliskV3Pro() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00AC, transport: .bluetooth)
+        XCTAssertEqual(profile?.id, .basiliskV3Pro)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 52 })?.defaultKind, .scrollLeft)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 53 })?.defaultKind, .scrollRight)
+        XCTAssertEqual(profile?.buttonLayout.documentedSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 15, 52, 53, 96, 106])
+        XCTAssertEqual(profile?.buttonLayout.access(for: 15), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 52), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 96), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 106), .softwareReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.softwareReadOnlySlots.map(\.slot), [106])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, false)
+        XCTAssertEqual(profile?.passiveDPIInput?.usagePage, 0x01)
+        XCTAssertEqual(profile?.passiveDPIInput?.usage, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.reportID, 0x05)
+        XCTAssertEqual(profile?.passiveDPIInput?.subtype, 0x02)
+        XCTAssertEqual(profile?.passiveDPIInput?.maxFeatureReportSize, 1)
+        XCTAssertEqual(profile?.passiveDPIInput?.profileSwitchPrefixes, [[0x05, 0x05, 0x39, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]])
+        XCTAssertEqual(profile?.passiveDPIInput?.profileSwitchPreludePrefixes, [[0x04, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]])
+        XCTAssertEqual(profile?.passiveDPIInput?.maximumDPI, 30_000)
+        XCTAssertEqual(profile?.supportsScrollModeControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.onboardProfileSupport, .mappedCore)
+        XCTAssertEqual(profile?.onboardProfileCount, 5)
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x01, 0x04, 0x0A])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel", "logo", "underglow"])
+    }
+
+    func testResolveBluetoothProfileForBasiliskV3Pro35KPhantomGreen() throws {
+        let baseline = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00AC, transport: .bluetooth))
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00D8, transport: .bluetooth))
+
+        XCTAssertEqual(profile.id, .basiliskV3Pro35K)
+        XCTAssertEqual(profile.productName, "Basilisk V3 Pro 35K Phantom Green Edition")
+        XCTAssertEqual(profile.supportedProducts, [0x00D8])
+        XCTAssertFalse(profile.isLocallyValidated)
+        XCTAssertEqual(profile.passiveDPIInput?.maximumDPI, 35_000)
+        XCTAssertEqual(profile.buttonLayout, baseline.buttonLayout)
+        XCTAssertEqual(profile.supportsAdvancedLightingEffects, baseline.supportsAdvancedLightingEffects)
+        XCTAssertEqual(profile.supportedLightingEffects, baseline.supportedLightingEffects)
+        // No logo LED on the Phantom Green Edition: only the scroll wheel and underglow zones.
+        XCTAssertEqual(profile.usbLightingZones.map(\.id), ["scroll_wheel", "underglow"])
+        XCTAssertEqual(profile.usbLightingLEDIDs, [0x01, 0x0A])
+        XCTAssertEqual(profile.lightingLEDIDs(), [0x01, 0x0A])
+        XCTAssertEqual(baseline.usbLightingLEDIDs, [0x01, 0x04, 0x0A])
+        XCTAssertEqual(profile.passiveDPIInput?.usagePage, baseline.passiveDPIInput?.usagePage)
+        XCTAssertEqual(profile.passiveDPIInput?.usage, baseline.passiveDPIInput?.usage)
+        XCTAssertEqual(profile.passiveDPIInput?.reportID, baseline.passiveDPIInput?.reportID)
+        XCTAssertEqual(profile.passiveDPIInput?.subtype, baseline.passiveDPIInput?.subtype)
+        XCTAssertEqual(profile.passiveDPIInput?.heartbeatSubtype, baseline.passiveDPIInput?.heartbeatSubtype)
+        XCTAssertEqual(profile.passiveDPIInput?.profileSwitchPrefixes, baseline.passiveDPIInput?.profileSwitchPrefixes)
+        XCTAssertEqual(profile.passiveDPIInput?.profileSwitchPreludePrefixes, baseline.passiveDPIInput?.profileSwitchPreludePrefixes)
+        XCTAssertEqual(profile.passiveDPIInput?.maxFeatureReportSize, baseline.passiveDPIInput?.maxFeatureReportSize)
+        XCTAssertEqual(profile.supportsIndependentXYDPI, true)
+        XCTAssertEqual(profile.supportsLightingBrightnessControls, true)
+        // The tested unit rejects `03 84` metadata reads (status 0x03), so Bluetooth profile CRUD stays off.
+        XCTAssertEqual(profile.onboardProfileSupport, .unavailable)
+        XCTAssertFalse(profile.supportsMappedOnboardProfileCRUD)
+        XCTAssertEqual(profile.onboardProfileCount, 1)
+        XCTAssertEqual(baseline.onboardProfileSupport, .mappedCore)
+        XCTAssertEqual(baseline.onboardProfileCount, 5)
+    }
+
+    func testBasiliskV3Pro35KUSBIdentitiesAreNotShippedYet() {
+        // Only the Phantom Green Edition Bluetooth path is hardware validated; its USB IDs (0x00D6/0x00D7)
+        // and the regular 35K's (0x00CC/0x00CD) stay unclaimed until they are validated.
+        for productID in [0x00CC, 0x00CD, 0x00D6, 0x00D7, 0x00D8] { XCTAssertNil(DeviceProfiles.resolve(vendorID: 0x1532, productID: productID, transport: .usb), String(format: "0x%04X", productID)) }
+    }
+
+    func testBasiliskV3Pro35KButtonDefaultsMatchFactoryReadback() {
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(profileID: .basiliskV3Pro35K).contains(.dpiClutch))
+        XCTAssertEqual(ButtonBindingSupport.defaultDPIClutchDPI(for: .basiliskV3Pro35K), 400)
+        // Factory blocks read from all four untouched stored profiles over Bluetooth
+        // (captures/ble/2026-10-13-basilisk-v3-pro-35k/probe-log.txt).
+        XCTAssertEqual(ButtonBindingSupport.defaultUSBFunctionBlock(for: 15, profileID: .basiliskV3Pro35K), [0x06, 0x01, 0x05, 0x01, 0x90, 0x01, 0x90])
+        XCTAssertEqual(ButtonBindingSupport.defaultUSBFunctionBlock(for: 96, profileID: .basiliskV3Pro35K), [0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00])
+        for slot in [1, 2, 3, 4, 5, 9, 10, 52, 53] { XCTAssertEqual(ButtonBindingSupport.defaultUSBFunctionBlock(for: slot, profileID: .basiliskV3Pro35K), ButtonBindingSupport.defaultUSBFunctionBlock(for: slot, profileID: .basiliskV3Pro), "slot \(slot)") }
+    }
+
+    func testBasiliskV3Pro35KFactoryButtonReadbackHydratesAsDefaults() {
+        let factoryBlocks: [Int: [UInt8]] = [15: [0x06, 0x01, 0x05, 0x01, 0x90, 0x01, 0x90], 52: [0x0E, 0x01, 0x68, 0x00, 0x14, 0x00, 0x00], 53: [0x0E, 0x01, 0x69, 0x00, 0x14, 0x00, 0x00], 96: [0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00]]
+        for (slot, block) in factoryBlocks {
+            let draft = ButtonBindingSupport.buttonBindingDraftFromUSBFunctionBlock(slot: slot, functionBlock: block, profileID: .basiliskV3Pro35K)
+            let normalized = draft.map { ButtonBindingSupport.normalizedDefaultRepresentation(for: slot, draft: $0, profileID: .basiliskV3Pro35K) }
+            XCTAssertEqual(normalized?.kind, .default, "slot \(slot)")
+        }
+    }
+
+    func testNonHyperspeedBasiliskV3ProfilesShareButtonMapSlots() throws {
+        let expectedSlots = DeviceProfiles.basiliskV3FamilyButtonSlots
+        let expectedSlotIDs = expectedSlots.map(\.slot)
+        let profiles = [
+            ("Basilisk V3 USB", DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0099, transport: .usb)), ("Basilisk V3 Pro USB", DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00AB, transport: .usb)),
+            ("Basilisk V3 Pro Bluetooth", DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00AC, transport: .bluetooth)), ("Basilisk V3 35K USB", DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00CB, transport: .usb)),
+            ("Basilisk V3 Pro 35K Phantom Green Bluetooth", DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00D8, transport: .bluetooth))
+        ]
+
+        for (label, maybeProfile) in profiles {
+            let profile = try XCTUnwrap(maybeProfile, label)
+            XCTAssertEqual(profile.buttonLayout.visibleSlots, expectedSlots, label)
+            XCTAssertEqual(profile.buttonLayout.writableSlots, expectedSlotIDs, label)
+        }
+    }
+
+    func testResolveBluetoothProfileForOrochiV2() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0095, transport: .bluetooth)
+        XCTAssertEqual(profile?.id, .orochiV2)
+        XCTAssertEqual(profile?.productName, "Orochi V2")
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 96])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 96])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, false)
+        XCTAssertEqual(profile?.supportedLightingEffects, [])
+        XCTAssertEqual(profile?.usbLightingZones.count, 0)
+        XCTAssertEqual(profile?.passiveDPIInput?.maximumDPI, 18_000)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, false)
+        XCTAssertEqual(profile?.onboardProfileCount, 1)
+        XCTAssertFalse(ButtonBindingSupport.availableButtonBindingKinds(profileID: .orochiV2).contains(.dpiClutch))
+        XCTAssertNil(ButtonBindingSupport.defaultDPIClutchDPI(for: .orochiV2))
+    }
+
+    func testResolveUSBProfileForNagaProWired() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x008F, transport: .usb)
+        XCTAssertEqual(profile?.id, .nagaPro)
+        XCTAssertEqual(profile?.productName, "Naga Pro")
+        XCTAssertEqual(profile?.supportedProducts, [0x008F, 0x0090])
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 11, 12, 14, 52, 53, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 80, 81, 82, 83, 84, 85])
+        XCTAssertEqual(profile?.buttonLayout.access(for: 14), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 11), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 12), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 80), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 83), .editable)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 83 })?.friendlyName, "Side Button 4")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 85 })?.friendlyName, "Side Button 6")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 5 })?.friendlyName, "Panel Button 1")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 5 })?.group, "2-Button Panel")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 4 })?.group, "2-Button Panel")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 64 })?.group, "12-Button Panel")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 80 })?.group, "6-Button Panel")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.filter { $0.group == "Mouse" }.map(\.slot), [1, 2, 3, 9, 10, 11, 12, 52, 53, 14])
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, false)
+        XCTAssertEqual(profile?.supportedLightingEffects, [])
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x01, 0x04])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel", "logo"])
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.onboardProfileSupport, .mappedCore)
+        XCTAssertEqual(profile?.onboardProfileCount, 5)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+        XCTAssertFalse(ButtonBindingSupport.availableButtonBindingKinds(profileID: .nagaPro).contains(.dpiClutch))
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(for: 64, profileID: .nagaPro).contains(.default))
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(for: 82, profileID: .nagaPro).contains(.default))
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(for: 83, profileID: .nagaPro).contains(.default))
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(for: 64, profileID: .nagaPro).contains(.keyboardSimple))
+        XCTAssertTrue(ButtonBindingSupport.availableButtonBindingKinds(for: 52, profileID: .nagaPro).contains(.default))
+        XCTAssertNil(ButtonBindingSupport.defaultDPIClutchDPI(for: .nagaPro))
+    }
+
+    func testResolveUSBProfileForNagaProWireless() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0090, transport: .usb)
+        XCTAssertEqual(profile?.id, .nagaPro)
+    }
+
+    func testResolveBluetoothProfileForNagaPro() {
+        // Unlike the Basilisk family, Naga Pro keeps vendor ID 0x1532 over Bluetooth instead of remapping to 0x068E.
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0092, transport: .bluetooth)
+        XCTAssertEqual(profile?.id, .nagaPro)
+        XCTAssertEqual(profile?.buttonLayout, DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x008F, transport: .usb)?.buttonLayout)
+    }
+
+    func testResolveUSBProfileForNagaV2ProWireless() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00A8, transport: .usb)
+        XCTAssertEqual(profile?.id, .nagaV2Pro)
+        XCTAssertEqual(profile?.productName, "Naga V2 Pro")
+        XCTAssertEqual(profile?.supportedProducts, [0x00A7, 0x00A8])
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [1, 2, 3, 4, 5, 9, 10, 14, 52, 53, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 80, 81, 82, 83, 84, 85])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.filter { $0.group == "Mouse" }.map(\.slot), [1, 2, 3, 9, 10, 52, 53, 14])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 5 })?.group, "2-Button Panel")
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.first(where: { $0.slot == 85 })?.group, "6-Button Panel")
+        XCTAssertEqual(profile?.buttonLayout.access(for: 83), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 14), .editable)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 96), .protocolReadOnly)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 109), .protocolReadOnly)
+        XCTAssertEqual(profile?.supportsAdvancedLightingEffects, true)
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave, .reactive, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x04, 0x05])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["logo", "side_panel"])
+        XCTAssertEqual(profile?.usbBrightnessLEDIDs, [0x00])
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.supportsScrollModeControls, false)
+        XCTAssertEqual(profile?.onboardProfileSupport, .mappedCore)
+        XCTAssertEqual(profile?.onboardProfileCount, 5)
+        XCTAssertEqual(profile?.softwareLightingFrameLayout?.cellCount, 1)
+        XCTAssertEqual(profile?.supportedSoftwareLightingPresets, SoftwareLightingPresetID.animatedPresets)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+        XCTAssertFalse(ButtonBindingSupport.availableButtonBindingKinds(profileID: .nagaV2Pro).contains(.dpiClutch))
+        XCTAssertFalse(DeviceProfiles.supportsIndependentXYDPI(for: .nagaV2Pro))
+        XCTAssertEqual(DeviceProfiles.maximumDPI(for: .nagaV2Pro), 30_000)
+    }
+
+    func testResolveUSBProfileForNagaV2ProWired() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00A7, transport: .usb)
+        XCTAssertEqual(profile?.id, .nagaV2Pro)
+        XCTAssertEqual(profile?.buttonLayout, DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00A8, transport: .usb)?.buttonLayout)
+    }
+
+    func testResolveBluetoothProfileForNagaV2Pro() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00A9, transport: .bluetooth)
+        XCTAssertEqual(profile?.id, .nagaV2Pro)
+        XCTAssertEqual(profile?.productName, "Naga V2 Pro")
+        XCTAssertEqual(profile?.supportedProducts, [0x00A9])
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, DeviceProfiles.nagaV2ProUSBWritableSlots)
+        XCTAssertEqual(profile?.buttonLayout.access(for: 14), .editable)
+        XCTAssertEqual(profile?.usbLightingLEDIDs, [0x04, 0x05])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["logo", "side_panel"])
+        XCTAssertEqual(profile?.supportedLightingEffects, [.staticColor])
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        // Bluetooth profile CRUD is not validated yet; leaving mapped CRUD off keeps the generic
+        // battery/lighting polling path enabled for the BT profile.
+        XCTAssertEqual(profile?.onboardProfileSupport, .unavailable)
+    }
+
+    func testNagaV2ProIsNotResolvedAsNagaPro() {
+        XCTAssertNil(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00A8, transport: .bluetooth))
+        XCTAssertEqual(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0090, transport: .usb)?.id, .nagaPro)
+        XCTAssertEqual(DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00A9, transport: .bluetooth)?.id, .nagaV2Pro)
+        XCTAssertNil(DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00A9, transport: .usb))
+    }
+
+    func testResolveBluetoothFallbackForNagaV2Pro() {
+        XCTAssertEqual(DeviceProfiles.resolveBluetoothFallback(name: "Naga V2 Pro")?.id, .nagaV2Pro)
+        XCTAssertEqual(DeviceProfiles.resolveBluetoothFallback(name: "Razer Naga V2 Pro")?.id, .nagaV2Pro)
+        XCTAssertEqual(DeviceProfiles.resolveBluetoothFallback(name: "Naga Pro")?.id, .nagaPro)
+    }
+
+    func testDPIRangesMatchSupportedProfiles() {
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .basiliskV3XHyperspeed), 100...18_000)
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .basiliskV3), 100...26_000)
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .basiliskV3Pro), 100...30_000)
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .basiliskV335K), 100...35_000)
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .basiliskV3Pro35K), 100...35_000)
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .orochiV2), 100...18_000)
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .nagaPro), 100...20_000)
+        XCTAssertEqual(DeviceProfiles.sliderDpiRange(for: .basiliskV3XHyperspeed), 100...18_000)
+        XCTAssertEqual(DeviceProfiles.sliderDpiRange(for: .basiliskV3), 100...26_000)
+        XCTAssertEqual(DeviceProfiles.sliderDpiRange(for: .basiliskV3Pro), 100...30_000)
+        XCTAssertEqual(DeviceProfiles.sliderDpiRange(for: .basiliskV335K), 100...35_000)
+        XCTAssertEqual(DeviceProfiles.sliderFineDpiRange(for: .basiliskV3XHyperspeed), 100...2_000)
+        XCTAssertEqual(DeviceProfiles.sliderFineDpiRange(for: .basiliskV3), 100...2_000)
+        XCTAssertEqual(DeviceProfiles.sliderFineDpiRange(for: .basiliskV3Pro), 100...2_000)
+        XCTAssertEqual(DeviceProfiles.sliderFineDpiRange(for: .basiliskV335K), 100...2_000)
+        XCTAssertEqual(DeviceProfiles.sliderScaleMarkerValues(for: .basiliskV3XHyperspeed), [100, 2_000, 10_000, 18_000])
+        XCTAssertEqual(DeviceProfiles.sliderScaleMarkerValues(for: .basiliskV3Pro), [100, 2_000, 10_000, 20_000, 30_000])
+        XCTAssertEqual(DeviceProfiles.sliderScaleMarkerValues(for: .basiliskV335K), [100, 2_000, 10_000, 20_000, 35_000])
+        XCTAssertEqual(DeviceProfiles.clampDPI(40_000, profileID: .basiliskV335K), 35_000)
+        XCTAssertEqual(DeviceProfiles.clampDPI(30_000, profileID: .basiliskV3), 26_000)
+        XCTAssertEqual(DeviceProfiles.clampDPI(24_000, profileID: .basiliskV3XHyperspeed), 18_000)
+    }
+
+    func testDPISliderCurveUsesFineLowRangeAndCoarseHighRange() {
+        XCTAssertEqual(DeviceProfiles.dpiSliderPosition(for: 100, profileID: .basiliskV3Pro), 0, accuracy: 0.000_001)
+        XCTAssertEqual(DeviceProfiles.dpiSliderPosition(for: 2_000, profileID: .basiliskV3Pro), 0.5, accuracy: 0.000_001)
+        XCTAssertEqual(DeviceProfiles.dpiSliderPosition(for: 10_000, profileID: .basiliskV3Pro), 0.75, accuracy: 0.000_001)
+        XCTAssertEqual(DeviceProfiles.dpiSliderPosition(for: 20_000, profileID: .basiliskV3Pro), 0.9, accuracy: 0.000_001)
+        XCTAssertEqual(DeviceProfiles.dpiSliderPosition(for: 30_000, profileID: .basiliskV3Pro), 1, accuracy: 0.000_001)
+
+        XCTAssertEqual(DeviceProfiles.dpi(forSliderPosition: 0, profileID: .basiliskV3Pro), 100)
+        XCTAssertEqual(DeviceProfiles.dpi(forSliderPosition: 0.5, profileID: .basiliskV3Pro), 2_000)
+        XCTAssertEqual(DeviceProfiles.dpi(forSliderPosition: 0.75, profileID: .basiliskV3Pro), 10_000)
+        XCTAssertEqual(DeviceProfiles.dpi(forSliderPosition: 0.9, profileID: .basiliskV3Pro), 20_000)
+        XCTAssertEqual(DeviceProfiles.dpi(forSliderPosition: 0.825, profileID: .basiliskV3Pro), 15_000)
+        XCTAssertEqual(DeviceProfiles.dpi(forSliderPosition: 0.95, profileID: .basiliskV3Pro), 25_000)
+        XCTAssertEqual(DeviceProfiles.dpi(forSliderPosition: 1, profileID: .basiliskV3Pro), 30_000)
+    }
+
+    func testBasiliskV3ProBluetoothShowsLightingControls() {
+        let bluetoothV3Pro = MouseDevice(id: "bt-v3-pro", vendor_id: 0x068E, product_id: 0x00AC, product_name: "Basilisk V3 Pro", transport: .bluetooth, path_b64: "", serial: nil, firmware: nil, profile_id: .basiliskV3Pro)
+        let bluetoothV3X = MouseDevice(id: "bt-v3x", vendor_id: 0x068E, product_id: 0x00BA, product_name: "Basilisk V3 X HyperSpeed", transport: .bluetooth, path_b64: "", serial: nil, firmware: nil, profile_id: .basiliskV3XHyperspeed)
+        let usbV3Pro = MouseDevice(id: "usb-v3-pro", vendor_id: 0x1532, product_id: 0x00AB, product_name: "Basilisk V3 Pro", transport: .usb, path_b64: "", serial: nil, firmware: nil, profile_id: .basiliskV3Pro)
+
+        XCTAssertTrue(bluetoothV3Pro.showsLightingControls)
+        XCTAssertTrue(bluetoothV3X.showsLightingControls)
+        XCTAssertTrue(usbV3Pro.showsLightingControls)
+    }
+
+    func testSoftwareLightingSupportIsUSBOnlyAndRequiresFrameLayout() {
+        let usbV3X = MouseDevice(id: "usb-v3x", vendor_id: 0x1532, product_id: 0x00B9, product_name: "Basilisk V3 X HyperSpeed", transport: .usb, path_b64: "", serial: nil, firmware: nil, profile_id: .basiliskV3XHyperspeed)
+        let usbV3Pro = MouseDevice(id: "usb-v3-pro", vendor_id: 0x1532, product_id: 0x00AB, product_name: "Basilisk V3 Pro", transport: .usb, path_b64: "", serial: nil, firmware: nil, profile_id: .basiliskV3Pro)
+        let bluetoothDevices = [
+            MouseDevice(id: "bt-v3x", vendor_id: 0x068E, product_id: 0x00BA, product_name: "Basilisk V3 X HyperSpeed", transport: .bluetooth, path_b64: "", serial: nil, firmware: nil, profile_id: .basiliskV3XHyperspeed),
+            MouseDevice(id: "bt-v3-pro", vendor_id: 0x068E, product_id: 0x00AC, product_name: "Basilisk V3 Pro", transport: .bluetooth, path_b64: "", serial: nil, firmware: nil, profile_id: .basiliskV3Pro),
+            MouseDevice(id: "bt-orochi", vendor_id: 0x1532, product_id: 0x0095, product_name: "Orochi V2", transport: .bluetooth, path_b64: "", serial: nil, firmware: nil, profile_id: .orochiV2)
+        ]
+
+        XCTAssertFalse(usbV3X.supportsSoftwareLightingEffects)
+        XCTAssertNil(usbV3X.softwareLightingFrameLayout)
+        XCTAssertEqual(usbV3X.supportedSoftwareLightingPresets, [])
+        XCTAssertTrue(usbV3Pro.supportsSoftwareLightingEffects)
+        XCTAssertEqual(usbV3Pro.softwareLightingFrameLayout, .basiliskV3ProUSB)
+        XCTAssertEqual(usbV3Pro.supportedSoftwareLightingPresets, SoftwareLightingPresetID.basiliskV3ProPresets)
+
+        for device in bluetoothDevices {
+            XCTAssertFalse(device.supportsSoftwareLightingEffects, device.product_name)
+            XCTAssertNil(device.softwareLightingFrameLayout, device.product_name)
+            XCTAssertEqual(device.supportedSoftwareLightingPresets, [], device.product_name)
+        }
+    }
+
+    func testBasiliskV3ProBluetoothLightingTargetsResolveAllZones() throws {
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00AC, transport: .bluetooth))
+        let targets = try XCTUnwrap(profile.lightingTargets())
+        XCTAssertEqual(targets.map(\.zoneID), ["scroll_wheel", "logo", "underglow"])
+        XCTAssertEqual(targets.map(\.ledID), [0x01, 0x04, 0x0A])
+        XCTAssertEqual(profile.lightingLEDIDs(), [0x01, 0x04, 0x0A])
+    }
+
+    func testBluetoothNameMatcherRanksMoreSpecificBasiliskNamesHigher() throws {
+        XCTAssertEqual(BluetoothNameMatcher.normalized("BSKV3P 35K"), "basilisk v3 pro 35k")
+        XCTAssertEqual(BluetoothNameMatcher.matchRank("BSK V3 PRO", "Basilisk V3 Pro"), Int.max)
+        XCTAssertNil(BluetoothNameMatcher.matchRank("BSK V3 PRO", "Orochi V2"))
+
+        let pro35KRank = try XCTUnwrap(BluetoothNameMatcher.matchRank("BSKV3P 35K", "Basilisk V3 Pro 35K Phantom Green Edition"))
+        let v3ProRank = try XCTUnwrap(BluetoothNameMatcher.matchRank("BSKV3P 35K", "Basilisk V3 Pro"))
+        XCTAssertGreaterThan(pro35KRank, v3ProRank)
+    }
+
+    func testResolveBluetoothFallbackProfileByName() {
+        let exact = DeviceProfiles.resolveBluetoothFallback(name: "Basilisk V3 X HyperSpeed")
+        XCTAssertEqual(exact?.id, .basiliskV3XHyperspeed)
+
+        let prefixed = DeviceProfiles.resolveBluetoothFallback(name: "Razer Basilisk V3 X HyperSpeed")
+        XCTAssertEqual(prefixed?.id, .basiliskV3XHyperspeed)
+
+        let shorthand = DeviceProfiles.resolveBluetoothFallback(name: "BSK V3 PRO")
+        XCTAssertEqual(shorthand?.id, .basiliskV3Pro)
+
+        let pro35KShorthand = DeviceProfiles.resolveBluetoothFallback(name: "BSKV3P 35K")
+        XCTAssertEqual(pro35KShorthand?.id, .basiliskV3Pro35K)
+
+        let pro35KMarketingName = DeviceProfiles.resolveBluetoothFallback(name: "Razer Basilisk V3 Pro 35K")
+        XCTAssertEqual(pro35KMarketingName?.id, .basiliskV3Pro35K)
+
+        let phantomGreen = DeviceProfiles.resolveBluetoothFallback(name: "Basilisk V3 Pro 35K Phantom Green Edition")
+        XCTAssertEqual(phantomGreen?.id, .basiliskV3Pro35K)
+
+        let orochi = DeviceProfiles.resolveBluetoothFallback(name: "Orochi V2")
+        XCTAssertEqual(orochi?.id, .orochiV2)
+
+        let razerOrochi = DeviceProfiles.resolveBluetoothFallback(name: "Razer Orochi V2")
+        XCTAssertEqual(razerOrochi?.id, .orochiV2)
+
+        let unknown = DeviceProfiles.resolveBluetoothFallback(name: "Razer Cobra Pro")
+        XCTAssertNil(unknown)
+    }
+
+    func testPersistenceKeysPreferSerial() {
+        let device = MouseDevice(id: "dev", vendor_id: 0x1532, product_id: 0x00B9, product_name: "Mouse", transport: .usb, path_b64: "", serial: "ABC123", firmware: nil)
+        XCTAssertEqual(DevicePersistenceKeys.key(for: device), "serial:abc123")
+        XCTAssertEqual(DevicePersistenceKeys.legacyKey(for: device), "dev")
+    }
+
+    func testResolveUSBProfileForBasilisk() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0064, transport: .usb)
+        XCTAssertEqual(profile?.id, .basilisk)
+        XCTAssertEqual(profile?.formFactor, .mouse)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [])
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots.map(\.slot), [1, 2, 3, 4, 5, 9, 10, 96])
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .reactive, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel", "logo"])
+        XCTAssertEqual(profile?.allUSBLightingLEDIDs, [0x01, 0x04])
+        XCTAssertEqual(profile?.allUSBBrightnessLEDIDs, [0x01, 0x04])
+        XCTAssertEqual(profile?.supportsDPIControls, true)
+        XCTAssertEqual(profile?.supportsPollRateControls, true)
+        XCTAssertEqual(profile?.supportsPowerManagementControls, false)
+        XCTAssertEqual(profile?.supportsButtonRemapControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.supportsIndependentXYDPI, true)
+        XCTAssertEqual(profile?.onboardProfileCount, 1)
+        XCTAssertNil(profile?.passiveDPIInput)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+    }
+
+    func testResolveUSBProfileForLanceheadTournamentEdition() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0060, transport: .usb)
+        XCTAssertEqual(profile?.id, .lanceheadTournamentEdition)
+        XCTAssertEqual(profile?.formFactor, .mouse)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [])
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave, .reactive, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["scroll_wheel", "logo", "left_side", "right_side"])
+        XCTAssertEqual(profile?.allUSBLightingLEDIDs, [0x01, 0x04, 0x11, 0x10])
+        XCTAssertEqual(profile?.supportsDPIControls, true)
+        XCTAssertEqual(profile?.supportsPollRateControls, true)
+        XCTAssertEqual(profile?.supportsPowerManagementControls, false)
+        XCTAssertEqual(profile?.supportsButtonRemapControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.supportsIndependentXYDPI, true)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+    }
+
+    func testNewDeviceDPIRanges() {
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .basilisk), 100...16_000)
+        XCTAssertEqual(DeviceProfiles.dpiRange(for: .lanceheadTournamentEdition), 100...16_000)
+        XCTAssertEqual(DeviceProfiles.sliderScaleMarkerValues(for: .basilisk), [100, 2_000, 10_000, 16_000])
+        XCTAssertEqual(DeviceProfiles.clampDPI(20_000, profileID: .lanceheadTournamentEdition), 16_000)
+    }
+
+    func testResolveUSBProfileForHuntsmanMini() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0257, transport: .usb)
+        XCTAssertEqual(profile?.id, .huntsmanMini)
+        XCTAssertEqual(profile?.formFactor, .keyboard)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots, [])
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [])
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave, .reactive, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["backlight"])
+        XCTAssertEqual(profile?.allUSBLightingLEDIDs, [0x05])
+        XCTAssertEqual(profile?.allUSBBrightnessLEDIDs, [0x05])
+        XCTAssertEqual(profile?.supportsDPIControls, false)
+        XCTAssertEqual(profile?.supportsPollRateControls, false)
+        XCTAssertEqual(profile?.supportsPowerManagementControls, false)
+        XCTAssertEqual(profile?.supportsButtonRemapControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+    }
+
+    func testResolveUSBProfileForTartarusPro() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x0244, transport: .usb)
+        XCTAssertEqual(profile?.id, .tartarusPro)
+        XCTAssertEqual(profile?.formFactor, .keypad)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots, [])
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["backlight"])
+        XCTAssertEqual(profile?.allUSBLightingLEDIDs, [0x05])
+        // OpenRazer's ZERO_LED brightness quirk: brightness is addressed via LED 0x00.
+        XCTAssertEqual(profile?.usbBrightnessLEDIDs, [0x00])
+        XCTAssertEqual(profile?.allUSBBrightnessLEDIDs, [0x00])
+        XCTAssertEqual(profile?.supportsDPIControls, false)
+        XCTAssertEqual(profile?.supportsPollRateControls, false)
+        XCTAssertEqual(profile?.supportsPowerManagementControls, false)
+        XCTAssertEqual(profile?.supportsButtonRemapControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+    }
+
+    func testResolveUSBProfileForMouseDock() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x007E, transport: .usb)
+        XCTAssertEqual(profile?.id, .mouseDock)
+        XCTAssertEqual(profile?.formFactor, .accessory)
+        XCTAssertEqual(profile?.usbTransactionID, 0x1F)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots, [])
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [])
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .spectrum, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["logo"])
+        XCTAssertEqual(profile?.allUSBLightingLEDIDs, [0x00])
+        XCTAssertEqual(profile?.allUSBBrightnessLEDIDs, [0x00])
+        XCTAssertEqual(profile?.supportsDPIControls, false)
+        XCTAssertEqual(profile?.supportsPollRateControls, false)
+        XCTAssertEqual(profile?.supportsPowerManagementControls, false)
+        XCTAssertEqual(profile?.supportsButtonRemapControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertEqual(profile?.supportsLightingStateReads, false)
+        XCTAssertEqual(profile?.softwareLightingFrameLayout, .mouseDockUSB)
+        XCTAssertEqual(profile?.supportedSoftwareLightingPresets, SoftwareLightingPresetID.batteryMeterAndAnimatedPresets)
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+    }
+
+    func testBrightnessLEDIDsDefaultToLightingLEDIDsUnlessOverridden() {
+        for profile in DeviceProfiles.all where profile.usbBrightnessLEDIDs == nil { XCTAssertEqual(profile.allUSBBrightnessLEDIDs, profile.allUSBLightingLEDIDs, "profile \(profile.id) \(profile.transport)") }
+
+        let overridden = DeviceProfile(
+            id: .orochiV2, productName: "Brightness Override Test Device", transport: .usb, supportedProducts: [0x7778], buttonLayout: ButtonSlotLayout(visibleSlots: [], writableSlots: []), supportsAdvancedLightingEffects: true, usbLightingLEDIDs: [0x05], usbBrightnessLEDIDs: [0x00])
+        XCTAssertEqual(overridden.allUSBLightingLEDIDs, [0x05])
+        XCTAssertEqual(overridden.allUSBBrightnessLEDIDs, [0x00])
+    }
+
+    func testBrightnessReadLEDIDsPreserveExistingAddressingUnlessOverridden() {
+        for profile in DeviceProfiles.all where profile.usbBrightnessReadLEDIDs == nil { XCTAssertEqual(profile.allUSBBrightnessReadLEDIDs, profile.allUSBBrightnessLEDIDs, "profile \(profile.id) \(profile.transport)") }
+        let emptyOverride = DeviceProfile(
+            id: .orochiV2, productName: "Empty Read Override", transport: .usb, supportedProducts: [0x7778], buttonLayout: ButtonSlotLayout(visibleSlots: [], writableSlots: []), supportsAdvancedLightingEffects: true, usbLightingLEDIDs: [0x05], usbBrightnessLEDIDs: [0x00], usbBrightnessReadLEDIDs: []
+        )
+        XCTAssertEqual(emptyOverride.allUSBBrightnessReadLEDIDs, [0x00])
+    }
+
+    func testNagaV2ProBrightnessReadsLogoButWritesWholeDeviceOnBothUSBTransports() throws {
+        for productID in [0x00A7, 0x00A8] {
+            let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: productID, transport: .usb))
+            XCTAssertEqual(profile.allUSBBrightnessReadLEDIDs, [0x04])
+            XCTAssertEqual(profile.allUSBBrightnessLEDIDs, [0x00])
+            XCTAssertTrue(profile.supportsLightingStateReads)
+        }
+    }
+
+    func testResolveUSBProfileForMouseDockPro() {
+        let profile = DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00A4, transport: .usb)
+        XCTAssertEqual(profile?.id, .mouseDockPro)
+        XCTAssertEqual(profile?.productName, "Mouse Dock Pro")
+        XCTAssertEqual(profile?.formFactor, .accessory)
+        // The dock ignores 0x1F and 0x3F entirely: every request with those transaction IDs
+        // answers status 0x04, so the profile pins the only ID the dock accepts.
+        XCTAssertEqual(profile?.usbTransactionID, 0xFF)
+        XCTAssertEqual(profile?.buttonLayout.visibleSlots, [])
+        XCTAssertEqual(profile?.buttonLayout.writableSlots, [])
+        XCTAssertEqual(profile?.supportedLightingEffects, [.off, .staticColor, .wave, .spectrum, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile?.usbLightingZones.map(\.id), ["logo"])
+        XCTAssertEqual(profile?.allUSBLightingLEDIDs, [0x00])
+        XCTAssertEqual(profile?.allUSBBrightnessLEDIDs, [0x00])
+        // 0F:84 only reports the stored value at LED 0x0F, so reads and writes use different LEDs.
+        XCTAssertEqual(profile?.allUSBBrightnessReadLEDIDs, [0x0F])
+        XCTAssertEqual(profile?.supportsDPIControls, false)
+        XCTAssertEqual(profile?.supportsPollRateControls, false)
+        XCTAssertEqual(profile?.supportsPowerManagementControls, false)
+        XCTAssertEqual(profile?.supportsButtonRemapControls, false)
+        XCTAssertEqual(profile?.supportsLightingBrightnessControls, true)
+        XCTAssertTrue(try XCTUnwrap(profile).supportsLightingStateReads)
+        // Per-cell rendering of the dock's 1x8 row is not mapped yet, so no frame layout ships.
+        XCTAssertNil(profile?.softwareLightingFrameLayout)
+        XCTAssertEqual(profile?.supportedSoftwareLightingPresets, [])
+        XCTAssertEqual(profile?.isLocallyValidated, false)
+    }
+
+    func testResolveUSBProfileForNagaV3ProReceiver() throws {
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00E8, transport: .usb))
+        XCTAssertEqual(profile.id, .nagaV3Pro)
+        XCTAssertEqual(profile.productName, "Naga V3 Pro")
+        XCTAssertEqual(profile.usbTransactionID, 0x1F)
+        // Focus Pro 50K Optical Sensor Gen-3. The firmware stores any value without clamping, so the
+        // published ceiling is the authoritative limit.
+        XCTAssertEqual(DeviceProfiles.maximumDPI(for: .nagaV3Pro), 50_000)
+        XCTAssertTrue(profile.supportsIndependentXYDPI)
+        XCTAssertTrue(DeviceProfiles.supportsIndependentXYDPI(for: profile.id))
+        XCTAssertEqual(profile.supportsLightingBrightnessControls, true)
+        XCTAssertTrue(profile.supportsLightingStateReads)
+        XCTAssertEqual(profile.supportedLightingEffects, [.off, .staticColor, .spectrum, .wave, .reactive, .pulseRandom, .pulseSingle, .pulseDual])
+        XCTAssertEqual(profile.usbLightingLEDIDs, [0x01, 0x04, 0x05])
+        XCTAssertEqual(profile.usbLightingZones.map(\.id), ["scroll_wheel", "logo", "side_panel"])
+        XCTAssertEqual(profile.usbLightingZones.map(\.label), ["Scroll Wheel", "Logo", "Side Panel"])
+        // Metadata reads (05:88) answer status 0x03 on every offset, so onboard profile CRUD stays off.
+        XCTAssertEqual(profile.onboardProfileSupport, .unavailable)
+        XCTAssertEqual(profile.onboardProfileCount, 1)
+        XCTAssertEqual(profile.isLocallyValidated, false)
+        XCTAssertFalse(ButtonBindingSupport.availableButtonBindingKinds(profileID: profile.id).contains(.dpiClutch))
+    }
+
+    func testResolveWiredNagaV3ProUsesSameProfileAsReceiver() throws {
+        let wired = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00E7, transport: .usb))
+        let receiver = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00E8, transport: .usb))
+        XCTAssertEqual(wired.id, .nagaV3Pro)
+        XCTAssertEqual(wired.supportedProducts, [0x00E7, 0x00E8])
+        XCTAssertEqual(wired.buttonLayout.visibleSlots, receiver.buttonLayout.visibleSlots)
+        XCTAssertEqual(wired.buttonLayout.writableSlots, receiver.buttonLayout.writableSlots)
+        XCTAssertEqual(wired.usbTransactionID, receiver.usbTransactionID)
+        XCTAssertEqual(wired.usbLightingZones, receiver.usbLightingZones)
+        XCTAssertEqual(wired.onboardProfileSupport, .unavailable)
+        XCTAssertFalse(wired.isLocallyValidated)
+    }
+
+    func testResolveBluetoothNagaV3ProUsesThreeZoneEffectProfile() throws {
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x068E, productID: 0x00E9, transport: .bluetooth))
+        XCTAssertEqual(profile.id, .nagaV3Pro)
+        XCTAssertEqual(DeviceProfiles.resolveBluetoothFallback(name: "Naga V3 Pro")?.id, .nagaV3Pro)
+        XCTAssertEqual(profile.buttonLayout.visibleSlots, DeviceProfiles.nagaV3ProUSBButtonSlots)
+        XCTAssertEqual(profile.buttonLayout.writableSlots, DeviceProfiles.nagaV3ProUSBWritableSlots.sorted())
+        XCTAssertEqual(profile.usbLightingZones, DeviceProfiles.nagaV3ProUSBLightingZones)
+        XCTAssertTrue(profile.supportsIndependentXYDPI)
+        XCTAssertEqual(profile.supportedLightingEffects, DeviceProfiles.nagaV3ProUSBLightingEffects)
+        XCTAssertTrue(profile.supportsAdvancedLightingEffects)
+        XCTAssertFalse(profile.supportsPollRateControls)
+        XCTAssertFalse(profile.supportsMappedOnboardProfileCRUD)
+        XCTAssertFalse(profile.isLocallyValidated)
+    }
+
+    func testNagaV3ProExposesBodyPlateAndVendorSlots() throws {
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: 0x1532, productID: 0x00E8, transport: .usb))
+
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.filter { $0.group == "Mouse" }.map(\.slot), [1, 2, 3, 9, 10, 11, 12, 52, 53, 57, 106, 128, 14])
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 11 })?.friendlyName, "Index Button (front)")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 12 })?.friendlyName, "Index Button (rear)")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 57 })?.friendlyName, "Pinky Button")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 106 })?.friendlyName, "Scroll Button (front)")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 128 })?.friendlyName, "Scroll Button (rear)")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 14 })?.friendlyName, "Profile Button")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 5 })?.group, "2-Button Panel")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 5 })?.friendlyName, "Panel Button (front)")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 4 })?.friendlyName, "Panel Button (rear)")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 85 })?.group, "6-Button Panel")
+        XCTAssertEqual(profile.buttonLayout.visibleSlots.first(where: { $0.slot == 75 })?.group, "12-Button Panel")
+
+        // Every slot in the table round-tripped a same-value write on both the live and persistent layers.
+        XCTAssertEqual(profile.buttonLayout.writableSlots, profile.buttonLayout.visibleSlots.map(\.slot).sorted())
+    }
+
+    func testNagaV3ProFactoryBlocksAreRestorableDefaults() throws {
+        let profileID = DeviceProfileID.nagaV3Pro
+        var expected: [Int: [UInt8]] = [:]
+        expected[11] = [0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00]
+        expected[12] = [0x06, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00]
+        expected[14] = [0x07, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00]
+        expected[57] = [0x0C, 0x01, 0x39, 0x00, 0x00, 0x00, 0x00]
+        expected[106] = [0x12, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00]
+        expected[52] = [0x0E, 0x01, 0x68, 0x00, 0x14, 0x00, 0x00]
+        expected[53] = [0x0E, 0x01, 0x69, 0x00, 0x14, 0x00, 0x00]
+        expected[64] = [0x02, 0x01, 0x00, 0x1E, 0x00, 0x00, 0x00]
+        expected[75] = [0x02, 0x01, 0x00, 0x2E, 0x00, 0x00, 0x00]
+        expected[80] = [0x02, 0x01, 0x00, 0x1E, 0x00, 0x00, 0x00]
+        expected[85] = [0x02, 0x01, 0x00, 0x23, 0x00, 0x00, 0x00]
+        expected[1] = [0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00]
+        // The rear scroll-wheel button defaults to no action rather than a mode toggle.
+        expected[128] = [0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00]
+        for (slot, block) in expected {
+            XCTAssertEqual(ButtonBindingSupport.defaultUSBFunctionBlock(for: slot, profileID: profileID), block, "slot \(slot)")
+            XCTAssertTrue(ButtonBindingSupport.supportsDefaultRestore(for: slot, profileID: profileID), "slot \(slot)")
+            XCTAssertNotNil(ButtonBindingSupport.buttonBindingDraftFromUSBFunctionBlock(slot: slot, functionBlock: block, profileID: profileID), "slot \(slot)")
+        }
+
+        // Slot 96 belongs to the Basilisk and Naga V2 Pro families, not to this device.
+        XCTAssertNil(ButtonBindingSupport.defaultUSBFunctionBlock(for: 96, profileID: profileID))
+        XCTAssertFalse(ButtonBindingSupport.supportsDefaultRestore(for: 96, profileID: profileID))
+    }
+
+    func testNagaV3ProDoesNotExposeBasiliskClutchOrScrollMode() {
+        XCTAssertNil(ButtonBindingSupport.defaultDPIClutchDPI(for: .nagaV3Pro))
+        XCTAssertFalse(DeviceProfiles.supportsIndependentXYDPI(for: DeviceProfileID.mouseDockPro))
+        XCTAssertEqual(DeviceProfiles.maximumDPI(for: .mouseDockPro), DeviceProfiles.defaultMaximumDPI)
+    }
+
+    func testPersistenceKeysIgnorePlaceholderZeroSerial() {
+        let device = MouseDevice(id: "dev", vendor_id: 0x1532, product_id: 0x00AB, product_name: "Mouse", transport: .usb, path_b64: "", serial: "000000000000", firmware: nil)
+
+        XCTAssertNil(DevicePersistenceKeys.normalizedStableSerial(device.serial))
+        XCTAssertEqual(DevicePersistenceKeys.key(for: device), "device:dev")
+    }
+}

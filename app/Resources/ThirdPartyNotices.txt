@@ -1,0 +1,36 @@
+# 上游来源与复用约定
+
+已复用 OpenSnek 的 Core、Protocols、Hardware、AppSupport 和鼠标控制界面，以及 Scroll Reverser 的来源识别、来源规则与事件处理核心。原始克隆保持只读，固定版本见 `docs/upstreams.json`。
+
+源码副本位于 `app/Sources/` 和 `app/ScrollCore/`。MouseControl 修改了产品身份、更新来源、后台集成、UI/本地化、图标、平滑滚动以及跨进程来源保存；新增功能位于 `app/MouseControlFeatures/`。OpenSnek 的 Apache 2.0 原文保存在 `app/Sources/UPSTREAM-LICENSE`；Scroll Reverser 原文和 NOTICE 保存在 `app/ScrollCore/`。
+
+只读诊断程序 `research/baseline/DpiReadProbe.swift` 使用上游未修改的 OpenSnekCore 和 OpenSnekProtocols 解析当前 DPI。其编译产物在忽略目录 `build/baseline/`，来源版本仍按 `docs/upstreams.json` 记录。
+
+## OpenSnek
+
+- 来源：https://github.com/gh123man/OpenSnek
+- 版本：见 `docs/upstreams.json`
+- 许可：Apache License 2.0，原文保存在 `references/OpenSnek/LICENSE`
+- 引入源码时保留原版权声明并注明我们修改过的文件。
+
+## Scroll Reverser
+
+- 来源：https://github.com/pilotmoon/Scroll-Reverser
+- 原声明：Copyright 2011 Nicholas Moore
+- 许可：Apache License 2.0，原文保存在 `references/Scroll-Reverser/LICENSE`
+- 原 NOTICE：Scroll Reverser 名称和图标为商标，衍生作品仅在说明来源时使用该名称。
+- 我们的产品名称、图标和 Bundle Identifier 独立创建；引入源码时保留原 NOTICE 和文件版权声明。
+
+## Sparkle
+
+- 版本 2.10.0（build 2064），复用 Scroll Reverser 所附框架，链接并嵌入应用。
+- 来源：https://github.com/sparkle-project/Sparkle
+- 许可及依赖声明：https://github.com/sparkle-project/Sparkle/blob/2.10.0/LICENSE
+- MouseControl 的更新仓库与签名 feed 单独配置，默认无发布源，不查询 OpenSnek 发布。
+
+## 图标素材
+
+默认鼠标图标由本项目绘制。可达鸭素材按用户提供的图片裁切、去背景，并生成白色透明菜单栏模板；没有采用上游 Scroll Reverser 或 OpenSnek 的产品图标。可达鸭角色权利属于原权利人，当前素材用于用户指定的本地应用开发。
+
+Orochi V2 DPI 指示色依据雷蛇官方手册：https://dl.razerzone.com/master-guides/RazerSynapse4/OROCHIV2-00000224-en.pdf
+

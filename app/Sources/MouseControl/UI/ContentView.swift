@@ -1,0 +1,504 @@
+import SwiftUI
+import AppKit
+import OpenSnekCore
+
+/// Renders the content view UI.
+struct ContentView: View {
+    let deviceStore: DeviceStore
+    let editorStore: EditorStore
+    let runtimeStore: RuntimeStore
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var dismissedPermissionNoticeKey: String?
+
+    var body: some View {
+        NavigationSplitView {
+            DeviceSidebarView(deviceStore: deviceStore).navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 340)
+        } detail: {
+            detail
+        }.navigationSplitViewStyle(.automatic).task {
+            await runtimeStore.start()
+            await runtimeStore.refreshHIDAccessStatus(forceRefresh: false)
+        }.onChange(of: deviceStore.selectedDeviceID) { _, _ in
+            guard !deviceStore.usesRemoteServiceTransport || deviceStore.state == nil else { return }
+            Task { await deviceStore.refreshState() }
+        }.onChange(of: scenePhase) { _, phase in
+            if phase == .active {
+                Task {
+                    await runtimeStore.refreshHIDAccessStatus(forceRefresh: false)
+                    if deviceStore.usesRemoteServiceTransport { runtimeStore.sendRemoteClientPresence() } else { await deviceStore.refreshDevices() }
+                }
+            }
+        }.onChange(of: runtimeStore.hidAccessStatus.authorization) { _, authorization in if authorization != .denied { dismissedPermissionNoticeKey = nil } }
+    }
+
+    private var detail: some View {
+        VStack(spacing: 0) {
+            if !noticeItems.isEmpty {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(Array(noticeItems.enumerated()), id: \.offset) { _, notice in
+                        StatusNoticeCard(title: notice.title, message: notice.message, detailLines: notice.detailLines, tone: notice.tone, actions: notice.actions)
+                    }
+                }.padding(.horizontal, 20).padding(.top, 12)
+            }
+            ZStack {
+                MouseTheme.background.ignoresSafeArea()
+
+            if let selected = deviceStore.selectedDevice {
+                if selected.usesGenericControls {
+                    BasicMouseDetailView(deviceStore: deviceStore, selected: selected)
+                } else if deviceStore.selectedDeviceIsStrictlyUnsupported || deviceStore.selectedDeviceIsUnsupportedUSB {
+                    GenericDeviceDetailView(deviceStore: deviceStore, selected: selected)
+                } else if deviceStore.connectionState(for: selected) == .reconnecting {
+                    DeviceConnectingDetailView(deviceStore: deviceStore, selected: selected)
+                } else if deviceStore.connectionState(for: selected) == .disconnected {
+                    DeviceUnavailableDetailView(deviceStore: deviceStore, selected: selected)
+                } else if let state = deviceStore.state, state.device.id == nil || state.device.id == selected.id {
+                    DeviceDetailView(deviceStore: deviceStore, editorStore: editorStore, selected: selected, state: state)
+                } else if shouldShowLoadingDetail(for: selected) {
+                    DeviceConnectingDetailView(deviceStore: deviceStore, selected: selected)
+                } else {
+                    DeviceUnavailableDetailView(deviceStore: deviceStore, selected: selected)
+                }
+            } else {
+                emptyState.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            }
+            }
+        }.background(MouseTheme.background)
+    }
+
+    private func shouldShowLoadingDetail(for selected: MouseDevice) -> Bool {
+        guard deviceStore.selectedDeviceID == selected.id else { return false }
+        if deviceStore.isRefreshingState { return true }
+
+        switch deviceStore.connectionState(for: selected) {
+        case .connected, .reconnecting: return true
+        case .disconnected, .unsupported, .error: return false
+        }
+    }
+
+    private func isInputMonitoringError(_ message: String?) -> Bool {
+        guard let message else { return false }
+        let lowered = message.lowercased()
+        return lowered.contains("input monitoring") || lowered.contains("usb hid access denied") || lowered.contains("usb hid feature reports are blocked") || lowered.contains("kioreturnnotpermitted")
+    }
+
+    private var permissionGuidanceDetailLines: [String] {
+        ["Open Input Monitoring settings and turn on MouseControl.", "If it still looks stuck, use Reset Permissions and try again.", "After changing the permission, quit and reopen MouseControl.", localizedFormat("Current app host: %@", runtimeStore.hidAccessStatus.hostLabel)]
+    }
+
+    private var activePermissionNoticeKey: String? {
+        guard runtimeStore.hidAccessStatus.isDenied, let selectedDevice = deviceStore.selectedDevice else { return nil }
+        if selectedDevice.transport == .bluetooth, deviceStore.selectedDeviceSupportsPassiveDPIInput { return "bt:\(selectedDevice.id):\(runtimeStore.hidAccessStatus.authorization.rawValue)" }
+        if selectedDevice.transport == .usb, isInputMonitoringError(deviceStore.errorMessage) { return "usb:\(selectedDevice.id):\(runtimeStore.hidAccessStatus.authorization.rawValue)" }
+        return nil
+    }
+
+    private var shouldShowPermissionNotice: Bool {
+        guard let activePermissionNoticeKey else { return false }
+        return dismissedPermissionNoticeKey != activePermissionNoticeKey
+    }
+
+    private var showsBluetoothHIDAccessCallout: Bool {
+        guard runtimeStore.hidAccessStatus.isDenied else { return false }
+        guard let selectedDevice = deviceStore.selectedDevice, selectedDevice.transport == .bluetooth else { return false }
+        return deviceStore.selectedDeviceSupportsPassiveDPIInput && shouldShowPermissionNotice
+    }
+
+    private var showsUSBAccessCallout: Bool {
+        guard deviceStore.selectedDevice?.transport == .usb else { return false }
+        if isInputMonitoringError(deviceStore.errorMessage) { return shouldShowPermissionNotice }
+        if shouldSuppressTelemetryNoticeDuringConnectionRecovery { return false }
+        if shouldSuppressUSBTelemetryLimitedNotice { return false }
+        if deviceStore.warningMessage != nil { return true }
+        guard let state = deviceStore.state, let device = deviceStore.selectedDevice else { return false }
+        return ContentNoticePresentation.shouldShowUSBTelemetryLimitedCallout(state: state, profile: DeviceProfiles.resolve(vendorID: device.vendor_id, productID: device.product_id, transport: device.transport))
+    }
+
+    private var usbCalloutTitle: String {
+        if isInputMonitoringError(deviceStore.errorMessage) { return "USB Access Blocked" }
+        return "USB Telemetry Limited"
+    }
+
+    private var usbCalloutMessage: String {
+        if let warning = deviceStore.warningMessage { return warning }
+        return "DPI, polling, or lighting readback is unavailable for this device session."
+    }
+
+    private var noticeItems: [NoticeItem] {
+        var notices: [NoticeItem] = []
+
+        if showsBluetoothHIDAccessCallout, let selectedDevice = deviceStore.selectedDevice {
+            notices.append(
+                NoticeItem(
+                    title: "Allow Input Monitoring", message: localizedFormat("MouseControl can read %@. Allow Input Monitoring to sync changes from its DPI button immediately.", selectedDevice.product_name), detailLines: permissionGuidanceDetailLines, tone: .permission,
+                    actions: [
+                        NoticeAction(title: "Open Settings", isProminent: true) { PermissionSupport.openInputMonitoringSettings() }, NoticeAction(title: "Reset Permissions") { Task { await runtimeStore.resetAllPermissions() } },
+                        NoticeAction(title: "Refresh") {
+                            Task {
+                                await runtimeStore.refreshHIDAccessStatus(forceRefresh: true)
+                                await deviceStore.refreshDevices()
+                            }
+                        }, NoticeAction(title: "Dismiss") { dismissedPermissionNoticeKey = activePermissionNoticeKey }
+                    ]))
+        }
+
+        if showsUSBAccessCallout {
+            var detailLines: [String] = []
+            var actions: [NoticeAction] = [
+                NoticeAction(title: "Refresh") {
+                    Task {
+                        await runtimeStore.refreshHIDAccessStatus(forceRefresh: true)
+                        await deviceStore.refreshDevices()
+                    }
+                }
+            ]
+
+            if isInputMonitoringError(deviceStore.errorMessage) {
+                detailLines = permissionGuidanceDetailLines
+                actions.insert(NoticeAction(title: "Open Settings", isProminent: true) { PermissionSupport.openInputMonitoringSettings() }, at: 0)
+                actions.insert(NoticeAction(title: "Reset Permissions") { Task { await runtimeStore.resetAllPermissions() } }, at: 1)
+                actions.append(NoticeAction(title: "Dismiss") { dismissedPermissionNoticeKey = activePermissionNoticeKey })
+            }
+
+            notices.append(
+                NoticeItem(
+                    title: isInputMonitoringError(deviceStore.errorMessage) ? "Allow Input Monitoring" : usbCalloutTitle, message: isInputMonitoringError(deviceStore.errorMessage) ? "OpenSnek needs one more macOS permission before it can read all USB settings from this mouse." : usbCalloutMessage,
+                    detailLines: detailLines, tone: isInputMonitoringError(deviceStore.errorMessage) ? .permission : .warning, actions: actions))
+        }
+
+        if let error = deviceStore.errorMessage, shouldShowSeparateErrorNotice { notices.append(NoticeItem(title: errorNoticeTitle(for: error), message: error, tone: .error, actions: [])) }
+
+        if let warning = deviceStore.warningMessage, shouldShowSeparateWarningNotice { notices.append(NoticeItem(title: "Warning", message: warning, tone: .warning, actions: [])) }
+
+        return notices
+    }
+
+    private var shouldShowSeparateErrorNotice: Bool {
+        guard deviceStore.errorMessage != nil else { return false }
+        if isInputMonitoringError(deviceStore.errorMessage), showsUSBAccessCallout { return false }
+        if selectedDetailHandlesConnectionRecovery { return false }
+        return true
+    }
+
+    private var selectedDetailHandlesConnectionRecovery: Bool { shouldSuppressTelemetryNoticeDuringConnectionRecovery }
+
+    private var shouldSuppressTelemetryNoticeDuringConnectionRecovery: Bool {
+        guard let selected = deviceStore.selectedDevice else { return false }
+        return ContentNoticePresentation.shouldSuppressTelemetryNoticeDuringConnectionRecovery(connectionState: deviceStore.connectionState(for: selected), isStrictlyUnsupported: deviceStore.selectedDeviceIsStrictlyUnsupported, isUnsupportedUSB: deviceStore.selectedDeviceIsUnsupportedUSB)
+    }
+
+    private var shouldSuppressUSBTelemetryLimitedNotice: Bool {
+        guard let selected = deviceStore.selectedDevice else { return false }
+        return ContentNoticePresentation.shouldSuppressUSBTelemetryLimitedNotice(warningMessage: deviceStore.warningMessage, selectedTransport: selected.transport)
+    }
+
+    private var shouldShowSeparateWarningNotice: Bool {
+        guard deviceStore.warningMessage != nil else { return false }
+        if shouldSuppressTelemetryNoticeDuringConnectionRecovery { return false }
+        if shouldSuppressUSBTelemetryLimitedNotice { return false }
+        return !showsUSBAccessCallout
+    }
+
+    private func errorNoticeTitle(for message: String) -> String {
+        let lowered = message.lowercased()
+        if lowered.contains("device read is failing repeatedly") { return "Device Read Unstable" }
+        if lowered.contains("failed") || lowered.contains("error") { return "Action Required" }
+        return "Notice"
+    }
+
+    private var supportedDeviceRows: [SupportedDeviceRow] {
+        DeviceProfiles.all.map { profile in
+            SupportedDeviceRow(id: "\(profile.id.rawValue):\(profile.transport.rawValue)", familyID: profile.id.rawValue, name: profile.productName, transport: profile.transport, productIDs: Self.productIDText(for: profile), capabilities: Self.capabilityText(for: profile))
+        }.sorted { lhs, rhs in
+            let nameOrder = lhs.name.localizedCaseInsensitiveCompare(rhs.name)
+            if nameOrder != .orderedSame { return nameOrder == .orderedAscending }
+            return transportSortKey(lhs.transport) < transportSortKey(rhs.transport)
+        }
+    }
+
+    private func transportSortKey(_ transport: DeviceTransportKind) -> Int {
+        switch transport {
+        case .usb: 0
+        case .bluetooth: 1
+        }
+    }
+
+    private static func productIDText(for profile: DeviceProfile) -> String { profile.supportedProducts.sorted().map { String(format: "0x%04X", $0) }.joined(separator: ", ") }
+
+    private static func capabilityText(for profile: DeviceProfile) -> String {
+        var items: [String] = []
+        if let maxDPI = profile.passiveDPIInput?.maximumDPI { items.append("DPI \(maxDPI / 1000)K") } else { items.append("DPI") }
+        if profile.supportsIndependentXYDPI { items.append("X/Y") }
+        if !profile.buttonLayout.writableSlots.isEmpty { items.append("Buttons") }
+        if !profile.supportedLightingEffects.isEmpty || !profile.usbLightingLEDIDs.isEmpty || !profile.usbLightingZones.isEmpty { items.append("Lighting") }
+        if profile.onboardProfileCount > 1 { items.append("\(profile.onboardProfileCount) profiles") }
+        return items.joined(separator: " · ")
+    }
+
+    private var emptyState: some View { EmptyDeviceState(rows: supportedDeviceRows) }
+}
+
+/// Stores empty device state.
+private struct EmptyDeviceState: View {
+    let rows: [SupportedDeviceRow]
+    @State private var showsWaitingState = true
+    @State private var showsSupportedDevices = false
+
+    private var supportedFamilyCount: Int { Set(rows.map(\.familyID)).count }
+
+    var body: some View {
+        EmptyDeviceStatePanel(showsWaitingState: showsWaitingState, supportedFamilyCount: supportedFamilyCount, connectionPathCount: rows.count, showSupportedDevices: { showsSupportedDevices = true }).frame(maxWidth: 440, alignment: .center).padding(24).background(
+            RoundedRectangle(cornerRadius: 22).fill(MouseTheme.text.opacity(0.04)).overlay(RoundedRectangle(cornerRadius: 22).stroke(MouseTheme.text.opacity(0.10), lineWidth: 1))
+        ).frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center).task {
+            guard showsWaitingState else { return }
+            do { try await Task.sleep(nanoseconds: 10_000_000_000) } catch { return }
+            withAnimation(.easeInOut(duration: 0.18)) { showsWaitingState = false }
+        }.sheet(isPresented: $showsSupportedDevices) { SupportedDevicesTableSheet(rows: rows) }
+    }
+}
+
+/// Renders the empty device state panel UI.
+private struct EmptyDeviceStatePanel: View {
+    let showsWaitingState: Bool
+    let supportedFamilyCount: Int
+    let connectionPathCount: Int
+    let showSupportedDevices: () -> Void
+
+    var body: some View {
+        VStack(alignment: .center, spacing: 18) {
+            VStack(alignment: .center, spacing: 8) {
+                if showsWaitingState { waitingHeader } else { connectHeader }
+                supportedDevicesLink
+            }.frame(maxWidth: .infinity, alignment: .center)
+        }
+    }
+
+    private var waitingHeader: some View {
+        VStack(spacing: 8) {
+            ProgressView().controlSize(.regular).tint(MouseTheme.text.opacity(0.9)).frame(maxWidth: .infinity, alignment: .center)
+
+            titleText("Waiting for devices")
+        }
+    }
+
+    private var connectHeader: some View { titleText("Connect a device") }
+
+    private func titleText(_ text: String) -> some View { Text(localized(text)).font(.system(size: 28, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text).multilineTextAlignment(.center).frame(maxWidth: .infinity, alignment: .center) }
+
+    private var supportedDevicesLink: some View {
+        VStack(spacing: 4) {
+            Button(action: showSupportedDevices) { Text("Supported devices").font(.system(size: 13, weight: .bold, design: .default)).underline() }.buttonStyle(.plain).foregroundStyle(MouseTheme.text).help("Open supported device table")
+
+            Text("\(supportedFamilyCount) models · \(connectionPathCount) connection paths").font(.system(size: 13, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.58)).multilineTextAlignment(.center).frame(maxWidth: .infinity, alignment: .center)
+        }.frame(maxWidth: .infinity, alignment: .center)
+    }
+}
+
+/// Renders the supported devices table sheet UI.
+private struct SupportedDevicesTableSheet: View {
+    let rows: [SupportedDeviceRow]
+    @Environment(\.dismiss) private var dismiss
+    @State private var searchText = ""
+
+    private var filteredRows: [SupportedDeviceRow] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return rows }
+        let terms = query.lowercased().split(separator: " ").map(String.init)
+        return rows.filter { row in terms.allSatisfy { row.searchText.contains($0) } }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Supported Devices").font(.system(size: 24, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text)
+                    Text("\(rows.count) connection paths across \(Set(rows.map(\.familyID)).count) device models").font(.system(size: 12, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.62))
+                }
+
+                Spacer()
+
+                Button("Done") { dismiss() }.buttonStyle(.borderedProminent)
+            }
+
+            TextField("Search by model, transport, product ID, or capability", text: $searchText).textFieldStyle(.roundedBorder).frame(maxWidth: 460)
+
+            SupportedDevicesTable(rows: filteredRows)
+        }.padding(22).frame(minWidth: 960, minHeight: 520).background(MouseTheme.secondary)
+    }
+}
+
+/// Renders the supported device row UI.
+private struct SupportedDeviceRow: Identifiable {
+    let id: String
+    let familyID: String
+    let name: String
+    let transport: DeviceTransportKind
+    let productIDs: String
+    let capabilities: String
+
+    var searchText: String { [name, transport.connectionLabel, transport.shortLabel, productIDs, capabilities].joined(separator: " ").lowercased() }
+}
+
+/// Renders the supported devices table UI.
+private struct SupportedDevicesTable: View {
+    let rows: [SupportedDeviceRow]
+
+    var body: some View { SupportedDevicesTableContent(rows: rows).background(RoundedRectangle(cornerRadius: 12).fill(MouseTheme.text.opacity(0.05)).overlay(RoundedRectangle(cornerRadius: 12).stroke(MouseTheme.text.opacity(0.12), lineWidth: 1))).clipShape(RoundedRectangle(cornerRadius: 12)) }
+}
+
+/// Renders the supported devices table content UI.
+private struct SupportedDevicesTableContent: View {
+    let rows: [SupportedDeviceRow]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            SupportedDevicesTableHeader()
+            Divider().overlay(MouseTheme.text.opacity(0.12))
+
+            if rows.isEmpty { emptyRowsView } else { supportedRowsView }
+        }
+    }
+
+    private var emptyRowsView: some View { Text("No supported devices match the current search.").font(.system(size: 13, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.62)).frame(maxWidth: .infinity, minHeight: 260) }
+
+    private var supportedRowsView: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(rows) { row in
+                    SupportedDevicesTableRow(row: row)
+                    Divider().overlay(MouseTheme.text.opacity(0.07))
+                }
+            }
+        }
+    }
+}
+
+/// Renders the supported devices table header UI.
+private struct SupportedDevicesTableHeader: View {
+    var body: some View {
+        HStack(alignment: .center, spacing: 16) {
+            tableHeader("Device").frame(maxWidth: .infinity, alignment: .leading)
+            tableHeader("Transport").frame(width: 108, alignment: .leading)
+            tableHeader("Product ID").frame(width: 132, alignment: .leading)
+            tableHeader("Capabilities").frame(width: 320, alignment: .leading)
+        }.padding(.horizontal, 14).padding(.vertical, 9).frame(maxWidth: .infinity, alignment: .leading).background(MouseTheme.text.opacity(0.06))
+    }
+
+    private func tableHeader(_ text: String) -> some View { Text(localized(text)).font(.system(size: 11, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.58)).textCase(.uppercase) }
+}
+
+/// Renders the supported devices table row UI.
+private struct SupportedDevicesTableRow: View {
+    let row: SupportedDeviceRow
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 16) {
+            Text(localized(row.name)).font(.system(size: 13, weight: .bold, design: .default)).foregroundStyle(MouseTheme.text).lineLimit(1).frame(maxWidth: .infinity, alignment: .leading)
+
+            Pill(text: row.transport.connectionLabel, color: row.transport == .bluetooth ? MouseTheme.secondary : MouseTheme.secondary, fontSize: 10, horizontalPadding: 8, verticalPadding: 4).frame(width: 108, alignment: .leading)
+
+            Text(localized(row.productIDs)).font(.system(size: 12, weight: .semibold, design: .monospaced)).foregroundStyle(MouseTheme.text.opacity(0.78)).lineLimit(1).frame(width: 132, alignment: .leading)
+
+            Text(localized(row.capabilities)).font(.system(size: 12, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.74)).lineLimit(1).frame(width: 320, alignment: .leading)
+        }.padding(.horizontal, 14).padding(.vertical, 10).frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// Stores notice item data.
+private struct NoticeItem {
+    let title: String
+    let message: String
+    var detailLines: [String] = []
+    let tone: StatusNoticeTone
+    var actions: [NoticeAction] = []
+}
+
+/// Defines content notice presentation values.
+enum ContentNoticePresentation {
+    static func shouldSuppressTelemetryNoticeDuringConnectionRecovery(connectionState: DeviceConnectionState, isStrictlyUnsupported: Bool, isUnsupportedUSB: Bool) -> Bool {
+        guard !isStrictlyUnsupported, !isUnsupportedUSB else { return false }
+        switch connectionState {
+        case .disconnected, .reconnecting: return true
+        case .connected, .unsupported, .error: return false
+        }
+    }
+
+    static func shouldSuppressUSBTelemetryLimitedNotice(warningMessage: String?, selectedTransport: DeviceTransportKind?) -> Bool {
+        guard selectedTransport == .usb, let warningMessage else { return false }
+        return warningMessage.hasPrefix("USB telemetry is incomplete")
+    }
+
+    /// Whether the selected USB device should surface the "USB Telemetry Limited" callout.
+    ///
+    /// This uses the same profile-aware rule as the telemetry warning, so a lighting-only accessory
+    /// or keyboard whose profile omits mouse telemetry is not flagged for telemetry it never had.
+    static func shouldShowUSBTelemetryLimitedCallout(state: MouseState, profile: DeviceProfile?) -> Bool { !USBTelemetryExpectation.missingTelemetry(state: state, profile: profile).isEmpty }
+}
+
+/// Stores notice action data.
+private struct NoticeAction {
+    let title: String
+    var isProminent: Bool = false
+    let handler: () -> Void
+}
+
+/// Defines status notice tone values.
+private enum StatusNoticeTone {
+    case error
+    case warning
+    case permission
+
+    var color: Color {
+        switch self {
+        case .error: MouseTheme.danger
+        case .warning, .permission: MouseTheme.warning
+        }
+    }
+    var symbol: String { self == .error ? "exclamationmark.circle" : "exclamationmark.shield" }
+}
+
+/// Renders the status notice card UI.
+private struct StatusNoticeCard: View {
+    let title: String
+    let message: String
+    let detailLines: [String]
+    let tone: StatusNoticeTone
+    let actions: [NoticeAction]
+    @State private var showsDetails = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(localized(title), systemImage: tone.symbol).font(.system(size: 13, weight: .semibold)).foregroundStyle(tone.color)
+
+            Text(localized(message)).font(.system(size: 12, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.90))
+
+            if !detailLines.isEmpty {
+                DisclosureGroup(isExpanded: $showsDetails) { detailLinesView } label: { Text("Permission details") }
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+            actionButtons
+        }.padding(12).frame(maxWidth: .infinity, alignment: .leading).background(cardBackground)
+    }
+
+    @ViewBuilder private var detailLinesView: some View { ForEach(Array(detailLines.enumerated()), id: \.offset) { _, line in detailLineView(for: line) } }
+
+    @ViewBuilder private var actionButtons: some View {
+        if !actions.isEmpty {
+            HStack(spacing: 8) {
+                ForEach(Array(actions.enumerated()), id: \.offset) { _, action in
+                    if action.isProminent { Button(localized(action.title), action: action.handler).buttonStyle(.borderedProminent).controlSize(.small) } else { Button(localized(action.title), action: action.handler).buttonStyle(.bordered).controlSize(.small) }
+                }
+            }
+        }
+    }
+
+    private func detailLineView(for line: String) -> some View {
+        let usesMonospace = line.contains("tccutil") || line.contains("Denied host:")
+        let fontSize = usesMonospace ? 11.0 : 12.0
+        let fontDesign: Font.Design = usesMonospace ? .monospaced : .rounded
+
+        return Text(localized(line)).font(.system(size: fontSize, weight: .medium, design: fontDesign)).foregroundStyle(MouseTheme.text.opacity(0.80)).textSelection(.enabled)
+    }
+
+    private var cardBackground: some View { RoundedRectangle(cornerRadius: 10).fill(tone.color.opacity(0.065)).overlay(RoundedRectangle(cornerRadius: 10).stroke(tone.color.opacity(0.18), lineWidth: 1)) }
+}

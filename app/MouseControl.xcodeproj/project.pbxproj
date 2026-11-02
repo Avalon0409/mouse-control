@@ -1,0 +1,2720 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0046C2AD36BCC5522C8FFE43 /* ReleaseUpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A20C459190DC81FBCABAB1 /* ReleaseUpdateChecker.swift */; };
+		0063C81677058BA863416786 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003B58101D70BEF429A8C4E /* Localizable.strings */; };
+		00B5B51FCD68AD8D3D026CA2 /* AppStateApplyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A441D562213DCC7FC1AEC2 /* AppStateApplyController.swift */; };
+		01CDDE56F46B95E82A8DD38A /* USBHIDProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 909CC4188E9DC60023A1A0B8 /* USBHIDProtocol.swift */; };
+		023760EAA92AF0B34778A8B0 /* OpenSnekUITestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B35BCA2B72ECAFC4F5470F /* OpenSnekUITestSupport.swift */; };
+		030DFE11AD214D435FD67C9A /* SmoothScrollEngine.m in Sources */ = {isa = PBXBuildFile; fileRef = 58232B80F0DECE516FE17BB4 /* SmoothScrollEngine.m */; };
+		03A8080478B5F7512D2776C7 /* AppStateApplyController+LocalProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3606FFEE97EF626E66E81B3 /* AppStateApplyController+LocalProfiles.swift */; };
+		04038E2531B154C15D30DEE7 /* BridgeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBEE3D1D435734F1582FEFB7 /* BridgeClient.swift */; };
+		0455182868070B3C33D57AC3 /* BackgroundServiceHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D6F90C5D0D04BED8D4F0BA /* BackgroundServiceHost.swift */; };
+		067DBD648283DDACE9628001 /* SourceTable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = F8675DA37B48F3663D87C21F /* SourceTable.h */; };
+		06BD51C71B3DF7BEAF5F1E41 /* MouseControlFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CD04D683CB45FFC09676CDB /* MouseControlFeatureTests.swift */; };
+		072CED7D8F47C928EEB5BD99 /* AppStateDeviceController+RemoteUpdates.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7795951F8E1CC66D4FD271D /* AppStateDeviceController+RemoteUpdates.swift */; };
+		0760D1F9D5CE8E1B789BB47D /* AppStateApplyAndDPICharacterizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CED04DCD86B1587595EBA824 /* AppStateApplyAndDPICharacterizationTests.swift */; };
+		07E0C22E420CD3DF02B9BBBF /* BridgeClient+PassiveDpiTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BEF52ECA57AEAF90B8FFC2 /* BridgeClient+PassiveDpiTracker.swift */; };
+		07F45B1903F7D3574D70B508 /* OpenSnek-Apache-2.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = E11BCEA6E82EDF0283041D7C /* OpenSnek-Apache-2.0.txt */; };
+		07FA1A3D7EE30B054DCAAAB3 /* AppStateDeviceController+RealtimeDPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D0BFA876D6DC545C4A3DA3 /* AppStateDeviceController+RealtimeDPI.swift */; };
+		081C61475496219C96A88564 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06EC3C12E86502A39889A70D /* Models.swift */; };
+		08CDE32EAEB5ACC2C40AB22D /* MacroRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C2F5CD1650C37628F0CCDF /* MacroRuntime.swift */; };
+		0A7C876092883339853DB894 /* AppStateTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF7B6A139E95B3B01F822AD /* AppStateTypes.swift */; };
+		0AF81D49DB336B2AB216EE34 /* Sparkle.txt in Resources */ = {isa = PBXBuildFile; fileRef = 16CDE6B0EEAD9DDB14164C4D /* Sparkle.txt */; };
+		0D7036F9D76A67D4C9444B3C /* KeyboardBindingControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF7C988B4D3B3DBF80E05434 /* KeyboardBindingControls.swift */; };
+		0E1821B38C1B09163578C181 /* AppStateEditorController+SelectionLighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9C77A82317A2307419C0AE /* AppStateEditorController+SelectionLighting.swift */; };
+		1025C4E30F23269113910105 /* IPCDeviceBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6E7686A578C5873691C6AB /* IPCDeviceBackend.swift */; };
+		1041DB54995FC72D95E487DA /* DeveloperRuntimeOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471B5CD744C9C1104485B359 /* DeveloperRuntimeOptions.swift */; };
+		10BB4441AC41D3BEB7F6F605 /* SoftwareUpdateSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9B28B4BD183FB8BC6F61FD /* SoftwareUpdateSession.swift */; };
+		113574F0E48C60844C0A9216 /* LightingOnlyDeviceGatingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 168017A6DFEF1002D983A861 /* LightingOnlyDeviceGatingTests.swift */; };
+		128CFD1599BE35026A2CE23B /* BridgeClient+PassiveDpiTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1BEF52ECA57AEAF90B8FFC2 /* BridgeClient+PassiveDpiTracker.swift */; };
+		14A6196A9E17B7C43F58463F /* OpenSnekBranding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 776FC18BBF57F199137F83AF /* OpenSnekBranding.swift */; };
+		1677AF631F3A7ECC5FF08367 /* USBHIDControlSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA63049A00C77D89398E58A0 /* USBHIDControlSessionTests.swift */; };
+		1688B57A58AB7A64A7091563 /* DeviceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE30E4E7751E4417959B2372 /* DeviceStore.swift */; };
+		1735AFD04305378F1B6AB0FA /* ContentNoticePresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E1AF18CBF7062ED316464B /* ContentNoticePresentationTests.swift */; };
+		1791E1EC9242D28D523914EC /* AppStateEditorController+OnboardProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0CCA7D09DA6663C3F8E85F /* AppStateEditorController+OnboardProfiles.swift */; };
+		1AB14E6EB7C51BF5C627FA96 /* PermissionSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 942E495A41B926AE140C1000 /* PermissionSupport.swift */; };
+		1C175DDC22B2EEE35B7BAB73 /* FeatureRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641498FD4DAACA0E3E220817 /* FeatureRuntime.swift */; };
+		1C4DEDFF4995D6A507AD597C /* ApplyCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CB6FA5DFC4AB3A8784AB6C /* ApplyCoordinator.swift */; };
+		1C83683D88C2990D9F8F81ED /* ServiceMenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D3F2196CF4234733713CAD /* ServiceMenuBarView.swift */; };
+		1D5494866E3661636005FE56 /* BroadcastStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = C837BBD5E2D4B3D62B87D387 /* BroadcastStream.swift */; };
+		1D862E5D2A17382F7C5E24C2 /* BridgeClient+OnboardProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972E72D49EDB3A102F78F1C5 /* BridgeClient+OnboardProfiles.swift */; };
+		1E4A85B9DB320D86145B7C13 /* LocalProfileLibraryPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADA7250200CD4F93902C2B0 /* LocalProfileLibraryPanel.swift */; };
+		2091A0510043AFE8F99661C2 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B764B623D92AAB140EB6D45B /* IOKit.framework */; };
+		222028F7609C0C86E69CC791 /* AppStateDeviceController+RealtimeDPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59D0BFA876D6DC545C4A3DA3 /* AppStateDeviceController+RealtimeDPI.swift */; };
+		229009947A981B7856F2480D /* HardwareBluetoothTarget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A74685648854BD4B993D5532 /* HardwareBluetoothTarget.swift */; };
+		2311CD383AA889028E56EDF9 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEB1FFFCC5FF4F806DB51BBF /* AppState.swift */; };
+		24023D86B6F5D7A0B3CF9CBF /* BridgeClientBluetoothFallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A3EB738B0CD2F5E369E7C62 /* BridgeClientBluetoothFallbackTests.swift */; };
+		2464AB83AB29CF32DF8BBC4F /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169E641DE80DFF60BB40924B /* AppLog.swift */; };
+		271E3ADED31007C116752A89 /* NativeBatteryPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75C63A28FDA42D310928B2AA /* NativeBatteryPublisher.swift */; };
+		277053CD2CE77C9C6FD69E74 /* RemoteServiceSnapshotHydrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1687FABC4D3145A9A75C57 /* RemoteServiceSnapshotHydrationTests.swift */; };
+		2888B51B89AB8CBE9A5A9C79 /* AppStateOnboardContentTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78AB2A4FE5211684103091FC /* AppStateOnboardContentTests.swift */; };
+		290E262E4411AD769FBEE3B8 /* Scroll-Reverser-NOTICE.txt in Resources */ = {isa = PBXBuildFile; fileRef = CD794DDD96A03A10485F2948 /* Scroll-Reverser-NOTICE.txt */; };
+		29D72D651ABB7E18526539EB /* LightingSummaryPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ED288098B26A3D53F972247 /* LightingSummaryPresentationTests.swift */; };
+		2AB1F953AB8E6AD0956FA68C /* OpenSnekApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46E69DA595046FFC2A4005 /* OpenSnekApp.swift */; };
+		2AE0D017C7619A7562008AFC /* TapLogger.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 19BE56C73195C4BDDE0D29FC /* TapLogger.h */; };
+		2AF8B6C765DAFA7A56EBE03B /* AppStateWiredMouseRestoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A539AE5554A8B9F1285AA8A /* AppStateWiredMouseRestoreTests.swift */; };
+		2B2B4BFCE256FCE7A68BFA2F /* LightingZoneEditModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3DEB3785207286597C3AA014 /* LightingZoneEditModeTests.swift */; };
+		2B712298ADCA088CF0FB7535 /* HardwareBluetoothRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BECF1DD404988B408FC1B8B6 /* HardwareBluetoothRecoveryTests.swift */; };
+		2BCF258651A6052C792CCCE6 /* SupportedDevicePresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BFB03DE69AD3D652B1BC20 /* SupportedDevicePresentationTests.swift */; };
+		2C88A38D83984D1BD9CC69BB /* libOpenSnekProtocols.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D7A66F4794918039E56A8C /* libOpenSnekProtocols.a */; };
+		2CB05CCB2F74B5120527DA6B /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D53695A38C9835CCF8FFB9DA /* Sparkle.framework */; };
+		2CF27FCCA33B003A467DE33B /* libOpenSnekAppSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77312E81B196E4368F2E1736 /* libOpenSnekAppSupport.a */; };
+		2DD7AA611FE4560A90F52DA8 /* SoftwareLightingBatterySamplerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C4C353FA3A4D943EF6E463 /* SoftwareLightingBatterySamplerTests.swift */; };
+		2F0463301636044D87DDB85C /* RemoteServiceSnapshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 919B26D4D37E260DFFCBF134 /* RemoteServiceSnapshotTests.swift */; };
+		2F35B7741A9C7F52D20EBB53 /* TurboRateMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9222B8860B55E656168A41B /* TurboRateMappingTests.swift */; };
+		2FCA5EA5651704251BF3A40E /* AppLifecycleDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 245D1DE5C13398F570C5C5D4 /* AppLifecycleDelegate.swift */; };
+		2FD509800C40D6EB37041DA7 /* BackgroundServiceTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8921D36EC46058D50895B6 /* BackgroundServiceTransport.swift */; };
+		2FFC4EDD8911386CBD6FFD19 /* AppStateOnboardHydrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78975B363B5A820D48EA0B50 /* AppStateOnboardHydrationTests.swift */; };
+		309B327F1B04B1919E7830BF /* Scroll-Reverser-NOTICE.txt in Resources */ = {isa = PBXBuildFile; fileRef = CD794DDD96A03A10485F2948 /* Scroll-Reverser-NOTICE.txt */; };
+		3175F8574AC2D8F398352BD6 /* ReleaseCandidateUpdateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C9402BAA2B866C8C679541E /* ReleaseCandidateUpdateTests.swift */; };
+		3254D5B3F7F2FF8F9D0E08C8 /* BatteryMeterSourceResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CF5C8BEE4769BA0A19DFA82 /* BatteryMeterSourceResolutionTests.swift */; };
+		329BA214D3123B32269F1B5A /* LaunchAtStartupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56E59CE5D9D5D822B04F50F0 /* LaunchAtStartupTests.swift */; };
+		32C046040310795C23A0B9FD /* NativeBatteryPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75C63A28FDA42D310928B2AA /* NativeBatteryPublisher.swift */; };
+		3345C1BD6C686CFCD486EF20 /* IOKitSPI.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2447D40C23887545F507CCA7 /* IOKitSPI.h */; };
+		34B92AE631CE84FAD08AC25A /* KeyboardBindingSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E826214B5DB76737BAEDFACC /* KeyboardBindingSupport.swift */; };
+		36FD2380C765181A1E819325 /* AppStateEditorController+LocalProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4268FF82BDAB3619770D922 /* AppStateEditorController+LocalProfiles.swift */; };
+		37CCE49A1C8A3FB18BFA68BC /* BLEVendorProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D622C25C14DCA34680F0B6C6 /* BLEVendorProtocolTests.swift */; };
+		37EFBEF4070CA01B9542AA2F /* ScrollIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8175615BA5FE24B24E2CB155 /* ScrollIdentityTests.swift */; };
+		3970E4FA36023B5A41483632 /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169E641DE80DFF60BB40924B /* AppLog.swift */; };
+		3AA7CCF8AAD09AD2697F2A99 /* AppStateEditorController+ButtonProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A64AC88D3140A86E345CC8C /* AppStateEditorController+ButtonProfiles.swift */; };
+		3AC916376B2377B9A0BE6085 /* NoControlInterfaceDeviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1E1D842A81768AB4A46A38 /* NoControlInterfaceDeviceTests.swift */; };
+		3C16D54F937894E079115307 /* AppStateEditorController+LocalProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4268FF82BDAB3619770D922 /* AppStateEditorController+LocalProfiles.swift */; };
+		3DA28C749982307F5D10DBBB /* DeviceDetailSettingsCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B7AA9AB5C38A469AC3835F /* DeviceDetailSettingsCards.swift */; };
+		3E14BABD063ABD8096A3FCE2 /* BluetoothNameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6602710841BA91D81C2B32F3 /* BluetoothNameMatcher.swift */; };
+		3ED69FC19C81B35AA68186ED /* DeviceDetailLightingControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26DE6C99A740EB4479C5063 /* DeviceDetailLightingControls.swift */; };
+		3F41D8208579350E863ED937 /* AppLifecycleDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 245D1DE5C13398F570C5C5D4 /* AppLifecycleDelegate.swift */; };
+		3FBBA4EA07B4682F1DAF27ED /* BackgroundServiceCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1657100ABA4AB8F330BE1D4F /* BackgroundServiceCoordinatorTests.swift */; };
+		40E4B34BF28405876A53B5FA /* snek-menu.png in Resources */ = {isa = PBXBuildFile; fileRef = 363F7DA73B19610764046856 /* snek-menu.png */; };
+		40EDF322B154B5D539F70C2A /* OpenSnekAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9431A58A34A9395A8883F80F /* OpenSnekAppearance.swift */; };
+		412CD25171F93E86B12884DD /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 217931DF8D8B3B8FDE2B6E89 /* CoreGraphics.framework */; };
+		413A55FA825D6EA6033F4EEA /* BridgeClient+Apply.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143AD741BEF6E815A883BE07 /* BridgeClient+Apply.swift */; };
+		428C5D811487DC6ECC337E8C /* DeviceSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E519B30C49EFC4E32EC1FE /* DeviceSidebarView.swift */; };
+		442D2F16B867EF59B9547B46 /* USBPassiveDPIEventMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7739E577DB8358885C16F6D6 /* USBPassiveDPIEventMonitor.swift */; };
+		44913882084CEB224BCCEE22 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F5DB60441813B2DC3DCEF9 /* SettingsView.swift */; };
+		454E0D86910E832E92A0A887 /* MouseControl.sdef in Resources */ = {isa = PBXBuildFile; fileRef = EBEF469112C126D6458134FC /* MouseControl.sdef */; };
+		4557B4CAB48D37AE4151C6A2 /* ButtonBindingSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39EB1BFFAF7C6A3F41DC262A /* ButtonBindingSupport.swift */; };
+		462D953C5F7172DF87428CB5 /* DpiStageIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F187E99D9D3B176D258E37E /* DpiStageIndicator.swift */; };
+		4801E5D14E79A42649567C5B /* AppStateApplyController+LocalProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3606FFEE97EF626E66E81B3 /* AppStateApplyController+LocalProfiles.swift */; };
+		48E0EEFC89ED51F629213C7F /* OpenSnekAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9431A58A34A9395A8883F80F /* OpenSnekAppearance.swift */; };
+		49461BD844AD4EA50BE90D67 /* LanguageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA462F6235760DC2C364242 /* LanguageStore.swift */; };
+		4A5738AB868405EDA936EE3F /* AppStateDeviceController+DeviceListSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB8349A7E7C4E053625F1A7 /* AppStateDeviceController+DeviceListSelection.swift */; };
+		4B87BFB1D0E401900B133F69 /* psyduck-app-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79FA268B0D31BCF2FEF7610C /* psyduck-app-icon.png */; };
+		4BA71C339D6B50926C4E5A7C /* WeakBound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B66EF0BD73B095B71155D9F /* WeakBound.swift */; };
+		4BC2C2249646D224AFFD24CF /* HardwareUSBStateSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD2FC24E6B3A03C9D7A85BF /* HardwareUSBStateSmokeTests.swift */; };
+		4CBF27573B21E41A2ED9EE73 /* SoftwareUpdateRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B617790993AB34C173CAFC6 /* SoftwareUpdateRecoveryTests.swift */; };
+		4E19CD46B29D5A1D0E4E5455 /* BackgroundServiceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B40AF592AD6E43F53E07BF6 /* BackgroundServiceCoordinator.swift */; };
+		4E2F9536DC9573893E093291 /* ApplyCoordinatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1536D53266086D887037C979 /* ApplyCoordinatorTests.swift */; };
+		4E9ADF3B5F51334B63EA7FC7 /* AppStateOnboardInventoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD7BCFD46910008D93E5F8ED /* AppStateOnboardInventoryTests.swift */; };
+		4FA92C00E6E1E5E410093F4D /* BroadcastStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = C837BBD5E2D4B3D62B87D387 /* BroadcastStream.swift */; };
+		4FFC84DBF24498097F25B2BB /* USBDpiStageParsingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1DF38A93CE0AFB8F315F8A /* USBDpiStageParsingTests.swift */; };
+		50E71F07F83241A0444E9117 /* libOpenSnekCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BF06624FDC7A95EE8C24820 /* libOpenSnekCore.a */; };
+		50EBA5C2EF51EDA0E64D4B34 /* IPCDeviceBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E6E7686A578C5873691C6AB /* IPCDeviceBackend.swift */; };
+		5117A7D209A0AAD3FDD4C402 /* DeviceDetailLightingControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = B26DE6C99A740EB4479C5063 /* DeviceDetailLightingControls.swift */; };
+		519DABEE332EB1A3E22AB2EE /* AppStateRuntimeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D419B750906D6C174FB4C2 /* AppStateRuntimeController.swift */; };
+		51D5C41165188CA94FA410E0 /* BackgroundServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE10E953CE7CF7E17B406068 /* BackgroundServiceProtocol.swift */; };
+		5360CAEAF227F465109EFDF1 /* BridgeClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBEE3D1D435734F1582FEFB7 /* BridgeClient.swift */; };
+		5396A12BCE6AB5C9ABF75C79 /* UIPrimitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EC706908271E383684C2F1 /* UIPrimitives.swift */; };
+		54799E7760D4367882F7C04F /* AppUpdateCheckTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECF644716EB2778FABBAD2C9 /* AppUpdateCheckTests.swift */; };
+		551EAA02A7DAC029488EC41D /* DeviceSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 886DCE9806215843CDDF4BBA /* DeviceSupport.swift */; };
+		556A753FD3A3BFCC1F2E1B56 /* DpiStageIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F187E99D9D3B176D258E37E /* DpiStageIndicator.swift */; };
+		56E075040C806D9793487ACD /* BridgeClient+USB.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5C685852ACC762DFDCC343 /* BridgeClient+USB.swift */; };
+		57263BA573D4021636A95E2E /* BridgeClient+USB.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF5C685852ACC762DFDCC343 /* BridgeClient+USB.swift */; };
+		57319BE780E06916E1E907DA /* MouseTap.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = A3F9030B1D858C0C4D28798E /* MouseTap.h */; };
+		5743FE5D54099500C3D9F877 /* KeyboardBindingSupportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89650984A5A2A91464D9A81 /* KeyboardBindingSupportTests.swift */; };
+		596AD147BF285D13C24C40A9 /* MouseControlSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A013933CBAD0E5A223EBC7 /* MouseControlSettingsView.swift */; };
+		5A176C74490C73260FCEACF0 /* AppStateTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF7B6A139E95B3B01F822AD /* AppStateTypes.swift */; };
+		5A3555DD28F5FD41FD83418F /* AppStateEditorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E794F138FA735E6B066E7CA /* AppStateEditorController.swift */; };
+		5B897205A4627E53AD8751A9 /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B879524B6084CC7F58341975 /* ShortcutRecorder.swift */; };
+		5CCC2953F4288F560D850EE8 /* DeviceDetailDpiStagesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCE16A58F5960075301759 /* DeviceDetailDpiStagesCard.swift */; };
+		5E936891FAC7606FA6CB842F /* AppStateEditorController+OnboardProfileContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A8F9E53151B55DB1259F46 /* AppStateEditorController+OnboardProfileContent.swift */; };
+		5F3864045C9E51B5AF76850C /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08F5DB60441813B2DC3DCEF9 /* SettingsView.swift */; };
+		5F931B95FF30087B7E5D7766 /* HardwareValidationSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8B716F6AF12422C24F5C53E /* HardwareValidationSessionTests.swift */; };
+		63CF661E9E85FB967AA79EFE /* DevicePersistenceKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E560CEFDF21FA1349C91CDF /* DevicePersistenceKeys.swift */; };
+		63EE3224D06DC2F0C45C2EDF /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EEBE87E9764E5432343BEF2F /* AppKit.framework */; };
+		644496DF43994C91B91BF360 /* DeviceDetailButtonMappingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0B3DFED6A8349BA0C74A93 /* DeviceDetailButtonMappingCard.swift */; };
+		6457003B6374B133AB0D8150 /* SoftwareUpdateSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9B28B4BD183FB8BC6F61FD /* SoftwareUpdateSession.swift */; };
+		64A189B56DF5F1E3926ED227 /* SparkleSoftwareUpdateInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1BC6D7AA8A1C437AA7C225 /* SparkleSoftwareUpdateInstaller.swift */; };
+		64EFF14D7BC2F983B2C53BF6 /* AppStateEditorController+OnboardProfileContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A8F9E53151B55DB1259F46 /* AppStateEditorController+OnboardProfileContent.swift */; };
+		64FDA3E24225906401295AA5 /* AppStateMultiDeviceAvailabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B795EAFB3496099EF3BC6D31 /* AppStateMultiDeviceAvailabilityTests.swift */; };
+		65BC814ABCE5CD980F873CFB /* libOpenSnekAppSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77312E81B196E4368F2E1736 /* libOpenSnekAppSupport.a */; };
+		65CE59D346FB2B686DCA1530 /* snek-menu-template.png in Resources */ = {isa = PBXBuildFile; fileRef = D93257EDE4BDC1D7AAF01950 /* snek-menu-template.png */; };
+		65D36901BD58244F9555C36B /* PhysicalDeviceListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E7C5FDA53AA72D4CE30156 /* PhysicalDeviceListTests.swift */; };
+		66C3D7C2DCDE048CC9E11C41 /* AppStateDeviceController+StateRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99094967BA0AF32FDB0DD9F9 /* AppStateDeviceController+StateRefresh.swift */; };
+		67C31F6D13E2C61B505FBBF7 /* mouse-app-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = D78890BDCFCA28335419A682 /* mouse-app-icon.png */; };
+		6888EA354FBA31FAF9169C04 /* MouseStateMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 921D3F699A15DB2B9A635DEC /* MouseStateMergeTests.swift */; };
+		6A08CFDBA69A28BDBFE2ED88 /* SoftwareLightingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4709007F7660EC56AE6CE /* SoftwareLightingEngine.swift */; };
+		6B35E11C34B756F9F439148B /* DeviceDetailButtonMappingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0B3DFED6A8349BA0C74A93 /* DeviceDetailButtonMappingCard.swift */; };
+		6B3AF839E4C4F9E5EDB5DA96 /* LocalProfileLibraryPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ADA7250200CD4F93902C2B0 /* LocalProfileLibraryPanel.swift */; };
+		6D1EA7C26DE5BA9980F1B299 /* AppStateApplyController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80A441D562213DCC7FC1AEC2 /* AppStateApplyController.swift */; };
+		6DADFE40A4D14140A38BEE00 /* DeviceSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7E519B30C49EFC4E32EC1FE /* DeviceSidebarView.swift */; };
+		6DDD04AA9B78AB242C153E12 /* LocalBridgeBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DCE9CF868294ACCFB861F /* LocalBridgeBackend.swift */; };
+		6E74B16406EA7CDC8838F2FA /* libOpenSnekHardware.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F8BC8465F0ABEC22A0EB30FA /* libOpenSnekHardware.a */; };
+		6EE90E55EF38F663F7190EE8 /* KeyboardBindingSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E826214B5DB76737BAEDFACC /* KeyboardBindingSupport.swift */; };
+		71D5432371199086BDB248AB /* USBPassiveDPIAppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE4B0703C9D2FF9C0CA0E6F /* USBPassiveDPIAppStateTests.swift */; };
+		721067FA9284982833CD6C93 /* Scroll-Reverser-Apache-2.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9B98E855666F095093B6482B /* Scroll-Reverser-Apache-2.0.txt */; };
+		7234064331D9E5A9A52C1438 /* AppStateMultiDeviceSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C93CF27F10A4592F43223B08 /* AppStateMultiDeviceSelectionTests.swift */; };
+		73C435BA9493D831E7229693 /* CoreAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BA96196B43FA40351D9F2 /* CoreAliases.swift */; };
+		73F69C5C1EB8116B5516E0B6 /* AppStateMultiDeviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04497C8C83E090F36EC23705 /* AppStateMultiDeviceTests.swift */; };
+		77745B45325931A523A706A8 /* BridgeClient+OnboardProfilesBluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31F9D3A4D4A7558FA86B04B /* BridgeClient+OnboardProfilesBluetooth.swift */; };
+		789772180C5B654AC01A2723 /* RuntimeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C72F3CBE869DEC725E9E46D /* RuntimeStore.swift */; };
+		78CFF2E2B8586213577D9878 /* DevicePatchUSBCapabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D273745A3434C6423ABF499C /* DevicePatchUSBCapabilityTests.swift */; };
+		78DA539389F0EC00FC72BF82 /* RemoteServiceSnapshotConnectivityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E667D05F50F04175DAEBEF20 /* RemoteServiceSnapshotConnectivityTests.swift */; };
+		78FD52DE0755BB4147D5D563 /* LanguageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAA462F6235760DC2C364242 /* LanguageStore.swift */; };
+		79019B01453E5CB46DC32F44 /* SupportedDevicesReadmeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B28D134FF64F3067E5574ACE /* SupportedDevicesReadmeTests.swift */; };
+		793E7046A923966BD6B8710C /* MacroRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C2F5CD1650C37628F0CCDF /* MacroRuntime.swift */; };
+		799BB5B934B590A673671BE5 /* ReleaseUpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A20C459190DC81FBCABAB1 /* ReleaseUpdateChecker.swift */; };
+		7A035CA12D194832A7759DC4 /* ThirdPartyNotices.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8A4B1D1C7743377C34122163 /* ThirdPartyNotices.txt */; };
+		7B9EF58F83D367C96493624B /* USBTelemetryExpectationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BAEFB587F2378D511D08DDD /* USBTelemetryExpectationTests.swift */; };
+		7CC7D8142015AD172419BE84 /* psyduck-menu-template.png in Resources */ = {isa = PBXBuildFile; fileRef = CDF9B0484D3D35A0E3079DCF /* psyduck-menu-template.png */; };
+		7CF2FE3333D04BDF169AAF74 /* HardwareValidationSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C50D00785CF370BC34BB5B9 /* HardwareValidationSession.swift */; };
+		7E05C7176A94834BFAC214C0 /* libOpenSnekProtocols.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D7A66F4794918039E56A8C /* libOpenSnekProtocols.a */; };
+		7E5CD630CAFD2AF3BAEC335C /* psyduck-app-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79FA268B0D31BCF2FEF7610C /* psyduck-app-icon.png */; };
+		7E85573749A7E9B89A98A508 /* MouseTap.m in Sources */ = {isa = PBXBuildFile; fileRef = 4D0BC2F01E72B95B6A8E947B /* MouseTap.m */; };
+		7ED6D9799103A625F13FD837 /* OnboardProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 897324777FC0C9B749D22A20 /* OnboardProfiles.swift */; };
+		7F423A74FF3346C1DBFEBFEC /* snek-menu-template.png in Resources */ = {isa = PBXBuildFile; fileRef = D93257EDE4BDC1D7AAF01950 /* snek-menu-template.png */; };
+		7F93561738D18BAB443B652E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6003B58101D70BEF429A8C4E /* Localizable.strings */; };
+		7FD59BB02EDFE61AD0085398 /* DevicePreferenceStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB2E706ABDB21573B00059CE /* DevicePreferenceStoreTests.swift */; };
+		803518DB8519021B2315692A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0E51C2976304EA268823525 /* Assets.xcassets */; };
+		8114B6D90DA4FA39E4952DFD /* libOpenSnekCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BF06624FDC7A95EE8C24820 /* libOpenSnekCore.a */; };
+		815833C4E81D6223AAECB20F /* AppLocalStorageResetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEFBF57ABE1B95E85D1B028 /* AppLocalStorageResetter.swift */; };
+		8273C9A6E951C588F6B15826 /* AppStateRuntimeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D419B750906D6C174FB4C2 /* AppStateRuntimeController.swift */; };
+		85538543921B5A314F8714C8 /* BridgeClient+OnboardProfilesUSB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EFB3DA0796E67252D87903 /* BridgeClient+OnboardProfilesUSB.swift */; };
+		85AA00FED88740DC3444BD8E /* AppStateEditorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E794F138FA735E6B066E7CA /* AppStateEditorController.swift */; };
+		86A1153AF64839220E8A36D6 /* psyduck-menu-template.png in Resources */ = {isa = PBXBuildFile; fileRef = CDF9B0484D3D35A0E3079DCF /* psyduck-menu-template.png */; };
+		870ACEB2C614D52B5324864C /* DeviceProfilesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA6EA55F2EA0F4849E7FCA51 /* DeviceProfilesTests.swift */; };
+		872EE066EAF6AD695F23331F /* IconStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E60FA96D8A748165158266 /* IconStore.swift */; };
+		87A10245DD81AB4193EF8F4F /* AppStateOnboardMutationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56CCA075D0AF3F97099976F8 /* AppStateOnboardMutationTests.swift */; };
+		87FE979A41D1B0349376FCB1 /* DeviceValidationCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = D252057430A08C2259A0A42A /* DeviceValidationCatalog.swift */; };
+		88FFA9C06623BCD47AC9FBE6 /* WindowChromeConfiguratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86702B76E45F8DABEBC2B94A /* WindowChromeConfiguratorTests.swift */; };
+		896D70D0E6B4E728855C4541 /* WindowChromeConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC495B616946940C0561EE1E /* WindowChromeConfigurator.swift */; };
+		89700251B96FB19B76464EB4 /* BackendSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA36AD5F36AC2B0948B7CFE0 /* BackendSession.swift */; };
+		8A556439C8795F7F69A5F117 /* OpenSnekUITestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B35BCA2B72ECAFC4F5470F /* OpenSnekUITestSupport.swift */; };
+		8BD843BD8B39678906C3E62F /* RemoteServiceBootstrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 426B187D1307C381A95DDBBA /* RemoteServiceBootstrapTests.swift */; };
+		8BEEE8C41A1BCEA7D95ABCFE /* libOpenSnekAppSupport.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 77312E81B196E4368F2E1736 /* libOpenSnekAppSupport.a */; };
+		8C07A318966607CC023ACC93 /* AppStateRestoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3774726B2F902FC64B965F4B /* AppStateRestoreTests.swift */; };
+		8C542E721D9EDC1FDE762A05 /* Logger.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = FB60675E46FF524A002B7AB0 /* Logger.h */; };
+		8D0B11042BCD2B03045F8904 /* BasicMouseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADA276F409AC56D0333CD01 /* BasicMouseDetailView.swift */; };
+		8E2A736202801D565074FBB6 /* ScrollSource.m in Sources */ = {isa = PBXBuildFile; fileRef = DFDC89288EEE35B35C2E8879 /* ScrollSource.m */; };
+		8ED43A237951C2ACBFD0527B /* BackgroundServiceTransportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC0DD23DD157BB5593EABFE6 /* BackgroundServiceTransportTests.swift */; };
+		901E168D5CD5CFDF9D218588 /* USBHIDProtocolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA3AA408E1884136FADA8304 /* USBHIDProtocolTests.swift */; };
+		907121FF3F8466949DF0A2BF /* AppStateEditorController+OnboardProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A0CCA7D09DA6663C3F8E85F /* AppStateEditorController+OnboardProfiles.swift */; };
+		9241EBB250B78CA1C8514856 /* ScrollRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5743044E480565191E38ED8C /* ScrollRuntime.swift */; };
+		93850F787B5DFEF5A2539B83 /* AppStateDeviceController+StateRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99094967BA0AF32FDB0DD9F9 /* AppStateDeviceController+StateRefresh.swift */; };
+		9499A39BDA4C4A54D2B9ACE8 /* libOpenSnekHardware.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F8BC8465F0ABEC22A0EB30FA /* libOpenSnekHardware.a */; };
+		9621E45A6ED971554A0245D7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FABE6600866F4597D3D37021 /* ContentView.swift */; };
+		9812B192E4D204B7A669D466 /* BridgeClient+OnboardProfilesUSB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59EFB3DA0796E67252D87903 /* BridgeClient+OnboardProfilesUSB.swift */; };
+		9856BD6A5D90DABFD5FA1728 /* AppLaunchReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = F105EC806F57B6D55425BC9B /* AppLaunchReceipt.swift */; };
+		9980036DE8D45B510D0DAD0B /* DeviceDiagnosticsFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7EAB072FFEFF71FADBA6466E /* DeviceDiagnosticsFormatterTests.swift */; };
+		99808B283D15E02412A7D466 /* Abstractions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10D641A66E3A6799179F28E0 /* Abstractions.swift */; };
+		99998264318A8BA52C01E53B /* OpenSnekBranding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 776FC18BBF57F199137F83AF /* OpenSnekBranding.swift */; };
+		99BB358BAC587EDA4F135CEE /* AppStateButtonProfileEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F622D2E7F37D698884C3074 /* AppStateButtonProfileEditTests.swift */; };
+		99ED4D4E9826CCA8FA1B22CB /* BackgroundServiceTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB8921D36EC46058D50895B6 /* BackgroundServiceTransport.swift */; };
+		99F0E1B3207BF010B0B97AC9 /* libOpenSnekCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0BF06624FDC7A95EE8C24820 /* libOpenSnekCore.a */; };
+		9A57203C685B0FA040D62BAE /* OnboardProfileProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32274F4753E5AC41F2C34168 /* OnboardProfileProjection.swift */; };
+		9C1F85D23B099BFC1A811D55 /* AppStateButtonWorkspaceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B51A6128270CC745CBD0EEB /* AppStateButtonWorkspaceTests.swift */; };
+		9C2B0E827AE2CBC2BAA352F3 /* LightingZoneEditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57113D4185F9C11613BFF2CA /* LightingZoneEditMode.swift */; };
+		9CA3BB13BC4DDC9CAE482A81 /* WindowChromeConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC495B616946940C0561EE1E /* WindowChromeConfigurator.swift */; };
+		9DCF150ADEFD0324088AA17B /* BLEVendorTransportClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF69CA59829A5C3998D9EAD0 /* BLEVendorTransportClient.swift */; };
+		9E13CB77ACB66B2A50FE12B5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FABE6600866F4597D3D37021 /* ContentView.swift */; };
+		9E7064F332BDC943CCDE4670 /* SoftwareLightingBatterySampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712D0D9C8EC9E6CF28DA603F /* SoftwareLightingBatterySampler.swift */; };
+		9ED79E320C9A28B9D4FEAA5B /* USBButtonHydrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94B29CC3F2EC9BF03F3020E /* USBButtonHydrationTests.swift */; };
+		A2A0CA6627422C7E5847A98E /* HIDDevicePresenceMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0DFBB54463AC027CC91B79 /* HIDDevicePresenceMonitor.swift */; };
+		A41808CBD5C49A0664729401 /* MouseIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEA9EE89D293EC2658037E5 /* MouseIdentityTests.swift */; };
+		A41888A0D09EEF84AA59D349 /* LocalBridgeBackendTelemetryMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D995DAFA3D04F4B1DF0405 /* LocalBridgeBackendTelemetryMerge.swift */; };
+		A497C4C42A7F5EEE765D542D /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D53695A38C9835CCF8FFB9DA /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		A644F01FE863B6895BFFEADF /* libOpenSnekHardware.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F8BC8465F0ABEC22A0EB30FA /* libOpenSnekHardware.a */; };
+		A679684CBF096FCC979D8AC1 /* SmoothScrollEngine.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2D7E7F1DA7DE69AC1027DD1D /* SmoothScrollEngine.h */; };
+		A6C2EFE76C0ABE9EC7CF0F62 /* BridgeClientUSBWriteSemanticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF2E0F392D905105253F2618 /* BridgeClientUSBWriteSemanticsTests.swift */; };
+		A77DB070538C450BEBECFBC8 /* EditorStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352A5362177BAFA287B14318 /* EditorStore.swift */; };
+		A7E46577702AB2E5B3AB5C43 /* RuntimeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C72F3CBE869DEC725E9E46D /* RuntimeStore.swift */; };
+		A8398E64EEC4BFE82D40B0BC /* AppSupportModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA2F0C1EF95850C94999AA62 /* AppSupportModule.swift */; };
+		A8DC245C473CABF10C407713 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2B3EA5199C57558939A727 /* AppEnvironment.swift */; };
+		A92868FC7E14482F2A630ADB /* DeviceValidationCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E177507197D44633BCFC460C /* DeviceValidationCatalogTests.swift */; };
+		AA55FBC4502DBA2610D6C450 /* AppStateEditorController+ButtonProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A64AC88D3140A86E345CC8C /* AppStateEditorController+ButtonProfiles.swift */; };
+		AA61C5C368E3B2C392C93211 /* USBTelemetryExpectation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87DDDCC3DDE00B4E2262654 /* USBTelemetryExpectation.swift */; };
+		AAE32B256C4BE2A5DDDA91D2 /* OpenSnekBrandingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C17DE47A5D57AFC19D477D00 /* OpenSnekBrandingTests.swift */; };
+		ABA0B0B354694EB47041EF90 /* ShortcutRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B879524B6084CC7F58341975 /* ShortcutRecorder.swift */; };
+		AC2A5FA149E1B10074930CF1 /* HardwareDpiReliabilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AE1E6CDC56177D6BBAABC2F /* HardwareDpiReliabilityTests.swift */; };
+		AC7C44CB6A67E5C3B74105F9 /* USBPassiveDPIParserMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5CDE7843D8ACD385CF2AA02 /* USBPassiveDPIParserMergeTests.swift */; };
+		AE5077BDC1BBE8E0548CA118 /* AppStateDeviceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8F534DB35D0E3CC607D70A /* AppStateDeviceController.swift */; };
+		B0EE7EBEED7CFA71A0C25A34 /* AppStateDeviceController+DeviceListSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFB8349A7E7C4E053625F1A7 /* AppStateDeviceController+DeviceListSelection.swift */; };
+		B13A8FD539A625407ECADE25 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0E51C2976304EA268823525 /* Assets.xcassets */; };
+		B1517CA7AB5832BF2AE5FA2D /* AppStateDeviceController+RemoteUpdates.swift in Sources */ = {isa = PBXBuildFile; fileRef = C7795951F8E1CC66D4FD271D /* AppStateDeviceController+RemoteUpdates.swift */; };
+		B1830959A7DA36026DFADC6B /* AppStateApplyController+ButtonProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA255BABAAB34022C22E9B94 /* AppStateApplyController+ButtonProfiles.swift */; };
+		B1C81609BF2BBC9603EB770B /* DevicePatch+USBControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CA350E2818AAFBB35B61B0E /* DevicePatch+USBControls.swift */; };
+		B26D5D5F8232F0421A2197E6 /* DeviceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F07A382DF1EA27C73A1291B0 /* DeviceDetailView.swift */; };
+		B2FCBA13908EAC22241E9388 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D2B3EA5199C57558939A727 /* AppEnvironment.swift */; };
+		B47FC5301764F71713BA62F2 /* BLEProbeSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A78628C4BCE091083A9D5A47 /* BLEProbeSessionTests.swift */; };
+		B4C9E83DA32DFFF9A1C0A097 /* BackgroundServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE10E953CE7CF7E17B406068 /* BackgroundServiceProtocol.swift */; };
+		B69495E90A59CD987780DCAA /* IssueReportFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBB348A4947F7F1A4D478D4A /* IssueReportFormatter.swift */; };
+		B6A7BDAC5B9E54243CD4A997 /* AppStateLightingCharacterizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E73F26AB652BBFD52C970789 /* AppStateLightingCharacterizationTests.swift */; };
+		B76442EFA3CDA9746D9F8D4A /* UIPrimitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EC706908271E383684C2F1 /* UIPrimitives.swift */; };
+		B78855FC5A18E64FD70CAEC8 /* BridgeClient+Apply.swift in Sources */ = {isa = PBXBuildFile; fileRef = 143AD741BEF6E815A883BE07 /* BridgeClient+Apply.swift */; };
+		B79285ABE14F955CCE7F8E02 /* IssueReportFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683F16774A788890DB8F96C8 /* IssueReportFormatterTests.swift */; };
+		B9A801EDD119E99B826E5004 /* KeyboardBindingControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF7C988B4D3B3DBF80E05434 /* KeyboardBindingControls.swift */; };
+		BA324CC94E913E69AFFB48FC /* ThirdPartyNotices.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8A4B1D1C7743377C34122163 /* ThirdPartyNotices.txt */; };
+		BA8241C0CEF9E341917726A4 /* UnsupportedDeviceHandlingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF96A32BAB7E72C5B36F287B /* UnsupportedDeviceHandlingTests.swift */; };
+		BA921412FEB32BFBE66C40D4 /* AppStateMultiDeviceServiceSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99CC7C20F3337558A84EC07 /* AppStateMultiDeviceServiceSelectionTests.swift */; };
+		BA9964B853177FC639AD1B11 /* FeaturePreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747647AFDF6BE04C83B4C607 /* FeaturePreferences.swift */; };
+		BB35AD29E1973BAFF0C8A599 /* Scroll-Reverser-Apache-2.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = 9B98E855666F095093B6482B /* Scroll-Reverser-Apache-2.0.txt */; };
+		BBA3738DA66C91EC997CC2E3 /* AppLocalStorageResetterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F68A6799CFE8AAE63E4145 /* AppLocalStorageResetterTests.swift */; };
+		BBCA4686A486C8A8439D63BE /* ServiceMenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46D3F2196CF4234733713CAD /* ServiceMenuBarView.swift */; };
+		BC57B9A0CA6899035DCF8C92 /* CoreGraphicsSPI.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 48621219857DDD5A6F849B3F /* CoreGraphicsSPI.h */; };
+		BC7164DAE958A61ABED9BBC0 /* BLEProbeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77FE7D8C9D13985D532224F7 /* BLEProbeSession.swift */; };
+		BCDAA02C5888FB11703758C9 /* BridgeClient+OnboardProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972E72D49EDB3A102F78F1C5 /* BridgeClient+OnboardProfiles.swift */; };
+		BD61E8181C24C8A770B54110 /* AppStateApplyController+ButtonProfiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA255BABAAB34022C22E9B94 /* AppStateApplyController+ButtonProfiles.swift */; };
+		BD74861B5A1393D57AD78BFE /* DevicePreferenceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A84634F3E200ABADED1E78 /* DevicePreferenceStore.swift */; };
+		BDF2E0166BAD33EB2D2F652D /* DeviceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE30E4E7751E4417959B2372 /* DeviceStore.swift */; };
+		BE5F16E1471AEF5A0733400A /* mouse-app-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = D78890BDCFCA28335419A682 /* mouse-app-icon.png */; };
+		BE76087874EA67F5D16537EA /* AppStateDeviceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F8F534DB35D0E3CC607D70A /* AppStateDeviceController.swift */; };
+		BFDC874DD644B19F7C2557C5 /* DeviceDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F07A382DF1EA27C73A1291B0 /* DeviceDetailView.swift */; };
+		BFFF2B9A537DCB8B42DBC90E /* DeveloperRuntimeOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB45C9744D62170F6879FB79 /* DeveloperRuntimeOptionsTests.swift */; };
+		C0CF9905B521F160BC0BEE3D /* AppStateFreshLocalProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18CDF86759291F2AC9C7B810 /* AppStateFreshLocalProfileTests.swift */; };
+		C0F4AEFAB359AD7666737614 /* DeviceDetailDpiStagesCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37DCE16A58F5960075301759 /* DeviceDetailDpiStagesCard.swift */; };
+		C18B1710F3AE9C1B59EDF2D5 /* OnboardProfileEditorModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783BB948AB54165E8A0DD5BA /* OnboardProfileEditorModels.swift */; };
+		C1A1976AE9E85930CD56A01F /* WeakBound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B66EF0BD73B095B71155D9F /* WeakBound.swift */; };
+		C36895FE55B3AE61035763D9 /* FeatureRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641498FD4DAACA0E3E220817 /* FeatureRuntime.swift */; };
+		C46D5045CBB46515DE0CF796 /* CoreAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = A89BA96196B43FA40351D9F2 /* CoreAliases.swift */; };
+		C4E20BA0975516DEA6746A95 /* BLEVendorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B3825B6618B5D3A91033E9 /* BLEVendorProtocol.swift */; };
+		C5580003D778FE1A4F06CA1F /* OpenSnek-Apache-2.0.txt in Resources */ = {isa = PBXBuildFile; fileRef = E11BCEA6E82EDF0283041D7C /* OpenSnek-Apache-2.0.txt */; };
+		C65415CE6EB81F7D8CA9AF57 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = 29A4C200C1D6BC27772B75C3 /* Logger.m */; };
+		CB46E5CA710042B66102BF51 /* libOpenSnekProtocols.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 86D7A66F4794918039E56A8C /* libOpenSnekProtocols.a */; };
+		CBCF5A322810F68FD36355ED /* BackgroundServiceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B40AF592AD6E43F53E07BF6 /* BackgroundServiceCoordinator.swift */; };
+		CC0D3C65F5A9D3AB4D58C223 /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D53695A38C9835CCF8FFB9DA /* Sparkle.framework */; };
+		CCCA150E2FE1148E21C8D29C /* SoftwareLightingEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3BCC106B59E1956C9DE1B0 /* SoftwareLightingEngineTests.swift */; };
+		CEEE63EDD9A514FC40456E80 /* LocalBridgeBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8DCE9CF868294ACCFB861F /* LocalBridgeBackend.swift */; };
+		CF4E64ACD7C0051A6723C3D0 /* BackendSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA36AD5F36AC2B0948B7CFE0 /* BackendSession.swift */; };
+		CF9D40BE0F96B5966128A73F /* SparkleSoftwareUpdateInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED1BC6D7AA8A1C437AA7C225 /* SparkleSoftwareUpdateInstaller.swift */; };
+		D2824D74A8E12BA0F1A5A90D /* DeviceDetailSettingsCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B7AA9AB5C38A469AC3835F /* DeviceDetailSettingsCards.swift */; };
+		D2BBC13D7354C6B1EC4D7496 /* LocalBridgeBackendTelemetryMerge.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6D995DAFA3D04F4B1DF0405 /* LocalBridgeBackendTelemetryMerge.swift */; };
+		D2D07C6B20BD3916FB669E6D /* BridgeClient+Bluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEB2F5C5EDC41128AD41D58D /* BridgeClient+Bluetooth.swift */; };
+		D2E5C7E852E9F285C2D5C609 /* snek-menu.png in Resources */ = {isa = PBXBuildFile; fileRef = 363F7DA73B19610764046856 /* snek-menu.png */; };
+		D489F96C901DF8582168D62E /* BridgeClient+OnboardProfilesBluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = E31F9D3A4D4A7558FA86B04B /* BridgeClient+OnboardProfilesBluetooth.swift */; };
+		D4A0EE2091FA17AC8415CA85 /* ReleaseUpdateCheckerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A16C01B3169A1335405F7F3D /* ReleaseUpdateCheckerTests.swift */; };
+		D4EFD0ABC7036680E3582505 /* FeaturePreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747647AFDF6BE04C83B4C607 /* FeaturePreferences.swift */; };
+		D61432E47383A7436323FC69 /* IconStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9E60FA96D8A748165158266 /* IconStore.swift */; };
+		D814EB12CE0F2B9B0F4C5C8E /* AppStateProfileSwitchRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 295811F21D6B77EF9E999B2C /* AppStateProfileSwitchRegressionTests.swift */; };
+		D8D07D65F7FE03D2E25016BE /* HardwareModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56DE0B8375FCABF669D6F358 /* HardwareModule.swift */; };
+		D9FA0536619A498F0B90C682 /* SoftwareLightingEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4709007F7660EC56AE6CE /* SoftwareLightingEngine.swift */; };
+		DAF0D8A28071061B91159F73 /* HardwareUSBButtonRemapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B950DA07CC9D53BD4FF8FF4 /* HardwareUSBButtonRemapTests.swift */; };
+		DB5CE7B3CCE18CDB007CB110 /* DeviceDetailLightingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6FCEE9D7887F0C669DF799 /* DeviceDetailLightingCard.swift */; };
+		DCF8952B187DC9441BA87A33 /* Sparkle.txt in Resources */ = {isa = PBXBuildFile; fileRef = 16CDE6B0EEAD9DDB14164C4D /* Sparkle.txt */; };
+		DCFCAC88AB5A3A069906D18F /* SoftwareLightingRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC78A9A0BF6415EC88E48BCA /* SoftwareLightingRendererTests.swift */; };
+		DD137A799B711E022D7EEB9F /* DeviceDetailLightingCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6FCEE9D7887F0C669DF799 /* DeviceDetailLightingCard.swift */; };
+		DD27FB587AE372C52BB0032F /* USBHIDControlSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1474C3CBAE93106582D5EB7 /* USBHIDControlSession.swift */; };
+		DF92E8EAA848E31275F524EA /* ScrollSource.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1AAA3EC867CCE2A141B11910 /* ScrollSource.h */; };
+		E18896E8B51CAE4DD3C3B2CB /* AppStateRefactorCharacterizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 167EF72630F2EDDC1CE1514F /* AppStateRefactorCharacterizationTests.swift */; };
+		E1EE1A4423EB0713AA8FD1F6 /* OnboardProfileEditorModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 783BB948AB54165E8A0DD5BA /* OnboardProfileEditorModels.swift */; };
+		E2897962284FC70967779E3D /* EditorStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 352A5362177BAFA287B14318 /* EditorStore.swift */; };
+		E4CFA04FFC2F641A92A6603A /* libScrollCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A04AE8A88746347711D252E /* libScrollCore.a */; };
+		E5A0C30548375FD542E0B444 /* NagaUSBBrightnessRecoveryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E2078F4003CFB38424D2CBF /* NagaUSBBrightnessRecoveryTests.swift */; };
+		E65D23EC38002727E42277F6 /* DevicePatchMergeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4AC1D2EE9CF31191A6D3D9D /* DevicePatchMergeTests.swift */; };
+		E677524E7A20D807AF0DB43B /* TapLogger.m in Sources */ = {isa = PBXBuildFile; fileRef = 60124CCF84A6EDF9D481FD34 /* TapLogger.m */; };
+		E7F6A58E11EB7248EF9DD191 /* AppStateLocalProfileCrossDeviceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEBA009B1029E2DFEE44E48 /* AppStateLocalProfileCrossDeviceTests.swift */; };
+		EA402E30385488EDB0F1C81A /* Sparkle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D53695A38C9835CCF8FFB9DA /* Sparkle.framework */; };
+		EAF3F4FC07A7787D6E3EC65C /* BLEVendorTransportClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264F3500EC25B9D80237ABC4 /* BLEVendorTransportClientTests.swift */; };
+		EB0A9DC1F3B79026A3301F72 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEB1FFFCC5FF4F806DB51BBF /* AppState.swift */; };
+		EB8544A2B26EA4CFE14D23B8 /* USBPassiveDPIBridgeBehaviorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 363D2D53AE897805A86DBF6E /* USBPassiveDPIBridgeBehaviorTests.swift */; };
+		ED4D00197A7BBDF00835F1C9 /* SoftwareUpdateSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733B0FD638FDBAB76045046C /* SoftwareUpdateSessionTests.swift */; };
+		EE210129C874B704FD420D0E /* ServiceModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE62FF0883F8298A8B4D925 /* ServiceModeTests.swift */; };
+		EE339E99770F2F1491D374FB /* MouseControlSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0A013933CBAD0E5A223EBC7 /* MouseControlSettingsView.swift */; };
+		EE948984091E49D155663FA3 /* AppStateLocalProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15B19E5B54ED5F3E87236918 /* AppStateLocalProfileTests.swift */; };
+		EEDCF60C8DE136C22BC5E74B /* HardwareUSBStartupHydrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF65C6D5650AF2465DF0816 /* HardwareUSBStartupHydrationTests.swift */; };
+		F09F5F9D0C27E712C430B350 /* AppLocalStorageResetter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEFBF57ABE1B95E85D1B028 /* AppLocalStorageResetter.swift */; };
+		F0F05A65AB1C946A1590E8F4 /* SourceTable.m in Sources */ = {isa = PBXBuildFile; fileRef = 789116B3DEC01668D459E8F2 /* SourceTable.m */; };
+		F435EAC731166F9666BE07E4 /* BackgroundServiceHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08D6F90C5D0D04BED8D4F0BA /* BackgroundServiceHost.swift */; };
+		F56619FB618EABDEAF0253E8 /* HIDDevicePresenceAccumulatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CE4F4892792E603797CABFE /* HIDDevicePresenceAccumulatorTests.swift */; };
+		F5789A82169FC8C1AA240ACF /* SoftwareLighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C69F56939F4C42E516E8613 /* SoftwareLighting.swift */; };
+		F614721B1520FD5F59B3FDE1 /* PermissionSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 942E495A41B926AE140C1000 /* PermissionSupport.swift */; };
+		F6EBC4F01A5128093EF67E6D /* OnboardProfileProjection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32274F4753E5AC41F2C34168 /* OnboardProfileProjection.swift */; };
+		F79EF292AA869754E13C7112 /* DeviceDiagnosticsFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97D122843207CBF475DA4055 /* DeviceDiagnosticsFormatter.swift */; };
+		F82810F22DEE4F80FD6EC873 /* AppLaunchReceiptTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D77591EFF4A5B20FA9E433 /* AppLaunchReceiptTests.swift */; };
+		F8D0332AFB8E9CA6EEB079C9 /* ScrollRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5743044E480565191E38ED8C /* ScrollRuntime.swift */; };
+		FA2FC8BCEA71436943C19505 /* AppLifecycleDelegateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514BA107B9CC1529D504E765 /* AppLifecycleDelegateTests.swift */; };
+		FA587A09764E8B1A4AD67591 /* OpenSnekApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA46E69DA595046FFC2A4005 /* OpenSnekApp.swift */; };
+		FBBB7D88D69CCCEFB19CD257 /* ServiceMenuBarPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E8C8BBF804ECE15811A9B6 /* ServiceMenuBarPresentationTests.swift */; };
+		FBC1572C1F46B8F5DE58648E /* SoftwareLightingBatterySampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712D0D9C8EC9E6CF28DA603F /* SoftwareLightingBatterySampler.swift */; };
+		FC4B4847B851C7406974E7EA /* MouseControl.sdef in Resources */ = {isa = PBXBuildFile; fileRef = EBEF469112C126D6458134FC /* MouseControl.sdef */; };
+		FCCF8299A94BCAF52A2773A0 /* AppStateButtonHydrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1682237A1A4F79A87737A8D8 /* AppStateButtonHydrationTests.swift */; };
+		FD635DD93490CE478097504F /* libScrollCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8A04AE8A88746347711D252E /* libScrollCore.a */; };
+		FD6926F47B07EF25687FFE53 /* USBTelemetryExpectation.swift in Sources */ = {isa = PBXBuildFile; fileRef = F87DDDCC3DDE00B4E2262654 /* USBTelemetryExpectation.swift */; };
+		FD7EAD63EED60B0E845FAB5D /* AppStateEditorController+SelectionLighting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9C77A82317A2307419C0AE /* AppStateEditorController+SelectionLighting.swift */; };
+		FDE1A40C6A5D85984AB601BC /* BridgeClient+Bluetooth.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEB2F5C5EDC41128AD41D58D /* BridgeClient+Bluetooth.swift */; };
+		FDE301FD00EA87AACC885A2B /* BasicMouseDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADA276F409AC56D0333CD01 /* BasicMouseDetailView.swift */; };
+		FDF43D0F2D057C798BB6FE6A /* USBPassiveDPIEventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D95644BB1DF0409B95AEA2F /* USBPassiveDPIEventTests.swift */; };
+		FE535FA83967E45FCE69F0AD /* Sparkle.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D53695A38C9835CCF8FFB9DA /* Sparkle.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FE742E7052CC1217C95F962C /* AppLaunchReceipt.swift in Sources */ = {isa = PBXBuildFile; fileRef = F105EC806F57B6D55425BC9B /* AppLaunchReceipt.swift */; };
+		FEBC1F911AB7D0A89FBCA948 /* LightingZoneEditMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57113D4185F9C11613BFF2CA /* LightingZoneEditMode.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		041277F09603BDCE76BD9931 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A57881F36FF8CAF0812D1783;
+			remoteInfo = OpenSnekCore;
+		};
+		06BF848A29F721D53673D5AA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A57881F36FF8CAF0812D1783;
+			remoteInfo = OpenSnekCore;
+		};
+		102E77BB910753425E2F5B5C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 175F7D6EA795FD0CF89D49C3;
+			remoteInfo = OpenSnekHardware;
+		};
+		1598E66CC7605586DE187B6E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 618DA5E1E390BED5A7757E7E;
+			remoteInfo = OpenSnekAppSupport;
+		};
+		24AE11C6E01777632A23C237 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 91848A82D29DEE1F78334616;
+			remoteInfo = ScrollCore;
+		};
+		4E7DD3A8C04DD0FC501738D6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 496255C7F0E16FF9DF575646;
+			remoteInfo = OpenSnekProtocols;
+		};
+		5B352FBBD3D0909DBB14EB27 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 175F7D6EA795FD0CF89D49C3;
+			remoteInfo = OpenSnekHardware;
+		};
+		74593966078B9504FC73F5BD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 175F7D6EA795FD0CF89D49C3;
+			remoteInfo = OpenSnekHardware;
+		};
+		856EB72CDCBC59FD71BFB0C8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 91848A82D29DEE1F78334616;
+			remoteInfo = ScrollCore;
+		};
+		8C9543ECBD606DABD6403D71 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 618DA5E1E390BED5A7757E7E;
+			remoteInfo = OpenSnekAppSupport;
+		};
+		92E391401061812B60EF4414 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 496255C7F0E16FF9DF575646;
+			remoteInfo = OpenSnekProtocols;
+		};
+		A9FCCD481D6FA77EC67AC377 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A57881F36FF8CAF0812D1783;
+			remoteInfo = OpenSnekCore;
+		};
+		CB153B76876F637E98AB449F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 496255C7F0E16FF9DF575646;
+			remoteInfo = OpenSnekProtocols;
+		};
+		CC543D0F45B0418CC240084F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 814B981D6CA8C0EBA0385138;
+			remoteInfo = MouseControlTestHost;
+		};
+		D324BB933E14F49EA3746B97 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A57881F36FF8CAF0812D1783;
+			remoteInfo = OpenSnekCore;
+		};
+		D59205FE76B8C57DD5207814 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 618DA5E1E390BED5A7757E7E;
+			remoteInfo = OpenSnekAppSupport;
+		};
+		E09972C46DAA2EE391C91828 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 175F7D6EA795FD0CF89D49C3;
+			remoteInfo = OpenSnekHardware;
+		};
+		F1E6A1800CD6A08356879647 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A57881F36FF8CAF0812D1783;
+			remoteInfo = OpenSnekCore;
+		};
+		F45992CDBDCFD7E686D8106D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 496255C7F0E16FF9DF575646;
+			remoteInfo = OpenSnekProtocols;
+		};
+		FB4ABD74B04CE15CB4C679F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BD9B749DF13799C3EAD201CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A57881F36FF8CAF0812D1783;
+			remoteInfo = OpenSnekCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		045EC51F10C65737BF7F606A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				BC57B9A0CA6899035DCF8C92 /* CoreGraphicsSPI.h in CopyFiles */,
+				3345C1BD6C686CFCD486EF20 /* IOKitSPI.h in CopyFiles */,
+				8C542E721D9EDC1FDE762A05 /* Logger.h in CopyFiles */,
+				57319BE780E06916E1E907DA /* MouseTap.h in CopyFiles */,
+				DF92E8EAA848E31275F524EA /* ScrollSource.h in CopyFiles */,
+				A679684CBF096FCC979D8AC1 /* SmoothScrollEngine.h in CopyFiles */,
+				067DBD648283DDACE9628001 /* SourceTable.h in CopyFiles */,
+				2AE0D017C7619A7562008AFC /* TapLogger.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F0886EE0F0B8402F286E85F /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				FE535FA83967E45FCE69F0AD /* Sparkle.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6D7D40911AC3780E6119778A /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				A497C4C42A7F5EEE765D542D /* Sparkle.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		04497C8C83E090F36EC23705 /* AppStateMultiDeviceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateMultiDeviceTests.swift; sourceTree = "<group>"; };
+		06EC3C12E86502A39889A70D /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		08D6F90C5D0D04BED8D4F0BA /* BackgroundServiceHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundServiceHost.swift; sourceTree = "<group>"; };
+		08F5DB60441813B2DC3DCEF9 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		0A0CCA7D09DA6663C3F8E85F /* AppStateEditorController+OnboardProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateEditorController+OnboardProfiles.swift"; sourceTree = "<group>"; };
+		0A64AC88D3140A86E345CC8C /* AppStateEditorController+ButtonProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateEditorController+ButtonProfiles.swift"; sourceTree = "<group>"; };
+		0BF06624FDC7A95EE8C24820 /* libOpenSnekCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOpenSnekCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		0C9402BAA2B866C8C679541E /* ReleaseCandidateUpdateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseCandidateUpdateTests.swift; sourceTree = "<group>"; };
+		10D641A66E3A6799179F28E0 /* Abstractions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Abstractions.swift; sourceTree = "<group>"; };
+		143AD741BEF6E815A883BE07 /* BridgeClient+Apply.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BridgeClient+Apply.swift"; sourceTree = "<group>"; };
+		1536D53266086D887037C979 /* ApplyCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyCoordinatorTests.swift; sourceTree = "<group>"; };
+		15B19E5B54ED5F3E87236918 /* AppStateLocalProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateLocalProfileTests.swift; sourceTree = "<group>"; };
+		1657100ABA4AB8F330BE1D4F /* BackgroundServiceCoordinatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundServiceCoordinatorTests.swift; sourceTree = "<group>"; };
+		167EF72630F2EDDC1CE1514F /* AppStateRefactorCharacterizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateRefactorCharacterizationTests.swift; sourceTree = "<group>"; };
+		168017A6DFEF1002D983A861 /* LightingOnlyDeviceGatingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightingOnlyDeviceGatingTests.swift; sourceTree = "<group>"; };
+		1682237A1A4F79A87737A8D8 /* AppStateButtonHydrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateButtonHydrationTests.swift; sourceTree = "<group>"; };
+		169E641DE80DFF60BB40924B /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
+		16CDE6B0EEAD9DDB14164C4D /* Sparkle.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = Sparkle.txt; sourceTree = "<group>"; };
+		18CDF86759291F2AC9C7B810 /* AppStateFreshLocalProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateFreshLocalProfileTests.swift; sourceTree = "<group>"; };
+		19BE56C73195C4BDDE0D29FC /* TapLogger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TapLogger.h; sourceTree = "<group>"; };
+		1AAA3EC867CCE2A141B11910 /* ScrollSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ScrollSource.h; sourceTree = "<group>"; };
+		1AE1E6CDC56177D6BBAABC2F /* HardwareDpiReliabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareDpiReliabilityTests.swift; sourceTree = "<group>"; };
+		1CA350E2818AAFBB35B61B0E /* DevicePatch+USBControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DevicePatch+USBControls.swift"; sourceTree = "<group>"; };
+		1CF5C8BEE4769BA0A19DFA82 /* BatteryMeterSourceResolutionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BatteryMeterSourceResolutionTests.swift; sourceTree = "<group>"; };
+		1E2078F4003CFB38424D2CBF /* NagaUSBBrightnessRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NagaUSBBrightnessRecoveryTests.swift; sourceTree = "<group>"; };
+		1E6E488402A490F129CEF27E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		1E794F138FA735E6B066E7CA /* AppStateEditorController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateEditorController.swift; sourceTree = "<group>"; };
+		1F622D2E7F37D698884C3074 /* AppStateButtonProfileEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateButtonProfileEditTests.swift; sourceTree = "<group>"; };
+		1F9B28B4BD183FB8BC6F61FD /* SoftwareUpdateSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareUpdateSession.swift; sourceTree = "<group>"; };
+		217931DF8D8B3B8FDE2B6E89 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		2447D40C23887545F507CCA7 /* IOKitSPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IOKitSPI.h; sourceTree = "<group>"; };
+		245D1DE5C13398F570C5C5D4 /* AppLifecycleDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleDelegate.swift; sourceTree = "<group>"; };
+		264F3500EC25B9D80237ABC4 /* BLEVendorTransportClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEVendorTransportClientTests.swift; sourceTree = "<group>"; };
+		26A84634F3E200ABADED1E78 /* DevicePreferenceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePreferenceStore.swift; sourceTree = "<group>"; };
+		295811F21D6B77EF9E999B2C /* AppStateProfileSwitchRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateProfileSwitchRegressionTests.swift; sourceTree = "<group>"; };
+		29A4C200C1D6BC27772B75C3 /* Logger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Logger.m; sourceTree = "<group>"; };
+		2A3EB738B0CD2F5E369E7C62 /* BridgeClientBluetoothFallbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeClientBluetoothFallbackTests.swift; sourceTree = "<group>"; };
+		2D2B3EA5199C57558939A727 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		2D7E7F1DA7DE69AC1027DD1D /* SmoothScrollEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SmoothScrollEngine.h; sourceTree = "<group>"; };
+		2DEA9EE89D293EC2658037E5 /* MouseIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseIdentityTests.swift; sourceTree = "<group>"; };
+		30B7AA9AB5C38A469AC3835F /* DeviceDetailSettingsCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailSettingsCards.swift; sourceTree = "<group>"; };
+		31A20C459190DC81FBCABAB1 /* ReleaseUpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseUpdateChecker.swift; sourceTree = "<group>"; };
+		32274F4753E5AC41F2C34168 /* OnboardProfileProjection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardProfileProjection.swift; sourceTree = "<group>"; };
+		34E1AF18CBF7062ED316464B /* ContentNoticePresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentNoticePresentationTests.swift; sourceTree = "<group>"; };
+		352A5362177BAFA287B14318 /* EditorStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorStore.swift; sourceTree = "<group>"; };
+		363D2D53AE897805A86DBF6E /* USBPassiveDPIBridgeBehaviorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBPassiveDPIBridgeBehaviorTests.swift; sourceTree = "<group>"; };
+		363F7DA73B19610764046856 /* snek-menu.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "snek-menu.png"; sourceTree = "<group>"; };
+		3774726B2F902FC64B965F4B /* AppStateRestoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateRestoreTests.swift; sourceTree = "<group>"; };
+		37D419B750906D6C174FB4C2 /* AppStateRuntimeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateRuntimeController.swift; sourceTree = "<group>"; };
+		37DCE16A58F5960075301759 /* DeviceDetailDpiStagesCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailDpiStagesCard.swift; sourceTree = "<group>"; };
+		39EB1BFFAF7C6A3F41DC262A /* ButtonBindingSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonBindingSupport.swift; sourceTree = "<group>"; };
+		3A8DCE9CF868294ACCFB861F /* LocalBridgeBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalBridgeBackend.swift; sourceTree = "<group>"; };
+		3B950DA07CC9D53BD4FF8FF4 /* HardwareUSBButtonRemapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareUSBButtonRemapTests.swift; sourceTree = "<group>"; };
+		3C69F56939F4C42E516E8613 /* SoftwareLighting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareLighting.swift; sourceTree = "<group>"; };
+		3DEB3785207286597C3AA014 /* LightingZoneEditModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightingZoneEditModeTests.swift; sourceTree = "<group>"; };
+		3EEFBF57ABE1B95E85D1B028 /* AppLocalStorageResetter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocalStorageResetter.swift; sourceTree = "<group>"; };
+		3F9C77A82317A2307419C0AE /* AppStateEditorController+SelectionLighting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateEditorController+SelectionLighting.swift"; sourceTree = "<group>"; };
+		40B35BCA2B72ECAFC4F5470F /* OpenSnekUITestSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSnekUITestSupport.swift; sourceTree = "<group>"; };
+		426B187D1307C381A95DDBBA /* RemoteServiceBootstrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteServiceBootstrapTests.swift; sourceTree = "<group>"; };
+		44C2F5CD1650C37628F0CCDF /* MacroRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroRuntime.swift; sourceTree = "<group>"; };
+		46D3F2196CF4234733713CAD /* ServiceMenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMenuBarView.swift; sourceTree = "<group>"; };
+		471B5CD744C9C1104485B359 /* DeveloperRuntimeOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperRuntimeOptions.swift; sourceTree = "<group>"; };
+		48621219857DDD5A6F849B3F /* CoreGraphicsSPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CoreGraphicsSPI.h; sourceTree = "<group>"; };
+		48CB6FA5DFC4AB3A8784AB6C /* ApplyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyCoordinator.swift; sourceTree = "<group>"; };
+		4D0BC2F01E72B95B6A8E947B /* MouseTap.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MouseTap.m; sourceTree = "<group>"; };
+		4F187E99D9D3B176D258E37E /* DpiStageIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DpiStageIndicator.swift; sourceTree = "<group>"; };
+		514BA107B9CC1529D504E765 /* AppLifecycleDelegateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLifecycleDelegateTests.swift; sourceTree = "<group>"; };
+		56CCA075D0AF3F97099976F8 /* AppStateOnboardMutationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateOnboardMutationTests.swift; sourceTree = "<group>"; };
+		56DE0B8375FCABF669D6F358 /* HardwareModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareModule.swift; sourceTree = "<group>"; };
+		56E59CE5D9D5D822B04F50F0 /* LaunchAtStartupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtStartupTests.swift; sourceTree = "<group>"; };
+		56E9DFE12A3B62EDD5EEAF51 /* MouseControlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MouseControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		57113D4185F9C11613BFF2CA /* LightingZoneEditMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightingZoneEditMode.swift; sourceTree = "<group>"; };
+		5743044E480565191E38ED8C /* ScrollRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollRuntime.swift; sourceTree = "<group>"; };
+		58232B80F0DECE516FE17BB4 /* SmoothScrollEngine.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SmoothScrollEngine.m; sourceTree = "<group>"; };
+		59D0BFA876D6DC545C4A3DA3 /* AppStateDeviceController+RealtimeDPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateDeviceController+RealtimeDPI.swift"; sourceTree = "<group>"; };
+		59EFB3DA0796E67252D87903 /* BridgeClient+OnboardProfilesUSB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BridgeClient+OnboardProfilesUSB.swift"; sourceTree = "<group>"; };
+		5ADA7250200CD4F93902C2B0 /* LocalProfileLibraryPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalProfileLibraryPanel.swift; sourceTree = "<group>"; };
+		5CE4F4892792E603797CABFE /* HIDDevicePresenceAccumulatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDDevicePresenceAccumulatorTests.swift; sourceTree = "<group>"; };
+		5D1DF38A93CE0AFB8F315F8A /* USBDpiStageParsingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBDpiStageParsingTests.swift; sourceTree = "<group>"; };
+		5ED288098B26A3D53F972247 /* LightingSummaryPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LightingSummaryPresentationTests.swift; sourceTree = "<group>"; };
+		60124CCF84A6EDF9D481FD34 /* TapLogger.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TapLogger.m; sourceTree = "<group>"; };
+		641498FD4DAACA0E3E220817 /* FeatureRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureRuntime.swift; sourceTree = "<group>"; };
+		6602710841BA91D81C2B32F3 /* BluetoothNameMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothNameMatcher.swift; sourceTree = "<group>"; };
+		683F16774A788890DB8F96C8 /* IssueReportFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueReportFormatterTests.swift; sourceTree = "<group>"; };
+		6B66EF0BD73B095B71155D9F /* WeakBound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeakBound.swift; sourceTree = "<group>"; };
+		6C72F3CBE869DEC725E9E46D /* RuntimeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeStore.swift; sourceTree = "<group>"; };
+		6D95644BB1DF0409B95AEA2F /* USBPassiveDPIEventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBPassiveDPIEventTests.swift; sourceTree = "<group>"; };
+		6DD2FC24E6B3A03C9D7A85BF /* HardwareUSBStateSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareUSBStateSmokeTests.swift; sourceTree = "<group>"; };
+		6E6E7686A578C5873691C6AB /* IPCDeviceBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCDeviceBackend.swift; sourceTree = "<group>"; };
+		712D0D9C8EC9E6CF28DA603F /* SoftwareLightingBatterySampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareLightingBatterySampler.swift; sourceTree = "<group>"; };
+		733B0FD638FDBAB76045046C /* SoftwareUpdateSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareUpdateSessionTests.swift; sourceTree = "<group>"; };
+		747647AFDF6BE04C83B4C607 /* FeaturePreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeaturePreferences.swift; sourceTree = "<group>"; };
+		75C63A28FDA42D310928B2AA /* NativeBatteryPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeBatteryPublisher.swift; sourceTree = "<group>"; };
+		77312E81B196E4368F2E1736 /* libOpenSnekAppSupport.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOpenSnekAppSupport.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7739E577DB8358885C16F6D6 /* USBPassiveDPIEventMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBPassiveDPIEventMonitor.swift; sourceTree = "<group>"; };
+		776FC18BBF57F199137F83AF /* OpenSnekBranding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSnekBranding.swift; sourceTree = "<group>"; };
+		77FE7D8C9D13985D532224F7 /* BLEProbeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEProbeSession.swift; sourceTree = "<group>"; };
+		783BB948AB54165E8A0DD5BA /* OnboardProfileEditorModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardProfileEditorModels.swift; sourceTree = "<group>"; };
+		789116B3DEC01668D459E8F2 /* SourceTable.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SourceTable.m; sourceTree = "<group>"; };
+		78975B363B5A820D48EA0B50 /* AppStateOnboardHydrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateOnboardHydrationTests.swift; sourceTree = "<group>"; };
+		78AB2A4FE5211684103091FC /* AppStateOnboardContentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateOnboardContentTests.swift; sourceTree = "<group>"; };
+		79FA268B0D31BCF2FEF7610C /* psyduck-app-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "psyduck-app-icon.png"; sourceTree = "<group>"; };
+		7A539AE5554A8B9F1285AA8A /* AppStateWiredMouseRestoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateWiredMouseRestoreTests.swift; sourceTree = "<group>"; };
+		7B40AF592AD6E43F53E07BF6 /* BackgroundServiceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundServiceCoordinator.swift; sourceTree = "<group>"; };
+		7C50D00785CF370BC34BB5B9 /* HardwareValidationSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareValidationSession.swift; sourceTree = "<group>"; };
+		7CD04D683CB45FFC09676CDB /* MouseControlFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseControlFeatureTests.swift; sourceTree = "<group>"; };
+		7EAB072FFEFF71FADBA6466E /* DeviceDiagnosticsFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDiagnosticsFormatterTests.swift; sourceTree = "<group>"; };
+		7F8F534DB35D0E3CC607D70A /* AppStateDeviceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateDeviceController.swift; sourceTree = "<group>"; };
+		80A441D562213DCC7FC1AEC2 /* AppStateApplyController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateApplyController.swift; sourceTree = "<group>"; };
+		8175615BA5FE24B24E2CB155 /* ScrollIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollIdentityTests.swift; sourceTree = "<group>"; };
+		82B3825B6618B5D3A91033E9 /* BLEVendorProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEVendorProtocol.swift; sourceTree = "<group>"; };
+		86702B76E45F8DABEBC2B94A /* WindowChromeConfiguratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowChromeConfiguratorTests.swift; sourceTree = "<group>"; };
+		86D7A66F4794918039E56A8C /* libOpenSnekProtocols.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOpenSnekProtocols.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		886395D1126D49FDDCB00CB0 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		886DCE9806215843CDDF4BBA /* DeviceSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSupport.swift; sourceTree = "<group>"; };
+		897324777FC0C9B749D22A20 /* OnboardProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardProfiles.swift; sourceTree = "<group>"; };
+		8A04AE8A88746347711D252E /* libScrollCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libScrollCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A4B1D1C7743377C34122163 /* ThirdPartyNotices.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = ThirdPartyNotices.txt; sourceTree = "<group>"; };
+		8B617790993AB34C173CAFC6 /* SoftwareUpdateRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareUpdateRecoveryTests.swift; sourceTree = "<group>"; };
+		8BAEFB587F2378D511D08DDD /* USBTelemetryExpectationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBTelemetryExpectationTests.swift; sourceTree = "<group>"; };
+		8E560CEFDF21FA1349C91CDF /* DevicePersistenceKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePersistenceKeys.swift; sourceTree = "<group>"; };
+		8EEBA009B1029E2DFEE44E48 /* AppStateLocalProfileCrossDeviceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateLocalProfileCrossDeviceTests.swift; sourceTree = "<group>"; };
+		8F0B3DFED6A8349BA0C74A93 /* DeviceDetailButtonMappingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailButtonMappingCard.swift; sourceTree = "<group>"; };
+		909CC4188E9DC60023A1A0B8 /* USBHIDProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBHIDProtocol.swift; sourceTree = "<group>"; };
+		919B26D4D37E260DFFCBF134 /* RemoteServiceSnapshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteServiceSnapshotTests.swift; sourceTree = "<group>"; };
+		921D3F699A15DB2B9A635DEC /* MouseStateMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseStateMergeTests.swift; sourceTree = "<group>"; };
+		93C4C353FA3A4D943EF6E463 /* SoftwareLightingBatterySamplerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareLightingBatterySamplerTests.swift; sourceTree = "<group>"; };
+		942E495A41B926AE140C1000 /* PermissionSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionSupport.swift; sourceTree = "<group>"; };
+		9431A58A34A9395A8883F80F /* OpenSnekAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSnekAppearance.swift; sourceTree = "<group>"; };
+		96E4709007F7660EC56AE6CE /* SoftwareLightingEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareLightingEngine.swift; sourceTree = "<group>"; };
+		972E72D49EDB3A102F78F1C5 /* BridgeClient+OnboardProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BridgeClient+OnboardProfiles.swift"; sourceTree = "<group>"; };
+		97D122843207CBF475DA4055 /* DeviceDiagnosticsFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDiagnosticsFormatter.swift; sourceTree = "<group>"; };
+		97EC706908271E383684C2F1 /* UIPrimitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIPrimitives.swift; sourceTree = "<group>"; };
+		99094967BA0AF32FDB0DD9F9 /* AppStateDeviceController+StateRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateDeviceController+StateRefresh.swift"; sourceTree = "<group>"; };
+		9B51A6128270CC745CBD0EEB /* AppStateButtonWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateButtonWorkspaceTests.swift; sourceTree = "<group>"; };
+		9B98E855666F095093B6482B /* Scroll-Reverser-Apache-2.0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Scroll-Reverser-Apache-2.0.txt"; sourceTree = "<group>"; };
+		A16C01B3169A1335405F7F3D /* ReleaseUpdateCheckerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseUpdateCheckerTests.swift; sourceTree = "<group>"; };
+		A3F9030B1D858C0C4D28798E /* MouseTap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MouseTap.h; sourceTree = "<group>"; };
+		A47611387ABB69A125B33411 /* MouseControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MouseControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A4AC1D2EE9CF31191A6D3D9D /* DevicePatchMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePatchMergeTests.swift; sourceTree = "<group>"; };
+		A74685648854BD4B993D5532 /* HardwareBluetoothTarget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareBluetoothTarget.swift; sourceTree = "<group>"; };
+		A78628C4BCE091083A9D5A47 /* BLEProbeSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEProbeSessionTests.swift; sourceTree = "<group>"; };
+		A89650984A5A2A91464D9A81 /* KeyboardBindingSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardBindingSupportTests.swift; sourceTree = "<group>"; };
+		A89BA96196B43FA40351D9F2 /* CoreAliases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreAliases.swift; sourceTree = "<group>"; };
+		A9222B8860B55E656168A41B /* TurboRateMappingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TurboRateMappingTests.swift; sourceTree = "<group>"; };
+		A94B29CC3F2EC9BF03F3020E /* USBButtonHydrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBButtonHydrationTests.swift; sourceTree = "<group>"; };
+		A9E60FA96D8A748165158266 /* IconStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconStore.swift; sourceTree = "<group>"; };
+		AB45C9744D62170F6879FB79 /* DeveloperRuntimeOptionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperRuntimeOptionsTests.swift; sourceTree = "<group>"; };
+		AB8921D36EC46058D50895B6 /* BackgroundServiceTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundServiceTransport.swift; sourceTree = "<group>"; };
+		AD7BCFD46910008D93E5F8ED /* AppStateOnboardInventoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateOnboardInventoryTests.swift; sourceTree = "<group>"; };
+		AE30E4E7751E4417959B2372 /* DeviceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceStore.swift; sourceTree = "<group>"; };
+		AEB1FFFCC5FF4F806DB51BBF /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		AEB2F5C5EDC41128AD41D58D /* BridgeClient+Bluetooth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BridgeClient+Bluetooth.swift"; sourceTree = "<group>"; };
+		AF5C685852ACC762DFDCC343 /* BridgeClient+USB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BridgeClient+USB.swift"; sourceTree = "<group>"; };
+		B0E51C2976304EA268823525 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B26DE6C99A740EB4479C5063 /* DeviceDetailLightingControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailLightingControls.swift; sourceTree = "<group>"; };
+		B28D134FF64F3067E5574ACE /* SupportedDevicesReadmeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedDevicesReadmeTests.swift; sourceTree = "<group>"; };
+		B2F68A6799CFE8AAE63E4145 /* AppLocalStorageResetterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLocalStorageResetterTests.swift; sourceTree = "<group>"; };
+		B3D77591EFF4A5B20FA9E433 /* AppLaunchReceiptTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchReceiptTests.swift; sourceTree = "<group>"; };
+		B764B623D92AAB140EB6D45B /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		B795EAFB3496099EF3BC6D31 /* AppStateMultiDeviceAvailabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateMultiDeviceAvailabilityTests.swift; sourceTree = "<group>"; };
+		B879524B6084CC7F58341975 /* ShortcutRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutRecorder.swift; sourceTree = "<group>"; };
+		BA6EA55F2EA0F4849E7FCA51 /* DeviceProfilesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProfilesTests.swift; sourceTree = "<group>"; };
+		BECF1DD404988B408FC1B8B6 /* HardwareBluetoothRecoveryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareBluetoothRecoveryTests.swift; sourceTree = "<group>"; };
+		BFB8349A7E7C4E053625F1A7 /* AppStateDeviceController+DeviceListSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateDeviceController+DeviceListSelection.swift"; sourceTree = "<group>"; };
+		C17DE47A5D57AFC19D477D00 /* OpenSnekBrandingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSnekBrandingTests.swift; sourceTree = "<group>"; };
+		C1BEF52ECA57AEAF90B8FFC2 /* BridgeClient+PassiveDpiTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BridgeClient+PassiveDpiTracker.swift"; sourceTree = "<group>"; };
+		C1E7C5FDA53AA72D4CE30156 /* PhysicalDeviceListTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhysicalDeviceListTests.swift; sourceTree = "<group>"; };
+		C3606FFEE97EF626E66E81B3 /* AppStateApplyController+LocalProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateApplyController+LocalProfiles.swift"; sourceTree = "<group>"; };
+		C6D995DAFA3D04F4B1DF0405 /* LocalBridgeBackendTelemetryMerge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalBridgeBackendTelemetryMerge.swift; sourceTree = "<group>"; };
+		C7795951F8E1CC66D4FD271D /* AppStateDeviceController+RemoteUpdates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateDeviceController+RemoteUpdates.swift"; sourceTree = "<group>"; };
+		C837BBD5E2D4B3D62B87D387 /* BroadcastStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastStream.swift; sourceTree = "<group>"; };
+		C8B716F6AF12422C24F5C53E /* HardwareValidationSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareValidationSessionTests.swift; sourceTree = "<group>"; };
+		C93CF27F10A4592F43223B08 /* AppStateMultiDeviceSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateMultiDeviceSelectionTests.swift; sourceTree = "<group>"; };
+		C99CC7C20F3337558A84EC07 /* AppStateMultiDeviceServiceSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateMultiDeviceServiceSelectionTests.swift; sourceTree = "<group>"; };
+		CCE4B0703C9D2FF9C0CA0E6F /* USBPassiveDPIAppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBPassiveDPIAppStateTests.swift; sourceTree = "<group>"; };
+		CD794DDD96A03A10485F2948 /* Scroll-Reverser-NOTICE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Scroll-Reverser-NOTICE.txt"; sourceTree = "<group>"; };
+		CDF9B0484D3D35A0E3079DCF /* psyduck-menu-template.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "psyduck-menu-template.png"; sourceTree = "<group>"; };
+		CED04DCD86B1587595EBA824 /* AppStateApplyAndDPICharacterizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateApplyAndDPICharacterizationTests.swift; sourceTree = "<group>"; };
+		CF7C988B4D3B3DBF80E05434 /* KeyboardBindingControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardBindingControls.swift; sourceTree = "<group>"; };
+		D252057430A08C2259A0A42A /* DeviceValidationCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceValidationCatalog.swift; sourceTree = "<group>"; };
+		D273745A3434C6423ABF499C /* DevicePatchUSBCapabilityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePatchUSBCapabilityTests.swift; sourceTree = "<group>"; };
+		D53695A38C9835CCF8FFB9DA /* Sparkle.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Sparkle.framework; path = "../references/Scroll-Reverser/Sparkle.framework"; sourceTree = "<group>"; };
+		D622C25C14DCA34680F0B6C6 /* BLEVendorProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEVendorProtocolTests.swift; sourceTree = "<group>"; };
+		D6BFB03DE69AD3D652B1BC20 /* SupportedDevicePresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedDevicePresentationTests.swift; sourceTree = "<group>"; };
+		D78890BDCFCA28335419A682 /* mouse-app-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mouse-app-icon.png"; sourceTree = "<group>"; };
+		D93257EDE4BDC1D7AAF01950 /* snek-menu-template.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "snek-menu-template.png"; sourceTree = "<group>"; };
+		DA0DFBB54463AC027CC91B79 /* HIDDevicePresenceMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HIDDevicePresenceMonitor.swift; sourceTree = "<group>"; };
+		DA46E69DA595046FFC2A4005 /* OpenSnekApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenSnekApp.swift; sourceTree = "<group>"; };
+		DADA276F409AC56D0333CD01 /* BasicMouseDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicMouseDetailView.swift; sourceTree = "<group>"; };
+		DB2E706ABDB21573B00059CE /* DevicePreferenceStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePreferenceStoreTests.swift; sourceTree = "<group>"; };
+		DC1E1D842A81768AB4A46A38 /* NoControlInterfaceDeviceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoControlInterfaceDeviceTests.swift; sourceTree = "<group>"; };
+		DD7A54F5734EAE9E1CF70E01 /* MouseControlTestHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MouseControlTestHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DF3BCC106B59E1956C9DE1B0 /* SoftwareLightingEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareLightingEngineTests.swift; sourceTree = "<group>"; };
+		DF69CA59829A5C3998D9EAD0 /* BLEVendorTransportClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEVendorTransportClient.swift; sourceTree = "<group>"; };
+		DF96A32BAB7E72C5B36F287B /* UnsupportedDeviceHandlingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnsupportedDeviceHandlingTests.swift; sourceTree = "<group>"; };
+		DFDC89288EEE35B35C2E8879 /* ScrollSource.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ScrollSource.m; sourceTree = "<group>"; };
+		DFF65C6D5650AF2465DF0816 /* HardwareUSBStartupHydrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardwareUSBStartupHydrationTests.swift; sourceTree = "<group>"; };
+		E11BCEA6E82EDF0283041D7C /* OpenSnek-Apache-2.0.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = "OpenSnek-Apache-2.0.txt"; sourceTree = "<group>"; };
+		E177507197D44633BCFC460C /* DeviceValidationCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceValidationCatalogTests.swift; sourceTree = "<group>"; };
+		E31F9D3A4D4A7558FA86B04B /* BridgeClient+OnboardProfilesBluetooth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BridgeClient+OnboardProfilesBluetooth.swift"; sourceTree = "<group>"; };
+		E4268FF82BDAB3619770D922 /* AppStateEditorController+LocalProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateEditorController+LocalProfiles.swift"; sourceTree = "<group>"; };
+		E5CDE7843D8ACD385CF2AA02 /* USBPassiveDPIParserMergeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBPassiveDPIParserMergeTests.swift; sourceTree = "<group>"; };
+		E667D05F50F04175DAEBEF20 /* RemoteServiceSnapshotConnectivityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteServiceSnapshotConnectivityTests.swift; sourceTree = "<group>"; };
+		E73F26AB652BBFD52C970789 /* AppStateLightingCharacterizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateLightingCharacterizationTests.swift; sourceTree = "<group>"; };
+		E7E519B30C49EFC4E32EC1FE /* DeviceSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSidebarView.swift; sourceTree = "<group>"; };
+		E826214B5DB76737BAEDFACC /* KeyboardBindingSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardBindingSupport.swift; sourceTree = "<group>"; };
+		EA2F0C1EF95850C94999AA62 /* AppSupportModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSupportModule.swift; sourceTree = "<group>"; };
+		EB6FCEE9D7887F0C669DF799 /* DeviceDetailLightingCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailLightingCard.swift; sourceTree = "<group>"; };
+		EBB348A4947F7F1A4D478D4A /* IssueReportFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IssueReportFormatter.swift; sourceTree = "<group>"; };
+		EBEE3D1D435734F1582FEFB7 /* BridgeClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeClient.swift; sourceTree = "<group>"; };
+		EBEF469112C126D6458134FC /* MouseControl.sdef */ = {isa = PBXFileReference; path = MouseControl.sdef; sourceTree = "<group>"; };
+		EC0DD23DD157BB5593EABFE6 /* BackgroundServiceTransportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundServiceTransportTests.swift; sourceTree = "<group>"; };
+		EC495B616946940C0561EE1E /* WindowChromeConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowChromeConfigurator.swift; sourceTree = "<group>"; };
+		ECF644716EB2778FABBAD2C9 /* AppUpdateCheckTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdateCheckTests.swift; sourceTree = "<group>"; };
+		ED1687FABC4D3145A9A75C57 /* RemoteServiceSnapshotHydrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteServiceSnapshotHydrationTests.swift; sourceTree = "<group>"; };
+		ED1BC6D7AA8A1C437AA7C225 /* SparkleSoftwareUpdateInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkleSoftwareUpdateInstaller.swift; sourceTree = "<group>"; };
+		EEBE87E9764E5432343BEF2F /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		EF2E0F392D905105253F2618 /* BridgeClientUSBWriteSemanticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeClientUSBWriteSemanticsTests.swift; sourceTree = "<group>"; };
+		EFF7B6A139E95B3B01F822AD /* AppStateTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTypes.swift; sourceTree = "<group>"; };
+		F07A382DF1EA27C73A1291B0 /* DeviceDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceDetailView.swift; sourceTree = "<group>"; };
+		F0A013933CBAD0E5A223EBC7 /* MouseControlSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseControlSettingsView.swift; sourceTree = "<group>"; };
+		F0A8F9E53151B55DB1259F46 /* AppStateEditorController+OnboardProfileContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateEditorController+OnboardProfileContent.swift"; sourceTree = "<group>"; };
+		F105EC806F57B6D55425BC9B /* AppLaunchReceipt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLaunchReceipt.swift; sourceTree = "<group>"; };
+		F1474C3CBAE93106582D5EB7 /* USBHIDControlSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBHIDControlSession.swift; sourceTree = "<group>"; };
+		F3E8C8BBF804ECE15811A9B6 /* ServiceMenuBarPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceMenuBarPresentationTests.swift; sourceTree = "<group>"; };
+		F8675DA37B48F3663D87C21F /* SourceTable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SourceTable.h; sourceTree = "<group>"; };
+		F87DDDCC3DDE00B4E2262654 /* USBTelemetryExpectation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBTelemetryExpectation.swift; sourceTree = "<group>"; };
+		F8BC8465F0ABEC22A0EB30FA /* libOpenSnekHardware.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libOpenSnekHardware.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA255BABAAB34022C22E9B94 /* AppStateApplyController+ButtonProfiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppStateApplyController+ButtonProfiles.swift"; sourceTree = "<group>"; };
+		FA36AD5F36AC2B0948B7CFE0 /* BackendSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackendSession.swift; sourceTree = "<group>"; };
+		FA3AA408E1884136FADA8304 /* USBHIDProtocolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBHIDProtocolTests.swift; sourceTree = "<group>"; };
+		FA63049A00C77D89398E58A0 /* USBHIDControlSessionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = USBHIDControlSessionTests.swift; sourceTree = "<group>"; };
+		FAA462F6235760DC2C364242 /* LanguageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageStore.swift; sourceTree = "<group>"; };
+		FABE6600866F4597D3D37021 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FB60675E46FF524A002B7AB0 /* Logger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
+		FC78A9A0BF6415EC88E48BCA /* SoftwareLightingRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoftwareLightingRendererTests.swift; sourceTree = "<group>"; };
+		FDE62FF0883F8298A8B4D925 /* ServiceModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceModeTests.swift; sourceTree = "<group>"; };
+		FE10E953CE7CF7E17B406068 /* BackgroundServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundServiceProtocol.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A7AE59E0E36DA6BA39085A4E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99F0E1B3207BF010B0B97AC9 /* libOpenSnekCore.a in Frameworks */,
+				7E05C7176A94834BFAC214C0 /* libOpenSnekProtocols.a in Frameworks */,
+				A644F01FE863B6895BFFEADF /* libOpenSnekHardware.a in Frameworks */,
+				8BEEE8C41A1BCEA7D95ABCFE /* libOpenSnekAppSupport.a in Frameworks */,
+				CC0D3C65F5A9D3AB4D58C223 /* Sparkle.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B6FC3809D4EE9127801CC07C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8114B6D90DA4FA39E4952DFD /* libOpenSnekCore.a in Frameworks */,
+				2C88A38D83984D1BD9CC69BB /* libOpenSnekProtocols.a in Frameworks */,
+				9499A39BDA4C4A54D2B9ACE8 /* libOpenSnekHardware.a in Frameworks */,
+				65BC814ABCE5CD980F873CFB /* libOpenSnekAppSupport.a in Frameworks */,
+				E4CFA04FFC2F641A92A6603A /* libScrollCore.a in Frameworks */,
+				2CB05CCB2F74B5120527DA6B /* Sparkle.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BB63515A06DDA51923DDD7EF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50E71F07F83241A0444E9117 /* libOpenSnekCore.a in Frameworks */,
+				CB46E5CA710042B66102BF51 /* libOpenSnekProtocols.a in Frameworks */,
+				6E74B16406EA7CDC8838F2FA /* libOpenSnekHardware.a in Frameworks */,
+				2CF27FCCA33B003A467DE33B /* libOpenSnekAppSupport.a in Frameworks */,
+				FD635DD93490CE478097504F /* libScrollCore.a in Frameworks */,
+				EA402E30385488EDB0F1C81A /* Sparkle.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FEED1841657EED223BDD4EA0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				63EE3224D06DC2F0C45C2EDF /* AppKit.framework in Frameworks */,
+				2091A0510043AFE8F99661C2 /* IOKit.framework in Frameworks */,
+				412CD25171F93E86B12884DD /* CoreGraphics.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4EEB2350A16BC8BE10D4B135 /* ScrollCore */ = {
+			isa = PBXGroup;
+			children = (
+				48621219857DDD5A6F849B3F /* CoreGraphicsSPI.h */,
+				2447D40C23887545F507CCA7 /* IOKitSPI.h */,
+				FB60675E46FF524A002B7AB0 /* Logger.h */,
+				29A4C200C1D6BC27772B75C3 /* Logger.m */,
+				A3F9030B1D858C0C4D28798E /* MouseTap.h */,
+				4D0BC2F01E72B95B6A8E947B /* MouseTap.m */,
+				1AAA3EC867CCE2A141B11910 /* ScrollSource.h */,
+				DFDC89288EEE35B35C2E8879 /* ScrollSource.m */,
+				2D7E7F1DA7DE69AC1027DD1D /* SmoothScrollEngine.h */,
+				58232B80F0DECE516FE17BB4 /* SmoothScrollEngine.m */,
+				F8675DA37B48F3663D87C21F /* SourceTable.h */,
+				789116B3DEC01668D459E8F2 /* SourceTable.m */,
+				19BE56C73195C4BDDE0D29FC /* TapLogger.h */,
+				60124CCF84A6EDF9D481FD34 /* TapLogger.m */,
+			);
+			path = ScrollCore;
+			sourceTree = "<group>";
+		};
+		4FA5E5F90006FBECEA92DBDC /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				FABE6600866F4597D3D37021 /* ContentView.swift */,
+				8F0B3DFED6A8349BA0C74A93 /* DeviceDetailButtonMappingCard.swift */,
+				37DCE16A58F5960075301759 /* DeviceDetailDpiStagesCard.swift */,
+				EB6FCEE9D7887F0C669DF799 /* DeviceDetailLightingCard.swift */,
+				B26DE6C99A740EB4479C5063 /* DeviceDetailLightingControls.swift */,
+				30B7AA9AB5C38A469AC3835F /* DeviceDetailSettingsCards.swift */,
+				F07A382DF1EA27C73A1291B0 /* DeviceDetailView.swift */,
+				E7E519B30C49EFC4E32EC1FE /* DeviceSidebarView.swift */,
+				4F187E99D9D3B176D258E37E /* DpiStageIndicator.swift */,
+				CF7C988B4D3B3DBF80E05434 /* KeyboardBindingControls.swift */,
+				5ADA7250200CD4F93902C2B0 /* LocalProfileLibraryPanel.swift */,
+				9431A58A34A9395A8883F80F /* OpenSnekAppearance.swift */,
+				776FC18BBF57F199137F83AF /* OpenSnekBranding.swift */,
+				46D3F2196CF4234733713CAD /* ServiceMenuBarView.swift */,
+				08F5DB60441813B2DC3DCEF9 /* SettingsView.swift */,
+				97EC706908271E383684C2F1 /* UIPrimitives.swift */,
+				EC495B616946940C0561EE1E /* WindowChromeConfigurator.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		51935535C482592AB06A8737 /* OpenSnekCore */ = {
+			isa = PBXGroup;
+			children = (
+				6602710841BA91D81C2B32F3 /* BluetoothNameMatcher.swift */,
+				39EB1BFFAF7C6A3F41DC262A /* ButtonBindingSupport.swift */,
+				97D122843207CBF475DA4055 /* DeviceDiagnosticsFormatter.swift */,
+				1CA350E2818AAFBB35B61B0E /* DevicePatch+USBControls.swift */,
+				8E560CEFDF21FA1349C91CDF /* DevicePersistenceKeys.swift */,
+				886DCE9806215843CDDF4BBA /* DeviceSupport.swift */,
+				D252057430A08C2259A0A42A /* DeviceValidationCatalog.swift */,
+				EBB348A4947F7F1A4D478D4A /* IssueReportFormatter.swift */,
+				06EC3C12E86502A39889A70D /* Models.swift */,
+				897324777FC0C9B749D22A20 /* OnboardProfiles.swift */,
+				3C69F56939F4C42E516E8613 /* SoftwareLighting.swift */,
+			);
+			name = OpenSnekCore;
+			path = Sources/OpenSnekCore;
+			sourceTree = "<group>";
+		};
+		5D9933FB41CC1123C5EC3780 = {
+			isa = PBXGroup;
+			children = (
+				F5B53597E562CDA1C16292A4 /* MouseControl */,
+				6FD287344CFFD516320041E5 /* MouseControlFeatures */,
+				CC234E738866CC97DC960445 /* MouseControlTests */,
+				EA240AE1B3D956C9AD1368D0 /* OpenSnekAppSupport */,
+				51935535C482592AB06A8737 /* OpenSnekCore */,
+				86A62BA76F845E3367A166A4 /* OpenSnekHardware */,
+				8B8BE406970D00842A59E2C7 /* OpenSnekProtocols */,
+				AC8FE080DC6AF92B9FB477E9 /* Resources */,
+				4EEB2350A16BC8BE10D4B135 /* ScrollCore */,
+				7D09C4FBB24CA42087EB2F05 /* Frameworks */,
+				C1D2915EBB55FB5BC1E8D9DB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		62B50F767B443920AFD9CE93 /* Domain */ = {
+			isa = PBXGroup;
+			children = (
+				A89BA96196B43FA40351D9F2 /* CoreAliases.swift */,
+			);
+			path = Domain;
+			sourceTree = "<group>";
+		};
+		6FD287344CFFD516320041E5 /* MouseControlFeatures */ = {
+			isa = PBXGroup;
+			children = (
+				DADA276F409AC56D0333CD01 /* BasicMouseDetailView.swift */,
+				747647AFDF6BE04C83B4C607 /* FeaturePreferences.swift */,
+				641498FD4DAACA0E3E220817 /* FeatureRuntime.swift */,
+				A9E60FA96D8A748165158266 /* IconStore.swift */,
+				FAA462F6235760DC2C364242 /* LanguageStore.swift */,
+				44C2F5CD1650C37628F0CCDF /* MacroRuntime.swift */,
+				F0A013933CBAD0E5A223EBC7 /* MouseControlSettingsView.swift */,
+				75C63A28FDA42D310928B2AA /* NativeBatteryPublisher.swift */,
+				5743044E480565191E38ED8C /* ScrollRuntime.swift */,
+				B879524B6084CC7F58341975 /* ShortcutRecorder.swift */,
+			);
+			path = MouseControlFeatures;
+			sourceTree = "<group>";
+		};
+		7242903DF3669E08C3197D5B /* Licenses */ = {
+			isa = PBXGroup;
+			children = (
+				E11BCEA6E82EDF0283041D7C /* OpenSnek-Apache-2.0.txt */,
+				9B98E855666F095093B6482B /* Scroll-Reverser-Apache-2.0.txt */,
+				CD794DDD96A03A10485F2948 /* Scroll-Reverser-NOTICE.txt */,
+				16CDE6B0EEAD9DDB14164C4D /* Sparkle.txt */,
+			);
+			path = Licenses;
+			sourceTree = "<group>";
+		};
+		7D09C4FBB24CA42087EB2F05 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EEBE87E9764E5432343BEF2F /* AppKit.framework */,
+				217931DF8D8B3B8FDE2B6E89 /* CoreGraphics.framework */,
+				B764B623D92AAB140EB6D45B /* IOKit.framework */,
+				D53695A38C9835CCF8FFB9DA /* Sparkle.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		86A62BA76F845E3367A166A4 /* OpenSnekHardware */ = {
+			isa = PBXGroup;
+			children = (
+				10D641A66E3A6799179F28E0 /* Abstractions.swift */,
+				77FE7D8C9D13985D532224F7 /* BLEProbeSession.swift */,
+				DF69CA59829A5C3998D9EAD0 /* BLEVendorTransportClient.swift */,
+				56DE0B8375FCABF669D6F358 /* HardwareModule.swift */,
+				DA0DFBB54463AC027CC91B79 /* HIDDevicePresenceMonitor.swift */,
+				F1474C3CBAE93106582D5EB7 /* USBHIDControlSession.swift */,
+				7739E577DB8358885C16F6D6 /* USBPassiveDPIEventMonitor.swift */,
+			);
+			name = OpenSnekHardware;
+			path = Sources/OpenSnekHardware;
+			sourceTree = "<group>";
+		};
+		8B8BE406970D00842A59E2C7 /* OpenSnekProtocols */ = {
+			isa = PBXGroup;
+			children = (
+				82B3825B6618B5D3A91033E9 /* BLEVendorProtocol.swift */,
+				909CC4188E9DC60023A1A0B8 /* USBHIDProtocol.swift */,
+			);
+			name = OpenSnekProtocols;
+			path = Sources/OpenSnekProtocols;
+			sourceTree = "<group>";
+		};
+		AC8FE080DC6AF92B9FB477E9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B0E51C2976304EA268823525 /* Assets.xcassets */,
+				D78890BDCFCA28335419A682 /* mouse-app-icon.png */,
+				EBEF469112C126D6458134FC /* MouseControl.sdef */,
+				79FA268B0D31BCF2FEF7610C /* psyduck-app-icon.png */,
+				CDF9B0484D3D35A0E3079DCF /* psyduck-menu-template.png */,
+				D93257EDE4BDC1D7AAF01950 /* snek-menu-template.png */,
+				363F7DA73B19610764046856 /* snek-menu.png */,
+				8A4B1D1C7743377C34122163 /* ThirdPartyNotices.txt */,
+				7242903DF3669E08C3197D5B /* Licenses */,
+				6003B58101D70BEF429A8C4E /* Localizable.strings */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		C1D2915EBB55FB5BC1E8D9DB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				77312E81B196E4368F2E1736 /* libOpenSnekAppSupport.a */,
+				0BF06624FDC7A95EE8C24820 /* libOpenSnekCore.a */,
+				F8BC8465F0ABEC22A0EB30FA /* libOpenSnekHardware.a */,
+				86D7A66F4794918039E56A8C /* libOpenSnekProtocols.a */,
+				8A04AE8A88746347711D252E /* libScrollCore.a */,
+				A47611387ABB69A125B33411 /* MouseControl.app */,
+				DD7A54F5734EAE9E1CF70E01 /* MouseControlTestHost.app */,
+				56E9DFE12A3B62EDD5EEAF51 /* MouseControlTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CC234E738866CC97DC960445 /* MouseControlTests */ = {
+			isa = PBXGroup;
+			children = (
+				B3D77591EFF4A5B20FA9E433 /* AppLaunchReceiptTests.swift */,
+				514BA107B9CC1529D504E765 /* AppLifecycleDelegateTests.swift */,
+				B2F68A6799CFE8AAE63E4145 /* AppLocalStorageResetterTests.swift */,
+				1536D53266086D887037C979 /* ApplyCoordinatorTests.swift */,
+				CED04DCD86B1587595EBA824 /* AppStateApplyAndDPICharacterizationTests.swift */,
+				1682237A1A4F79A87737A8D8 /* AppStateButtonHydrationTests.swift */,
+				1F622D2E7F37D698884C3074 /* AppStateButtonProfileEditTests.swift */,
+				9B51A6128270CC745CBD0EEB /* AppStateButtonWorkspaceTests.swift */,
+				18CDF86759291F2AC9C7B810 /* AppStateFreshLocalProfileTests.swift */,
+				E73F26AB652BBFD52C970789 /* AppStateLightingCharacterizationTests.swift */,
+				8EEBA009B1029E2DFEE44E48 /* AppStateLocalProfileCrossDeviceTests.swift */,
+				15B19E5B54ED5F3E87236918 /* AppStateLocalProfileTests.swift */,
+				B795EAFB3496099EF3BC6D31 /* AppStateMultiDeviceAvailabilityTests.swift */,
+				C93CF27F10A4592F43223B08 /* AppStateMultiDeviceSelectionTests.swift */,
+				C99CC7C20F3337558A84EC07 /* AppStateMultiDeviceServiceSelectionTests.swift */,
+				04497C8C83E090F36EC23705 /* AppStateMultiDeviceTests.swift */,
+				78AB2A4FE5211684103091FC /* AppStateOnboardContentTests.swift */,
+				78975B363B5A820D48EA0B50 /* AppStateOnboardHydrationTests.swift */,
+				AD7BCFD46910008D93E5F8ED /* AppStateOnboardInventoryTests.swift */,
+				56CCA075D0AF3F97099976F8 /* AppStateOnboardMutationTests.swift */,
+				295811F21D6B77EF9E999B2C /* AppStateProfileSwitchRegressionTests.swift */,
+				167EF72630F2EDDC1CE1514F /* AppStateRefactorCharacterizationTests.swift */,
+				3774726B2F902FC64B965F4B /* AppStateRestoreTests.swift */,
+				7A539AE5554A8B9F1285AA8A /* AppStateWiredMouseRestoreTests.swift */,
+				ECF644716EB2778FABBAD2C9 /* AppUpdateCheckTests.swift */,
+				1657100ABA4AB8F330BE1D4F /* BackgroundServiceCoordinatorTests.swift */,
+				EC0DD23DD157BB5593EABFE6 /* BackgroundServiceTransportTests.swift */,
+				1CF5C8BEE4769BA0A19DFA82 /* BatteryMeterSourceResolutionTests.swift */,
+				A78628C4BCE091083A9D5A47 /* BLEProbeSessionTests.swift */,
+				D622C25C14DCA34680F0B6C6 /* BLEVendorProtocolTests.swift */,
+				264F3500EC25B9D80237ABC4 /* BLEVendorTransportClientTests.swift */,
+				2A3EB738B0CD2F5E369E7C62 /* BridgeClientBluetoothFallbackTests.swift */,
+				EF2E0F392D905105253F2618 /* BridgeClientUSBWriteSemanticsTests.swift */,
+				34E1AF18CBF7062ED316464B /* ContentNoticePresentationTests.swift */,
+				AB45C9744D62170F6879FB79 /* DeveloperRuntimeOptionsTests.swift */,
+				7EAB072FFEFF71FADBA6466E /* DeviceDiagnosticsFormatterTests.swift */,
+				A4AC1D2EE9CF31191A6D3D9D /* DevicePatchMergeTests.swift */,
+				D273745A3434C6423ABF499C /* DevicePatchUSBCapabilityTests.swift */,
+				DB2E706ABDB21573B00059CE /* DevicePreferenceStoreTests.swift */,
+				BA6EA55F2EA0F4849E7FCA51 /* DeviceProfilesTests.swift */,
+				E177507197D44633BCFC460C /* DeviceValidationCatalogTests.swift */,
+				BECF1DD404988B408FC1B8B6 /* HardwareBluetoothRecoveryTests.swift */,
+				A74685648854BD4B993D5532 /* HardwareBluetoothTarget.swift */,
+				1AE1E6CDC56177D6BBAABC2F /* HardwareDpiReliabilityTests.swift */,
+				3B950DA07CC9D53BD4FF8FF4 /* HardwareUSBButtonRemapTests.swift */,
+				DFF65C6D5650AF2465DF0816 /* HardwareUSBStartupHydrationTests.swift */,
+				6DD2FC24E6B3A03C9D7A85BF /* HardwareUSBStateSmokeTests.swift */,
+				7C50D00785CF370BC34BB5B9 /* HardwareValidationSession.swift */,
+				C8B716F6AF12422C24F5C53E /* HardwareValidationSessionTests.swift */,
+				5CE4F4892792E603797CABFE /* HIDDevicePresenceAccumulatorTests.swift */,
+				683F16774A788890DB8F96C8 /* IssueReportFormatterTests.swift */,
+				A89650984A5A2A91464D9A81 /* KeyboardBindingSupportTests.swift */,
+				56E59CE5D9D5D822B04F50F0 /* LaunchAtStartupTests.swift */,
+				168017A6DFEF1002D983A861 /* LightingOnlyDeviceGatingTests.swift */,
+				5ED288098B26A3D53F972247 /* LightingSummaryPresentationTests.swift */,
+				3DEB3785207286597C3AA014 /* LightingZoneEditModeTests.swift */,
+				7CD04D683CB45FFC09676CDB /* MouseControlFeatureTests.swift */,
+				2DEA9EE89D293EC2658037E5 /* MouseIdentityTests.swift */,
+				921D3F699A15DB2B9A635DEC /* MouseStateMergeTests.swift */,
+				1E2078F4003CFB38424D2CBF /* NagaUSBBrightnessRecoveryTests.swift */,
+				DC1E1D842A81768AB4A46A38 /* NoControlInterfaceDeviceTests.swift */,
+				C17DE47A5D57AFC19D477D00 /* OpenSnekBrandingTests.swift */,
+				C1E7C5FDA53AA72D4CE30156 /* PhysicalDeviceListTests.swift */,
+				0C9402BAA2B866C8C679541E /* ReleaseCandidateUpdateTests.swift */,
+				A16C01B3169A1335405F7F3D /* ReleaseUpdateCheckerTests.swift */,
+				426B187D1307C381A95DDBBA /* RemoteServiceBootstrapTests.swift */,
+				E667D05F50F04175DAEBEF20 /* RemoteServiceSnapshotConnectivityTests.swift */,
+				ED1687FABC4D3145A9A75C57 /* RemoteServiceSnapshotHydrationTests.swift */,
+				919B26D4D37E260DFFCBF134 /* RemoteServiceSnapshotTests.swift */,
+				8175615BA5FE24B24E2CB155 /* ScrollIdentityTests.swift */,
+				F3E8C8BBF804ECE15811A9B6 /* ServiceMenuBarPresentationTests.swift */,
+				FDE62FF0883F8298A8B4D925 /* ServiceModeTests.swift */,
+				93C4C353FA3A4D943EF6E463 /* SoftwareLightingBatterySamplerTests.swift */,
+				DF3BCC106B59E1956C9DE1B0 /* SoftwareLightingEngineTests.swift */,
+				FC78A9A0BF6415EC88E48BCA /* SoftwareLightingRendererTests.swift */,
+				8B617790993AB34C173CAFC6 /* SoftwareUpdateRecoveryTests.swift */,
+				733B0FD638FDBAB76045046C /* SoftwareUpdateSessionTests.swift */,
+				D6BFB03DE69AD3D652B1BC20 /* SupportedDevicePresentationTests.swift */,
+				B28D134FF64F3067E5574ACE /* SupportedDevicesReadmeTests.swift */,
+				A9222B8860B55E656168A41B /* TurboRateMappingTests.swift */,
+				DF96A32BAB7E72C5B36F287B /* UnsupportedDeviceHandlingTests.swift */,
+				A94B29CC3F2EC9BF03F3020E /* USBButtonHydrationTests.swift */,
+				5D1DF38A93CE0AFB8F315F8A /* USBDpiStageParsingTests.swift */,
+				FA63049A00C77D89398E58A0 /* USBHIDControlSessionTests.swift */,
+				FA3AA408E1884136FADA8304 /* USBHIDProtocolTests.swift */,
+				CCE4B0703C9D2FF9C0CA0E6F /* USBPassiveDPIAppStateTests.swift */,
+				363D2D53AE897805A86DBF6E /* USBPassiveDPIBridgeBehaviorTests.swift */,
+				6D95644BB1DF0409B95AEA2F /* USBPassiveDPIEventTests.swift */,
+				E5CDE7843D8ACD385CF2AA02 /* USBPassiveDPIParserMergeTests.swift */,
+				8BAEFB587F2378D511D08DDD /* USBTelemetryExpectationTests.swift */,
+				86702B76E45F8DABEBC2B94A /* WindowChromeConfiguratorTests.swift */,
+			);
+			name = MouseControlTests;
+			path = Tests/MouseControlTests;
+			sourceTree = "<group>";
+		};
+		DA2278BA177BD9E02F876CE4 /* Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				EBEE3D1D435734F1582FEFB7 /* BridgeClient.swift */,
+				143AD741BEF6E815A883BE07 /* BridgeClient+Apply.swift */,
+				AEB2F5C5EDC41128AD41D58D /* BridgeClient+Bluetooth.swift */,
+				972E72D49EDB3A102F78F1C5 /* BridgeClient+OnboardProfiles.swift */,
+				E31F9D3A4D4A7558FA86B04B /* BridgeClient+OnboardProfilesBluetooth.swift */,
+				59EFB3DA0796E67252D87903 /* BridgeClient+OnboardProfilesUSB.swift */,
+				C1BEF52ECA57AEAF90B8FFC2 /* BridgeClient+PassiveDpiTracker.swift */,
+				AF5C685852ACC762DFDCC343 /* BridgeClient+USB.swift */,
+				32274F4753E5AC41F2C34168 /* OnboardProfileProjection.swift */,
+			);
+			path = Bridge;
+			sourceTree = "<group>";
+		};
+		EA240AE1B3D956C9AD1368D0 /* OpenSnekAppSupport */ = {
+			isa = PBXGroup;
+			children = (
+				48CB6FA5DFC4AB3A8784AB6C /* ApplyCoordinator.swift */,
+				EA2F0C1EF95850C94999AA62 /* AppSupportModule.swift */,
+				471B5CD744C9C1104485B359 /* DeveloperRuntimeOptions.swift */,
+				26A84634F3E200ABADED1E78 /* DevicePreferenceStore.swift */,
+			);
+			name = OpenSnekAppSupport;
+			path = Sources/OpenSnekAppSupport;
+			sourceTree = "<group>";
+		};
+		EFD6CA379CE2364C5C78F81C /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				2D2B3EA5199C57558939A727 /* AppEnvironment.swift */,
+				3EEFBF57ABE1B95E85D1B028 /* AppLocalStorageResetter.swift */,
+				169E641DE80DFF60BB40924B /* AppLog.swift */,
+				AEB1FFFCC5FF4F806DB51BBF /* AppState.swift */,
+				80A441D562213DCC7FC1AEC2 /* AppStateApplyController.swift */,
+				FA255BABAAB34022C22E9B94 /* AppStateApplyController+ButtonProfiles.swift */,
+				C3606FFEE97EF626E66E81B3 /* AppStateApplyController+LocalProfiles.swift */,
+				7F8F534DB35D0E3CC607D70A /* AppStateDeviceController.swift */,
+				BFB8349A7E7C4E053625F1A7 /* AppStateDeviceController+DeviceListSelection.swift */,
+				59D0BFA876D6DC545C4A3DA3 /* AppStateDeviceController+RealtimeDPI.swift */,
+				C7795951F8E1CC66D4FD271D /* AppStateDeviceController+RemoteUpdates.swift */,
+				99094967BA0AF32FDB0DD9F9 /* AppStateDeviceController+StateRefresh.swift */,
+				1E794F138FA735E6B066E7CA /* AppStateEditorController.swift */,
+				0A64AC88D3140A86E345CC8C /* AppStateEditorController+ButtonProfiles.swift */,
+				E4268FF82BDAB3619770D922 /* AppStateEditorController+LocalProfiles.swift */,
+				F0A8F9E53151B55DB1259F46 /* AppStateEditorController+OnboardProfileContent.swift */,
+				0A0CCA7D09DA6663C3F8E85F /* AppStateEditorController+OnboardProfiles.swift */,
+				3F9C77A82317A2307419C0AE /* AppStateEditorController+SelectionLighting.swift */,
+				37D419B750906D6C174FB4C2 /* AppStateRuntimeController.swift */,
+				EFF7B6A139E95B3B01F822AD /* AppStateTypes.swift */,
+				FA36AD5F36AC2B0948B7CFE0 /* BackendSession.swift */,
+				7B40AF592AD6E43F53E07BF6 /* BackgroundServiceCoordinator.swift */,
+				08D6F90C5D0D04BED8D4F0BA /* BackgroundServiceHost.swift */,
+				FE10E953CE7CF7E17B406068 /* BackgroundServiceProtocol.swift */,
+				AB8921D36EC46058D50895B6 /* BackgroundServiceTransport.swift */,
+				C837BBD5E2D4B3D62B87D387 /* BroadcastStream.swift */,
+				AE30E4E7751E4417959B2372 /* DeviceStore.swift */,
+				352A5362177BAFA287B14318 /* EditorStore.swift */,
+				6E6E7686A578C5873691C6AB /* IPCDeviceBackend.swift */,
+				E826214B5DB76737BAEDFACC /* KeyboardBindingSupport.swift */,
+				57113D4185F9C11613BFF2CA /* LightingZoneEditMode.swift */,
+				3A8DCE9CF868294ACCFB861F /* LocalBridgeBackend.swift */,
+				C6D995DAFA3D04F4B1DF0405 /* LocalBridgeBackendTelemetryMerge.swift */,
+				783BB948AB54165E8A0DD5BA /* OnboardProfileEditorModels.swift */,
+				40B35BCA2B72ECAFC4F5470F /* OpenSnekUITestSupport.swift */,
+				942E495A41B926AE140C1000 /* PermissionSupport.swift */,
+				31A20C459190DC81FBCABAB1 /* ReleaseUpdateChecker.swift */,
+				6C72F3CBE869DEC725E9E46D /* RuntimeStore.swift */,
+				712D0D9C8EC9E6CF28DA603F /* SoftwareLightingBatterySampler.swift */,
+				96E4709007F7660EC56AE6CE /* SoftwareLightingEngine.swift */,
+				1F9B28B4BD183FB8BC6F61FD /* SoftwareUpdateSession.swift */,
+				ED1BC6D7AA8A1C437AA7C225 /* SparkleSoftwareUpdateInstaller.swift */,
+				F87DDDCC3DDE00B4E2262654 /* USBTelemetryExpectation.swift */,
+				6B66EF0BD73B095B71155D9F /* WeakBound.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		F5B53597E562CDA1C16292A4 /* MouseControl */ = {
+			isa = PBXGroup;
+			children = (
+				F105EC806F57B6D55425BC9B /* AppLaunchReceipt.swift */,
+				245D1DE5C13398F570C5C5D4 /* AppLifecycleDelegate.swift */,
+				DA46E69DA595046FFC2A4005 /* OpenSnekApp.swift */,
+				DA2278BA177BD9E02F876CE4 /* Bridge */,
+				62B50F767B443920AFD9CE93 /* Domain */,
+				EFD6CA379CE2364C5C78F81C /* Services */,
+				4FA5E5F90006FBECEA92DBDC /* UI */,
+			);
+			name = MouseControl;
+			path = Sources/MouseControl;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		175F7D6EA795FD0CF89D49C3 /* OpenSnekHardware */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6C955C89D0404C3BBFD496B8 /* Build configuration list for PBXNativeTarget "OpenSnekHardware" */;
+			buildPhases = (
+				63F5AE34EF5FD9F120FC970A /* Sources */,
+				F72DB3527182255EC7F08E6B /* Copy Swift Objective-C Interface Header */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				00E5654CC97374C88ADCB73C /* PBXTargetDependency */,
+				0BEB0AAB5B396E91A4C56274 /* PBXTargetDependency */,
+			);
+			name = OpenSnekHardware;
+			packageProductDependencies = (
+			);
+			productName = OpenSnekHardware;
+			productReference = F8BC8465F0ABEC22A0EB30FA /* libOpenSnekHardware.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		496255C7F0E16FF9DF575646 /* OpenSnekProtocols */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F997290299EFABA660CC4188 /* Build configuration list for PBXNativeTarget "OpenSnekProtocols" */;
+			buildPhases = (
+				C071EE204AD4EB7F01D83D71 /* Sources */,
+				366B9998F933F14B8002FB56 /* Copy Swift Objective-C Interface Header */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				72DA1D6297B1A57727B9D3AB /* PBXTargetDependency */,
+			);
+			name = OpenSnekProtocols;
+			packageProductDependencies = (
+			);
+			productName = OpenSnekProtocols;
+			productReference = 86D7A66F4794918039E56A8C /* libOpenSnekProtocols.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		618DA5E1E390BED5A7757E7E /* OpenSnekAppSupport */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A44687D32CEE0F9E4CE791F9 /* Build configuration list for PBXNativeTarget "OpenSnekAppSupport" */;
+			buildPhases = (
+				E87CDAC31880C2D9C7186089 /* Sources */,
+				36116E1F401DBE90BEB54EBB /* Copy Swift Objective-C Interface Header */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BE139FB366D661BC569B62D0 /* PBXTargetDependency */,
+				B32C3933CCE58D9316AF15D7 /* PBXTargetDependency */,
+			);
+			name = OpenSnekAppSupport;
+			packageProductDependencies = (
+			);
+			productName = OpenSnekAppSupport;
+			productReference = 77312E81B196E4368F2E1736 /* libOpenSnekAppSupport.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		814B981D6CA8C0EBA0385138 /* MouseControlTestHost */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3624A844E01D2916BC42EB36 /* Build configuration list for PBXNativeTarget "MouseControlTestHost" */;
+			buildPhases = (
+				F499F52F2DAB0A5A03CB13A0 /* Sources */,
+				9A7A05F9D4B7F05EA902C17F /* Resources */,
+				B6FC3809D4EE9127801CC07C /* Frameworks */,
+				4F0886EE0F0B8402F286E85F /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E0F7F2DDB24704C54C414E45 /* PBXTargetDependency */,
+				F82B7D5303176EBA6192E5D9 /* PBXTargetDependency */,
+				AFBC8A4291625C481B29AE69 /* PBXTargetDependency */,
+				266AF70C3001FBD01D3E7055 /* PBXTargetDependency */,
+				D013E73FE833EB9B85AEB1FC /* PBXTargetDependency */,
+			);
+			name = MouseControlTestHost;
+			packageProductDependencies = (
+			);
+			productName = MouseControlTestHost;
+			productReference = DD7A54F5734EAE9E1CF70E01 /* MouseControlTestHost.app */;
+			productType = "com.apple.product-type.application";
+		};
+		91848A82D29DEE1F78334616 /* ScrollCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6C7E44AE16E50B3A81DE1E9F /* Build configuration list for PBXNativeTarget "ScrollCore" */;
+			buildPhases = (
+				045EC51F10C65737BF7F606A /* CopyFiles */,
+				7E09B6E71087BC7C0E078E1A /* Sources */,
+				FEED1841657EED223BDD4EA0 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ScrollCore;
+			packageProductDependencies = (
+			);
+			productName = ScrollCore;
+			productReference = 8A04AE8A88746347711D252E /* libScrollCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		A57881F36FF8CAF0812D1783 /* OpenSnekCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3166F595F37B40726B1EC540 /* Build configuration list for PBXNativeTarget "OpenSnekCore" */;
+			buildPhases = (
+				8FB2B08BC2514DED3D1229D5 /* Sources */,
+				0679FD78ABC5AA79650BC7B3 /* Copy Swift Objective-C Interface Header */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenSnekCore;
+			packageProductDependencies = (
+			);
+			productName = OpenSnekCore;
+			productReference = 0BF06624FDC7A95EE8C24820 /* libOpenSnekCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		C1916BE2BD36CEA797257A60 /* MouseControl */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 942E8F1E4011F9D888207E65 /* Build configuration list for PBXNativeTarget "MouseControl" */;
+			buildPhases = (
+				9FE749221E842E4B716FCDF2 /* Sources */,
+				91A8B8379D05DE40164EAB3C /* Resources */,
+				BB63515A06DDA51923DDD7EF /* Frameworks */,
+				6D7D40911AC3780E6119778A /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				51F4A21F6C47049D1064DF48 /* PBXTargetDependency */,
+				FEA9153919B0FBC7B7D712B4 /* PBXTargetDependency */,
+				3CC129D0FE24B2EB0073EABD /* PBXTargetDependency */,
+				8514925F35877EE50AECBEC6 /* PBXTargetDependency */,
+				F0B63F3206E826DF9CDF8C37 /* PBXTargetDependency */,
+			);
+			name = MouseControl;
+			packageProductDependencies = (
+			);
+			productName = MouseControl;
+			productReference = A47611387ABB69A125B33411 /* MouseControl.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E83A5E3497C4F83F0E494AEE /* MouseControlTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7E7362E8EED81A27DA76D671 /* Build configuration list for PBXNativeTarget "MouseControlTests" */;
+			buildPhases = (
+				E4736B3067D14C158C34CF5F /* Sources */,
+				A7AE59E0E36DA6BA39085A4E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FA61A8959072F80C4A1971D9 /* PBXTargetDependency */,
+				60E209A6FF2159039F435A41 /* PBXTargetDependency */,
+				C4704C575ADFA965D2D259B8 /* PBXTargetDependency */,
+				0440B8D11BB61F8E7AF6F355 /* PBXTargetDependency */,
+				ED0008DC00BC5828CEB70CE7 /* PBXTargetDependency */,
+			);
+			name = MouseControlTests;
+			packageProductDependencies = (
+			);
+			productName = MouseControlTests;
+			productReference = 56E9DFE12A3B62EDD5EEAF51 /* MouseControlTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		BD9B749DF13799C3EAD201CC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = D7DA60D4DFE78C36A602B4BC /* Build configuration list for PBXProject "MouseControl" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+				"zh-Hans",
+			);
+			mainGroup = 5D9933FB41CC1123C5EC3780;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C1D2915EBB55FB5BC1E8D9DB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A57881F36FF8CAF0812D1783 /* OpenSnekCore */,
+				496255C7F0E16FF9DF575646 /* OpenSnekProtocols */,
+				175F7D6EA795FD0CF89D49C3 /* OpenSnekHardware */,
+				618DA5E1E390BED5A7757E7E /* OpenSnekAppSupport */,
+				91848A82D29DEE1F78334616 /* ScrollCore */,
+				C1916BE2BD36CEA797257A60 /* MouseControl */,
+				814B981D6CA8C0EBA0385138 /* MouseControlTestHost */,
+				E83A5E3497C4F83F0E494AEE /* MouseControlTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		91A8B8379D05DE40164EAB3C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B13A8FD539A625407ECADE25 /* Assets.xcassets in Resources */,
+				0063C81677058BA863416786 /* Localizable.strings in Resources */,
+				454E0D86910E832E92A0A887 /* MouseControl.sdef in Resources */,
+				07F45B1903F7D3574D70B508 /* OpenSnek-Apache-2.0.txt in Resources */,
+				721067FA9284982833CD6C93 /* Scroll-Reverser-Apache-2.0.txt in Resources */,
+				309B327F1B04B1919E7830BF /* Scroll-Reverser-NOTICE.txt in Resources */,
+				0AF81D49DB336B2AB216EE34 /* Sparkle.txt in Resources */,
+				BA324CC94E913E69AFFB48FC /* ThirdPartyNotices.txt in Resources */,
+				67C31F6D13E2C61B505FBBF7 /* mouse-app-icon.png in Resources */,
+				7E5CD630CAFD2AF3BAEC335C /* psyduck-app-icon.png in Resources */,
+				86A1153AF64839220E8A36D6 /* psyduck-menu-template.png in Resources */,
+				7F423A74FF3346C1DBFEBFEC /* snek-menu-template.png in Resources */,
+				40E4B34BF28405876A53B5FA /* snek-menu.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9A7A05F9D4B7F05EA902C17F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				803518DB8519021B2315692A /* Assets.xcassets in Resources */,
+				7F93561738D18BAB443B652E /* Localizable.strings in Resources */,
+				FC4B4847B851C7406974E7EA /* MouseControl.sdef in Resources */,
+				C5580003D778FE1A4F06CA1F /* OpenSnek-Apache-2.0.txt in Resources */,
+				BB35AD29E1973BAFF0C8A599 /* Scroll-Reverser-Apache-2.0.txt in Resources */,
+				290E262E4411AD769FBEE3B8 /* Scroll-Reverser-NOTICE.txt in Resources */,
+				DCF8952B187DC9441BA87A33 /* Sparkle.txt in Resources */,
+				7A035CA12D194832A7759DC4 /* ThirdPartyNotices.txt in Resources */,
+				BE5F16E1471AEF5A0733400A /* mouse-app-icon.png in Resources */,
+				4B87BFB1D0E401900B133F69 /* psyduck-app-icon.png in Resources */,
+				7CC7D8142015AD172419BE84 /* psyduck-menu-template.png in Resources */,
+				65CE59D346FB2B686DCA1530 /* snek-menu-template.png in Resources */,
+				D2E5C7E852E9F285C2D5C609 /* snek-menu.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0679FD78ABC5AA79650BC7B3 /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		36116E1F401DBE90BEB54EBB /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		366B9998F933F14B8002FB56 /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+		F72DB3527182255EC7F08E6B /* Copy Swift Objective-C Interface Header */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(DERIVED_SOURCES_DIR)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			name = "Copy Swift Objective-C Interface Header";
+			outputPaths = (
+				"$(BUILT_PRODUCTS_DIR)/include/$(PRODUCT_MODULE_NAME)/$(SWIFT_OBJC_INTERFACE_HEADER_NAME)",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SCRIPT_INPUT_FILE_0}\" \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		63F5AE34EF5FD9F120FC970A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99808B283D15E02412A7D466 /* Abstractions.swift in Sources */,
+				BC7164DAE958A61ABED9BBC0 /* BLEProbeSession.swift in Sources */,
+				9DCF150ADEFD0324088AA17B /* BLEVendorTransportClient.swift in Sources */,
+				A2A0CA6627422C7E5847A98E /* HIDDevicePresenceMonitor.swift in Sources */,
+				D8D07D65F7FE03D2E25016BE /* HardwareModule.swift in Sources */,
+				DD27FB587AE372C52BB0032F /* USBHIDControlSession.swift in Sources */,
+				442D2F16B867EF59B9547B46 /* USBPassiveDPIEventMonitor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7E09B6E71087BC7C0E078E1A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C65415CE6EB81F7D8CA9AF57 /* Logger.m in Sources */,
+				7E85573749A7E9B89A98A508 /* MouseTap.m in Sources */,
+				8E2A736202801D565074FBB6 /* ScrollSource.m in Sources */,
+				030DFE11AD214D435FD67C9A /* SmoothScrollEngine.m in Sources */,
+				F0F05A65AB1C946A1590E8F4 /* SourceTable.m in Sources */,
+				E677524E7A20D807AF0DB43B /* TapLogger.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8FB2B08BC2514DED3D1229D5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3E14BABD063ABD8096A3FCE2 /* BluetoothNameMatcher.swift in Sources */,
+				4557B4CAB48D37AE4151C6A2 /* ButtonBindingSupport.swift in Sources */,
+				F79EF292AA869754E13C7112 /* DeviceDiagnosticsFormatter.swift in Sources */,
+				B1C81609BF2BBC9603EB770B /* DevicePatch+USBControls.swift in Sources */,
+				63CF661E9E85FB967AA79EFE /* DevicePersistenceKeys.swift in Sources */,
+				551EAA02A7DAC029488EC41D /* DeviceSupport.swift in Sources */,
+				87FE979A41D1B0349376FCB1 /* DeviceValidationCatalog.swift in Sources */,
+				B69495E90A59CD987780DCAA /* IssueReportFormatter.swift in Sources */,
+				081C61475496219C96A88564 /* Models.swift in Sources */,
+				7ED6D9799103A625F13FD837 /* OnboardProfiles.swift in Sources */,
+				F5789A82169FC8C1AA240ACF /* SoftwareLighting.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9FE749221E842E4B716FCDF2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2FCBA13908EAC22241E9388 /* AppEnvironment.swift in Sources */,
+				9856BD6A5D90DABFD5FA1728 /* AppLaunchReceipt.swift in Sources */,
+				2FCA5EA5651704251BF3A40E /* AppLifecycleDelegate.swift in Sources */,
+				F09F5F9D0C27E712C430B350 /* AppLocalStorageResetter.swift in Sources */,
+				2464AB83AB29CF32DF8BBC4F /* AppLog.swift in Sources */,
+				EB0A9DC1F3B79026A3301F72 /* AppState.swift in Sources */,
+				B1830959A7DA36026DFADC6B /* AppStateApplyController+ButtonProfiles.swift in Sources */,
+				03A8080478B5F7512D2776C7 /* AppStateApplyController+LocalProfiles.swift in Sources */,
+				6D1EA7C26DE5BA9980F1B299 /* AppStateApplyController.swift in Sources */,
+				4A5738AB868405EDA936EE3F /* AppStateDeviceController+DeviceListSelection.swift in Sources */,
+				222028F7609C0C86E69CC791 /* AppStateDeviceController+RealtimeDPI.swift in Sources */,
+				B1517CA7AB5832BF2AE5FA2D /* AppStateDeviceController+RemoteUpdates.swift in Sources */,
+				93850F787B5DFEF5A2539B83 /* AppStateDeviceController+StateRefresh.swift in Sources */,
+				AE5077BDC1BBE8E0548CA118 /* AppStateDeviceController.swift in Sources */,
+				AA55FBC4502DBA2610D6C450 /* AppStateEditorController+ButtonProfiles.swift in Sources */,
+				3C16D54F937894E079115307 /* AppStateEditorController+LocalProfiles.swift in Sources */,
+				5E936891FAC7606FA6CB842F /* AppStateEditorController+OnboardProfileContent.swift in Sources */,
+				907121FF3F8466949DF0A2BF /* AppStateEditorController+OnboardProfiles.swift in Sources */,
+				FD7EAD63EED60B0E845FAB5D /* AppStateEditorController+SelectionLighting.swift in Sources */,
+				85AA00FED88740DC3444BD8E /* AppStateEditorController.swift in Sources */,
+				8273C9A6E951C588F6B15826 /* AppStateRuntimeController.swift in Sources */,
+				0A7C876092883339853DB894 /* AppStateTypes.swift in Sources */,
+				89700251B96FB19B76464EB4 /* BackendSession.swift in Sources */,
+				4E19CD46B29D5A1D0E4E5455 /* BackgroundServiceCoordinator.swift in Sources */,
+				0455182868070B3C33D57AC3 /* BackgroundServiceHost.swift in Sources */,
+				51D5C41165188CA94FA410E0 /* BackgroundServiceProtocol.swift in Sources */,
+				2FD509800C40D6EB37041DA7 /* BackgroundServiceTransport.swift in Sources */,
+				FDE301FD00EA87AACC885A2B /* BasicMouseDetailView.swift in Sources */,
+				413A55FA825D6EA6033F4EEA /* BridgeClient+Apply.swift in Sources */,
+				FDE1A40C6A5D85984AB601BC /* BridgeClient+Bluetooth.swift in Sources */,
+				1D862E5D2A17382F7C5E24C2 /* BridgeClient+OnboardProfiles.swift in Sources */,
+				77745B45325931A523A706A8 /* BridgeClient+OnboardProfilesBluetooth.swift in Sources */,
+				85538543921B5A314F8714C8 /* BridgeClient+OnboardProfilesUSB.swift in Sources */,
+				128CFD1599BE35026A2CE23B /* BridgeClient+PassiveDpiTracker.swift in Sources */,
+				57263BA573D4021636A95E2E /* BridgeClient+USB.swift in Sources */,
+				5360CAEAF227F465109EFDF1 /* BridgeClient.swift in Sources */,
+				4FA92C00E6E1E5E410093F4D /* BroadcastStream.swift in Sources */,
+				9621E45A6ED971554A0245D7 /* ContentView.swift in Sources */,
+				73C435BA9493D831E7229693 /* CoreAliases.swift in Sources */,
+				644496DF43994C91B91BF360 /* DeviceDetailButtonMappingCard.swift in Sources */,
+				5CCC2953F4288F560D850EE8 /* DeviceDetailDpiStagesCard.swift in Sources */,
+				DD137A799B711E022D7EEB9F /* DeviceDetailLightingCard.swift in Sources */,
+				3ED69FC19C81B35AA68186ED /* DeviceDetailLightingControls.swift in Sources */,
+				3DA28C749982307F5D10DBBB /* DeviceDetailSettingsCards.swift in Sources */,
+				BFDC874DD644B19F7C2557C5 /* DeviceDetailView.swift in Sources */,
+				428C5D811487DC6ECC337E8C /* DeviceSidebarView.swift in Sources */,
+				BDF2E0166BAD33EB2D2F652D /* DeviceStore.swift in Sources */,
+				462D953C5F7172DF87428CB5 /* DpiStageIndicator.swift in Sources */,
+				E2897962284FC70967779E3D /* EditorStore.swift in Sources */,
+				BA9964B853177FC639AD1B11 /* FeaturePreferences.swift in Sources */,
+				1C175DDC22B2EEE35B7BAB73 /* FeatureRuntime.swift in Sources */,
+				1025C4E30F23269113910105 /* IPCDeviceBackend.swift in Sources */,
+				872EE066EAF6AD695F23331F /* IconStore.swift in Sources */,
+				B9A801EDD119E99B826E5004 /* KeyboardBindingControls.swift in Sources */,
+				34B92AE631CE84FAD08AC25A /* KeyboardBindingSupport.swift in Sources */,
+				78FD52DE0755BB4147D5D563 /* LanguageStore.swift in Sources */,
+				FEBC1F911AB7D0A89FBCA948 /* LightingZoneEditMode.swift in Sources */,
+				6DDD04AA9B78AB242C153E12 /* LocalBridgeBackend.swift in Sources */,
+				D2BBC13D7354C6B1EC4D7496 /* LocalBridgeBackendTelemetryMerge.swift in Sources */,
+				1E4A85B9DB320D86145B7C13 /* LocalProfileLibraryPanel.swift in Sources */,
+				08CDE32EAEB5ACC2C40AB22D /* MacroRuntime.swift in Sources */,
+				EE339E99770F2F1491D374FB /* MouseControlSettingsView.swift in Sources */,
+				271E3ADED31007C116752A89 /* NativeBatteryPublisher.swift in Sources */,
+				E1EE1A4423EB0713AA8FD1F6 /* OnboardProfileEditorModels.swift in Sources */,
+				9A57203C685B0FA040D62BAE /* OnboardProfileProjection.swift in Sources */,
+				FA587A09764E8B1A4AD67591 /* OpenSnekApp.swift in Sources */,
+				40EDF322B154B5D539F70C2A /* OpenSnekAppearance.swift in Sources */,
+				99998264318A8BA52C01E53B /* OpenSnekBranding.swift in Sources */,
+				023760EAA92AF0B34778A8B0 /* OpenSnekUITestSupport.swift in Sources */,
+				F614721B1520FD5F59B3FDE1 /* PermissionSupport.swift in Sources */,
+				799BB5B934B590A673671BE5 /* ReleaseUpdateChecker.swift in Sources */,
+				789772180C5B654AC01A2723 /* RuntimeStore.swift in Sources */,
+				9241EBB250B78CA1C8514856 /* ScrollRuntime.swift in Sources */,
+				BBCA4686A486C8A8439D63BE /* ServiceMenuBarView.swift in Sources */,
+				5F3864045C9E51B5AF76850C /* SettingsView.swift in Sources */,
+				5B897205A4627E53AD8751A9 /* ShortcutRecorder.swift in Sources */,
+				FBC1572C1F46B8F5DE58648E /* SoftwareLightingBatterySampler.swift in Sources */,
+				D9FA0536619A498F0B90C682 /* SoftwareLightingEngine.swift in Sources */,
+				6457003B6374B133AB0D8150 /* SoftwareUpdateSession.swift in Sources */,
+				64A189B56DF5F1E3926ED227 /* SparkleSoftwareUpdateInstaller.swift in Sources */,
+				B76442EFA3CDA9746D9F8D4A /* UIPrimitives.swift in Sources */,
+				FD6926F47B07EF25687FFE53 /* USBTelemetryExpectation.swift in Sources */,
+				C1A1976AE9E85930CD56A01F /* WeakBound.swift in Sources */,
+				9CA3BB13BC4DDC9CAE482A81 /* WindowChromeConfigurator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C071EE204AD4EB7F01D83D71 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4E20BA0975516DEA6746A95 /* BLEVendorProtocol.swift in Sources */,
+				01CDDE56F46B95E82A8DD38A /* USBHIDProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E4736B3067D14C158C34CF5F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F82810F22DEE4F80FD6EC873 /* AppLaunchReceiptTests.swift in Sources */,
+				FA2FC8BCEA71436943C19505 /* AppLifecycleDelegateTests.swift in Sources */,
+				BBA3738DA66C91EC997CC2E3 /* AppLocalStorageResetterTests.swift in Sources */,
+				0760D1F9D5CE8E1B789BB47D /* AppStateApplyAndDPICharacterizationTests.swift in Sources */,
+				FCCF8299A94BCAF52A2773A0 /* AppStateButtonHydrationTests.swift in Sources */,
+				99BB358BAC587EDA4F135CEE /* AppStateButtonProfileEditTests.swift in Sources */,
+				9C1F85D23B099BFC1A811D55 /* AppStateButtonWorkspaceTests.swift in Sources */,
+				C0CF9905B521F160BC0BEE3D /* AppStateFreshLocalProfileTests.swift in Sources */,
+				B6A7BDAC5B9E54243CD4A997 /* AppStateLightingCharacterizationTests.swift in Sources */,
+				E7F6A58E11EB7248EF9DD191 /* AppStateLocalProfileCrossDeviceTests.swift in Sources */,
+				EE948984091E49D155663FA3 /* AppStateLocalProfileTests.swift in Sources */,
+				64FDA3E24225906401295AA5 /* AppStateMultiDeviceAvailabilityTests.swift in Sources */,
+				7234064331D9E5A9A52C1438 /* AppStateMultiDeviceSelectionTests.swift in Sources */,
+				BA921412FEB32BFBE66C40D4 /* AppStateMultiDeviceServiceSelectionTests.swift in Sources */,
+				73F69C5C1EB8116B5516E0B6 /* AppStateMultiDeviceTests.swift in Sources */,
+				2888B51B89AB8CBE9A5A9C79 /* AppStateOnboardContentTests.swift in Sources */,
+				2FFC4EDD8911386CBD6FFD19 /* AppStateOnboardHydrationTests.swift in Sources */,
+				4E9ADF3B5F51334B63EA7FC7 /* AppStateOnboardInventoryTests.swift in Sources */,
+				87A10245DD81AB4193EF8F4F /* AppStateOnboardMutationTests.swift in Sources */,
+				D814EB12CE0F2B9B0F4C5C8E /* AppStateProfileSwitchRegressionTests.swift in Sources */,
+				E18896E8B51CAE4DD3C3B2CB /* AppStateRefactorCharacterizationTests.swift in Sources */,
+				8C07A318966607CC023ACC93 /* AppStateRestoreTests.swift in Sources */,
+				2AF8B6C765DAFA7A56EBE03B /* AppStateWiredMouseRestoreTests.swift in Sources */,
+				54799E7760D4367882F7C04F /* AppUpdateCheckTests.swift in Sources */,
+				4E2F9536DC9573893E093291 /* ApplyCoordinatorTests.swift in Sources */,
+				B47FC5301764F71713BA62F2 /* BLEProbeSessionTests.swift in Sources */,
+				37CCE49A1C8A3FB18BFA68BC /* BLEVendorProtocolTests.swift in Sources */,
+				EAF3F4FC07A7787D6E3EC65C /* BLEVendorTransportClientTests.swift in Sources */,
+				3FBBA4EA07B4682F1DAF27ED /* BackgroundServiceCoordinatorTests.swift in Sources */,
+				8ED43A237951C2ACBFD0527B /* BackgroundServiceTransportTests.swift in Sources */,
+				3254D5B3F7F2FF8F9D0E08C8 /* BatteryMeterSourceResolutionTests.swift in Sources */,
+				24023D86B6F5D7A0B3CF9CBF /* BridgeClientBluetoothFallbackTests.swift in Sources */,
+				A6C2EFE76C0ABE9EC7CF0F62 /* BridgeClientUSBWriteSemanticsTests.swift in Sources */,
+				1735AFD04305378F1B6AB0FA /* ContentNoticePresentationTests.swift in Sources */,
+				BFFF2B9A537DCB8B42DBC90E /* DeveloperRuntimeOptionsTests.swift in Sources */,
+				9980036DE8D45B510D0DAD0B /* DeviceDiagnosticsFormatterTests.swift in Sources */,
+				E65D23EC38002727E42277F6 /* DevicePatchMergeTests.swift in Sources */,
+				78CFF2E2B8586213577D9878 /* DevicePatchUSBCapabilityTests.swift in Sources */,
+				7FD59BB02EDFE61AD0085398 /* DevicePreferenceStoreTests.swift in Sources */,
+				870ACEB2C614D52B5324864C /* DeviceProfilesTests.swift in Sources */,
+				A92868FC7E14482F2A630ADB /* DeviceValidationCatalogTests.swift in Sources */,
+				F56619FB618EABDEAF0253E8 /* HIDDevicePresenceAccumulatorTests.swift in Sources */,
+				2B712298ADCA088CF0FB7535 /* HardwareBluetoothRecoveryTests.swift in Sources */,
+				229009947A981B7856F2480D /* HardwareBluetoothTarget.swift in Sources */,
+				AC2A5FA149E1B10074930CF1 /* HardwareDpiReliabilityTests.swift in Sources */,
+				DAF0D8A28071061B91159F73 /* HardwareUSBButtonRemapTests.swift in Sources */,
+				EEDCF60C8DE136C22BC5E74B /* HardwareUSBStartupHydrationTests.swift in Sources */,
+				4BC2C2249646D224AFFD24CF /* HardwareUSBStateSmokeTests.swift in Sources */,
+				7CF2FE3333D04BDF169AAF74 /* HardwareValidationSession.swift in Sources */,
+				5F931B95FF30087B7E5D7766 /* HardwareValidationSessionTests.swift in Sources */,
+				B79285ABE14F955CCE7F8E02 /* IssueReportFormatterTests.swift in Sources */,
+				5743FE5D54099500C3D9F877 /* KeyboardBindingSupportTests.swift in Sources */,
+				329BA214D3123B32269F1B5A /* LaunchAtStartupTests.swift in Sources */,
+				113574F0E48C60844C0A9216 /* LightingOnlyDeviceGatingTests.swift in Sources */,
+				29D72D651ABB7E18526539EB /* LightingSummaryPresentationTests.swift in Sources */,
+				2B2B4BFCE256FCE7A68BFA2F /* LightingZoneEditModeTests.swift in Sources */,
+				06BD51C71B3DF7BEAF5F1E41 /* MouseControlFeatureTests.swift in Sources */,
+				A41808CBD5C49A0664729401 /* MouseIdentityTests.swift in Sources */,
+				6888EA354FBA31FAF9169C04 /* MouseStateMergeTests.swift in Sources */,
+				E5A0C30548375FD542E0B444 /* NagaUSBBrightnessRecoveryTests.swift in Sources */,
+				3AC916376B2377B9A0BE6085 /* NoControlInterfaceDeviceTests.swift in Sources */,
+				AAE32B256C4BE2A5DDDA91D2 /* OpenSnekBrandingTests.swift in Sources */,
+				65D36901BD58244F9555C36B /* PhysicalDeviceListTests.swift in Sources */,
+				3175F8574AC2D8F398352BD6 /* ReleaseCandidateUpdateTests.swift in Sources */,
+				D4A0EE2091FA17AC8415CA85 /* ReleaseUpdateCheckerTests.swift in Sources */,
+				8BD843BD8B39678906C3E62F /* RemoteServiceBootstrapTests.swift in Sources */,
+				78DA539389F0EC00FC72BF82 /* RemoteServiceSnapshotConnectivityTests.swift in Sources */,
+				277053CD2CE77C9C6FD69E74 /* RemoteServiceSnapshotHydrationTests.swift in Sources */,
+				2F0463301636044D87DDB85C /* RemoteServiceSnapshotTests.swift in Sources */,
+				37EFBEF4070CA01B9542AA2F /* ScrollIdentityTests.swift in Sources */,
+				FBBB7D88D69CCCEFB19CD257 /* ServiceMenuBarPresentationTests.swift in Sources */,
+				EE210129C874B704FD420D0E /* ServiceModeTests.swift in Sources */,
+				2DD7AA611FE4560A90F52DA8 /* SoftwareLightingBatterySamplerTests.swift in Sources */,
+				CCCA150E2FE1148E21C8D29C /* SoftwareLightingEngineTests.swift in Sources */,
+				DCFCAC88AB5A3A069906D18F /* SoftwareLightingRendererTests.swift in Sources */,
+				4CBF27573B21E41A2ED9EE73 /* SoftwareUpdateRecoveryTests.swift in Sources */,
+				ED4D00197A7BBDF00835F1C9 /* SoftwareUpdateSessionTests.swift in Sources */,
+				2BCF258651A6052C792CCCE6 /* SupportedDevicePresentationTests.swift in Sources */,
+				79019B01453E5CB46DC32F44 /* SupportedDevicesReadmeTests.swift in Sources */,
+				2F35B7741A9C7F52D20EBB53 /* TurboRateMappingTests.swift in Sources */,
+				9ED79E320C9A28B9D4FEAA5B /* USBButtonHydrationTests.swift in Sources */,
+				4FFC84DBF24498097F25B2BB /* USBDpiStageParsingTests.swift in Sources */,
+				1677AF631F3A7ECC5FF08367 /* USBHIDControlSessionTests.swift in Sources */,
+				901E168D5CD5CFDF9D218588 /* USBHIDProtocolTests.swift in Sources */,
+				71D5432371199086BDB248AB /* USBPassiveDPIAppStateTests.swift in Sources */,
+				EB8544A2B26EA4CFE14D23B8 /* USBPassiveDPIBridgeBehaviorTests.swift in Sources */,
+				FDF43D0F2D057C798BB6FE6A /* USBPassiveDPIEventTests.swift in Sources */,
+				AC7C44CB6A67E5C3B74105F9 /* USBPassiveDPIParserMergeTests.swift in Sources */,
+				7B9EF58F83D367C96493624B /* USBTelemetryExpectationTests.swift in Sources */,
+				BA8241C0CEF9E341917726A4 /* UnsupportedDeviceHandlingTests.swift in Sources */,
+				88FFA9C06623BCD47AC9FBE6 /* WindowChromeConfiguratorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E87CDAC31880C2D9C7186089 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A8398E64EEC4BFE82D40B0BC /* AppSupportModule.swift in Sources */,
+				1C4DEDFF4995D6A507AD597C /* ApplyCoordinator.swift in Sources */,
+				1041DB54995FC72D95E487DA /* DeveloperRuntimeOptions.swift in Sources */,
+				BD74861B5A1393D57AD78BFE /* DevicePreferenceStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F499F52F2DAB0A5A03CB13A0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A8DC245C473CABF10C407713 /* AppEnvironment.swift in Sources */,
+				FE742E7052CC1217C95F962C /* AppLaunchReceipt.swift in Sources */,
+				3F41D8208579350E863ED937 /* AppLifecycleDelegate.swift in Sources */,
+				815833C4E81D6223AAECB20F /* AppLocalStorageResetter.swift in Sources */,
+				3970E4FA36023B5A41483632 /* AppLog.swift in Sources */,
+				2311CD383AA889028E56EDF9 /* AppState.swift in Sources */,
+				BD61E8181C24C8A770B54110 /* AppStateApplyController+ButtonProfiles.swift in Sources */,
+				4801E5D14E79A42649567C5B /* AppStateApplyController+LocalProfiles.swift in Sources */,
+				00B5B51FCD68AD8D3D026CA2 /* AppStateApplyController.swift in Sources */,
+				B0EE7EBEED7CFA71A0C25A34 /* AppStateDeviceController+DeviceListSelection.swift in Sources */,
+				07FA1A3D7EE30B054DCAAAB3 /* AppStateDeviceController+RealtimeDPI.swift in Sources */,
+				072CED7D8F47C928EEB5BD99 /* AppStateDeviceController+RemoteUpdates.swift in Sources */,
+				66C3D7C2DCDE048CC9E11C41 /* AppStateDeviceController+StateRefresh.swift in Sources */,
+				BE76087874EA67F5D16537EA /* AppStateDeviceController.swift in Sources */,
+				3AA7CCF8AAD09AD2697F2A99 /* AppStateEditorController+ButtonProfiles.swift in Sources */,
+				36FD2380C765181A1E819325 /* AppStateEditorController+LocalProfiles.swift in Sources */,
+				64EFF14D7BC2F983B2C53BF6 /* AppStateEditorController+OnboardProfileContent.swift in Sources */,
+				1791E1EC9242D28D523914EC /* AppStateEditorController+OnboardProfiles.swift in Sources */,
+				0E1821B38C1B09163578C181 /* AppStateEditorController+SelectionLighting.swift in Sources */,
+				5A3555DD28F5FD41FD83418F /* AppStateEditorController.swift in Sources */,
+				519DABEE332EB1A3E22AB2EE /* AppStateRuntimeController.swift in Sources */,
+				5A176C74490C73260FCEACF0 /* AppStateTypes.swift in Sources */,
+				CF4E64ACD7C0051A6723C3D0 /* BackendSession.swift in Sources */,
+				CBCF5A322810F68FD36355ED /* BackgroundServiceCoordinator.swift in Sources */,
+				F435EAC731166F9666BE07E4 /* BackgroundServiceHost.swift in Sources */,
+				B4C9E83DA32DFFF9A1C0A097 /* BackgroundServiceProtocol.swift in Sources */,
+				99ED4D4E9826CCA8FA1B22CB /* BackgroundServiceTransport.swift in Sources */,
+				8D0B11042BCD2B03045F8904 /* BasicMouseDetailView.swift in Sources */,
+				B78855FC5A18E64FD70CAEC8 /* BridgeClient+Apply.swift in Sources */,
+				D2D07C6B20BD3916FB669E6D /* BridgeClient+Bluetooth.swift in Sources */,
+				BCDAA02C5888FB11703758C9 /* BridgeClient+OnboardProfiles.swift in Sources */,
+				D489F96C901DF8582168D62E /* BridgeClient+OnboardProfilesBluetooth.swift in Sources */,
+				9812B192E4D204B7A669D466 /* BridgeClient+OnboardProfilesUSB.swift in Sources */,
+				07E0C22E420CD3DF02B9BBBF /* BridgeClient+PassiveDpiTracker.swift in Sources */,
+				56E075040C806D9793487ACD /* BridgeClient+USB.swift in Sources */,
+				04038E2531B154C15D30DEE7 /* BridgeClient.swift in Sources */,
+				1D5494866E3661636005FE56 /* BroadcastStream.swift in Sources */,
+				9E13CB77ACB66B2A50FE12B5 /* ContentView.swift in Sources */,
+				C46D5045CBB46515DE0CF796 /* CoreAliases.swift in Sources */,
+				6B35E11C34B756F9F439148B /* DeviceDetailButtonMappingCard.swift in Sources */,
+				C0F4AEFAB359AD7666737614 /* DeviceDetailDpiStagesCard.swift in Sources */,
+				DB5CE7B3CCE18CDB007CB110 /* DeviceDetailLightingCard.swift in Sources */,
+				5117A7D209A0AAD3FDD4C402 /* DeviceDetailLightingControls.swift in Sources */,
+				D2824D74A8E12BA0F1A5A90D /* DeviceDetailSettingsCards.swift in Sources */,
+				B26D5D5F8232F0421A2197E6 /* DeviceDetailView.swift in Sources */,
+				6DADFE40A4D14140A38BEE00 /* DeviceSidebarView.swift in Sources */,
+				1688B57A58AB7A64A7091563 /* DeviceStore.swift in Sources */,
+				556A753FD3A3BFCC1F2E1B56 /* DpiStageIndicator.swift in Sources */,
+				A77DB070538C450BEBECFBC8 /* EditorStore.swift in Sources */,
+				D4EFD0ABC7036680E3582505 /* FeaturePreferences.swift in Sources */,
+				C36895FE55B3AE61035763D9 /* FeatureRuntime.swift in Sources */,
+				50EBA5C2EF51EDA0E64D4B34 /* IPCDeviceBackend.swift in Sources */,
+				D61432E47383A7436323FC69 /* IconStore.swift in Sources */,
+				0D7036F9D76A67D4C9444B3C /* KeyboardBindingControls.swift in Sources */,
+				6EE90E55EF38F663F7190EE8 /* KeyboardBindingSupport.swift in Sources */,
+				49461BD844AD4EA50BE90D67 /* LanguageStore.swift in Sources */,
+				9C2B0E827AE2CBC2BAA352F3 /* LightingZoneEditMode.swift in Sources */,
+				CEEE63EDD9A514FC40456E80 /* LocalBridgeBackend.swift in Sources */,
+				A41888A0D09EEF84AA59D349 /* LocalBridgeBackendTelemetryMerge.swift in Sources */,
+				6B3AF839E4C4F9E5EDB5DA96 /* LocalProfileLibraryPanel.swift in Sources */,
+				793E7046A923966BD6B8710C /* MacroRuntime.swift in Sources */,
+				596AD147BF285D13C24C40A9 /* MouseControlSettingsView.swift in Sources */,
+				32C046040310795C23A0B9FD /* NativeBatteryPublisher.swift in Sources */,
+				C18B1710F3AE9C1B59EDF2D5 /* OnboardProfileEditorModels.swift in Sources */,
+				F6EBC4F01A5128093EF67E6D /* OnboardProfileProjection.swift in Sources */,
+				2AB1F953AB8E6AD0956FA68C /* OpenSnekApp.swift in Sources */,
+				48E0EEFC89ED51F629213C7F /* OpenSnekAppearance.swift in Sources */,
+				14A6196A9E17B7C43F58463F /* OpenSnekBranding.swift in Sources */,
+				8A556439C8795F7F69A5F117 /* OpenSnekUITestSupport.swift in Sources */,
+				1AB14E6EB7C51BF5C627FA96 /* PermissionSupport.swift in Sources */,
+				0046C2AD36BCC5522C8FFE43 /* ReleaseUpdateChecker.swift in Sources */,
+				A7E46577702AB2E5B3AB5C43 /* RuntimeStore.swift in Sources */,
+				F8D0332AFB8E9CA6EEB079C9 /* ScrollRuntime.swift in Sources */,
+				1C83683D88C2990D9F8F81ED /* ServiceMenuBarView.swift in Sources */,
+				44913882084CEB224BCCEE22 /* SettingsView.swift in Sources */,
+				ABA0B0B354694EB47041EF90 /* ShortcutRecorder.swift in Sources */,
+				9E7064F332BDC943CCDE4670 /* SoftwareLightingBatterySampler.swift in Sources */,
+				6A08CFDBA69A28BDBFE2ED88 /* SoftwareLightingEngine.swift in Sources */,
+				10BB4441AC41D3BEB7F6F605 /* SoftwareUpdateSession.swift in Sources */,
+				CF9D40BE0F96B5966128A73F /* SparkleSoftwareUpdateInstaller.swift in Sources */,
+				5396A12BCE6AB5C9ABF75C79 /* UIPrimitives.swift in Sources */,
+				AA61C5C368E3B2C392C93211 /* USBTelemetryExpectation.swift in Sources */,
+				4BA71C339D6B50926C4E5A7C /* WeakBound.swift in Sources */,
+				896D70D0E6B4E728855C4541 /* WindowChromeConfigurator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		00E5654CC97374C88ADCB73C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A57881F36FF8CAF0812D1783 /* OpenSnekCore */;
+			targetProxy = 041277F09603BDCE76BD9931 /* PBXContainerItemProxy */;
+		};
+		0440B8D11BB61F8E7AF6F355 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 175F7D6EA795FD0CF89D49C3 /* OpenSnekHardware */;
+			targetProxy = 102E77BB910753425E2F5B5C /* PBXContainerItemProxy */;
+		};
+		0BEB0AAB5B396E91A4C56274 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 496255C7F0E16FF9DF575646 /* OpenSnekProtocols */;
+			targetProxy = 92E391401061812B60EF4414 /* PBXContainerItemProxy */;
+		};
+		266AF70C3001FBD01D3E7055 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 618DA5E1E390BED5A7757E7E /* OpenSnekAppSupport */;
+			targetProxy = 8C9543ECBD606DABD6403D71 /* PBXContainerItemProxy */;
+		};
+		3CC129D0FE24B2EB0073EABD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 175F7D6EA795FD0CF89D49C3 /* OpenSnekHardware */;
+			targetProxy = 5B352FBBD3D0909DBB14EB27 /* PBXContainerItemProxy */;
+		};
+		51F4A21F6C47049D1064DF48 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A57881F36FF8CAF0812D1783 /* OpenSnekCore */;
+			targetProxy = D324BB933E14F49EA3746B97 /* PBXContainerItemProxy */;
+		};
+		60E209A6FF2159039F435A41 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A57881F36FF8CAF0812D1783 /* OpenSnekCore */;
+			targetProxy = FB4ABD74B04CE15CB4C679F4 /* PBXContainerItemProxy */;
+		};
+		72DA1D6297B1A57727B9D3AB /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A57881F36FF8CAF0812D1783 /* OpenSnekCore */;
+			targetProxy = F1E6A1800CD6A08356879647 /* PBXContainerItemProxy */;
+		};
+		8514925F35877EE50AECBEC6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 618DA5E1E390BED5A7757E7E /* OpenSnekAppSupport */;
+			targetProxy = D59205FE76B8C57DD5207814 /* PBXContainerItemProxy */;
+		};
+		AFBC8A4291625C481B29AE69 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 175F7D6EA795FD0CF89D49C3 /* OpenSnekHardware */;
+			targetProxy = E09972C46DAA2EE391C91828 /* PBXContainerItemProxy */;
+		};
+		B32C3933CCE58D9316AF15D7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 175F7D6EA795FD0CF89D49C3 /* OpenSnekHardware */;
+			targetProxy = 74593966078B9504FC73F5BD /* PBXContainerItemProxy */;
+		};
+		BE139FB366D661BC569B62D0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A57881F36FF8CAF0812D1783 /* OpenSnekCore */;
+			targetProxy = A9FCCD481D6FA77EC67AC377 /* PBXContainerItemProxy */;
+		};
+		C4704C575ADFA965D2D259B8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 496255C7F0E16FF9DF575646 /* OpenSnekProtocols */;
+			targetProxy = 4E7DD3A8C04DD0FC501738D6 /* PBXContainerItemProxy */;
+		};
+		D013E73FE833EB9B85AEB1FC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 91848A82D29DEE1F78334616 /* ScrollCore */;
+			targetProxy = 856EB72CDCBC59FD71BFB0C8 /* PBXContainerItemProxy */;
+		};
+		E0F7F2DDB24704C54C414E45 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A57881F36FF8CAF0812D1783 /* OpenSnekCore */;
+			targetProxy = 06BF848A29F721D53673D5AA /* PBXContainerItemProxy */;
+		};
+		ED0008DC00BC5828CEB70CE7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 618DA5E1E390BED5A7757E7E /* OpenSnekAppSupport */;
+			targetProxy = 1598E66CC7605586DE187B6E /* PBXContainerItemProxy */;
+		};
+		F0B63F3206E826DF9CDF8C37 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 91848A82D29DEE1F78334616 /* ScrollCore */;
+			targetProxy = 24AE11C6E01777632A23C237 /* PBXContainerItemProxy */;
+		};
+		F82B7D5303176EBA6192E5D9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 496255C7F0E16FF9DF575646 /* OpenSnekProtocols */;
+			targetProxy = CB153B76876F637E98AB449F /* PBXContainerItemProxy */;
+		};
+		FA61A8959072F80C4A1971D9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 814B981D6CA8C0EBA0385138 /* MouseControlTestHost */;
+			targetProxy = CC543D0F45B0418CC240084F /* PBXContainerItemProxy */;
+		};
+		FEA9153919B0FBC7B7D712B4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 496255C7F0E16FF9DF575646 /* OpenSnekProtocols */;
+			targetProxy = F45992CDBDCFD7E686D8106D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		6003B58101D70BEF429A8C4E /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				886395D1126D49FDDCB00CB0 /* en */,
+				1E6E488402A490F129CEF27E /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		0478D10541BD7F0F0D741E7D /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Local;
+		};
+		193A3202655CF7DCFFE67184 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Local;
+		};
+		1A663947BAD10C2255D75F5A /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Local;
+		};
+		4167BC9E51E0B8E6CBDB20D2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		56B4BEC9B62786CC2B5507F4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		57CFE1224B8D1371C24EC53B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		63BC81E4E486426644935179 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControlTests;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MouseControlTestHost.app/Contents/MacOS/MouseControlTestHost";
+			};
+			name = Local;
+		};
+		7888D5CEFF2DE78B7BFE4E53 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControlTests;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MouseControlTestHost.app/Contents/MacOS/MouseControlTestHost";
+			};
+			name = Debug;
+		};
+		7E79B2B4B39DA4354B38F0D3 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControl.testhost;
+				PRODUCT_NAME = MouseControlTestHost;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+			};
+			name = Local;
+		};
+		835A06A5ED0A4B57712AA7D2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		87EB4DC09C8B2FD92C61B6FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		8853231057FE95EDBEFF87C9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		89DF04A7DD1459844BFFC746 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControl.testhost;
+				PRODUCT_NAME = MouseControlTestHost;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+			};
+			name = Debug;
+		};
+		92F69CC2065F4A2586CAD2A0 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Local;
+		};
+		94ABCB5B6F3D7AF29ED8B188 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControlTests;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MouseControlTestHost.app/Contents/MacOS/MouseControlTestHost";
+			};
+			name = Release;
+		};
+		9C7D2412D152637B74E80753 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControl;
+				PRODUCT_NAME = MouseControl;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+			};
+			name = Debug;
+		};
+		A35339BDFECC9A5431B372DE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		B73BD1D132219EBF5996E5ED /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControl;
+				PRODUCT_NAME = MouseControl;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+			};
+			name = Release;
+		};
+		C278B85BDB878A6059576014 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		C34E6688AB966FE9EA03AC0F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		CCD565C5531674FB2ED645E2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		DD54E6A9A08E5B91A56C6C60 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		DD5784CEA2E5F69764CAC39A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		E0F4E33783B6B4BFF2B07797 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControl;
+				PRODUCT_NAME = MouseControl;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+			};
+			name = Local;
+		};
+		E7D555BF3A2EDA1B9CE2D1E0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				COMBINE_HIDPI_IMAGES = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"../references/Scroll-Reverser\"",
+				);
+				HEADER_SEARCH_PATHS = "$(SRCROOT)/ScrollCore";
+				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-ObjC",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = local.mousecontrol.MouseControl.testhost;
+				PRODUCT_NAME = MouseControlTestHost;
+				SDKROOT = macosx;
+				SWIFT_OBJC_BRIDGING_HEADER = "ScrollCore/MouseControl-Bridging-Header.h";
+			};
+			name = Release;
+		};
+		E88D426EAF85E6CE5F3D01DC /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEFINES_MODULE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Local;
+		};
+		F94853492487FC5F0A8F05E2 /* Local */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Local;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3166F595F37B40726B1EC540 /* Build configuration list for PBXNativeTarget "OpenSnekCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56B4BEC9B62786CC2B5507F4 /* Debug */,
+				1A663947BAD10C2255D75F5A /* Local */,
+				57CFE1224B8D1371C24EC53B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3624A844E01D2916BC42EB36 /* Build configuration list for PBXNativeTarget "MouseControlTestHost" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				89DF04A7DD1459844BFFC746 /* Debug */,
+				7E79B2B4B39DA4354B38F0D3 /* Local */,
+				E7D555BF3A2EDA1B9CE2D1E0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6C7E44AE16E50B3A81DE1E9F /* Build configuration list for PBXNativeTarget "ScrollCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8853231057FE95EDBEFF87C9 /* Debug */,
+				F94853492487FC5F0A8F05E2 /* Local */,
+				A35339BDFECC9A5431B372DE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6C955C89D0404C3BBFD496B8 /* Build configuration list for PBXNativeTarget "OpenSnekHardware" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C34E6688AB966FE9EA03AC0F /* Debug */,
+				E88D426EAF85E6CE5F3D01DC /* Local */,
+				4167BC9E51E0B8E6CBDB20D2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7E7362E8EED81A27DA76D671 /* Build configuration list for PBXNativeTarget "MouseControlTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7888D5CEFF2DE78B7BFE4E53 /* Debug */,
+				63BC81E4E486426644935179 /* Local */,
+				94ABCB5B6F3D7AF29ED8B188 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		942E8F1E4011F9D888207E65 /* Build configuration list for PBXNativeTarget "MouseControl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9C7D2412D152637B74E80753 /* Debug */,
+				E0F4E33783B6B4BFF2B07797 /* Local */,
+				B73BD1D132219EBF5996E5ED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A44687D32CEE0F9E4CE791F9 /* Build configuration list for PBXNativeTarget "OpenSnekAppSupport" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD5784CEA2E5F69764CAC39A /* Debug */,
+				92F69CC2065F4A2586CAD2A0 /* Local */,
+				DD54E6A9A08E5B91A56C6C60 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D7DA60D4DFE78C36A602B4BC /* Build configuration list for PBXProject "MouseControl" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				87EB4DC09C8B2FD92C61B6FB /* Debug */,
+				193A3202655CF7DCFFE67184 /* Local */,
+				C278B85BDB878A6059576014 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F997290299EFABA660CC4188 /* Build configuration list for PBXNativeTarget "OpenSnekProtocols" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				835A06A5ED0A4B57712AA7D2 /* Debug */,
+				0478D10541BD7F0F0D741E7D /* Local */,
+				CCD565C5531674FB2ED645E2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = BD9B749DF13799C3EAD201CC /* Project object */;
+}

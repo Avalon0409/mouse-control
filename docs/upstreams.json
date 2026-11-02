@@ -1,0 +1,23 @@
+{
+  "captured_date": "2026-11-02",
+  "repositories": [
+    {
+      "name": "OpenSnek",
+      "url": "https://github.com/gh123man/OpenSnek.git",
+      "path": "references/OpenSnek",
+      "commit": "b4e0f666d21b52efc0a64a0e128a1278aa1b3ad2",
+      "tag": "v1.4.1-rc.2",
+      "license": "Apache-2.0",
+      "clone_depth": 1
+    },
+    {
+      "name": "Scroll Reverser",
+      "url": "https://github.com/pilotmoon/Scroll-Reverser.git",
+      "path": "references/Scroll-Reverser",
+      "commit": "5fc4cc983b612d8a841358f0c53fcdf1df0f730a",
+      "license": "Apache-2.0",
+      "clone_depth": 1,
+      "submodules": [{"name": "BuildScripts", "commit": "3ae5af323cb4ff05975869ff82f963edf599f7c5"}]
+    }
+  ]
+}

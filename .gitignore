@@ -1,0 +1,11 @@
+/references/
+/build/
+/research/
+.DS_Store
+xcuserdata/
+*.xcuserstate
+__pycache__/
+*.pyc
+*.p12
+*.key
+

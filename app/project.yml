@@ -1,0 +1,140 @@
+name: MouseControl
+options:
+  deploymentTarget:
+    macOS: "14.0"
+configs:
+  Debug: debug
+  Local: release
+  Release: release
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 0.1.0
+targets:
+  OpenSnekCore:
+    type: library.static
+    platform: macOS
+    sources: [Sources/OpenSnekCore]
+    settings:
+      base:
+        DEFINES_MODULE: YES
+  OpenSnekProtocols:
+    type: library.static
+    platform: macOS
+    sources: [Sources/OpenSnekProtocols]
+    dependencies: [{target: OpenSnekCore}]
+    settings:
+      base:
+        DEFINES_MODULE: YES
+  OpenSnekHardware:
+    type: library.static
+    platform: macOS
+    sources: [Sources/OpenSnekHardware]
+    dependencies: [{target: OpenSnekCore}, {target: OpenSnekProtocols}]
+    settings:
+      base:
+        DEFINES_MODULE: YES
+  OpenSnekAppSupport:
+    type: library.static
+    platform: macOS
+    sources: [Sources/OpenSnekAppSupport]
+    dependencies: [{target: OpenSnekCore}, {target: OpenSnekHardware}]
+    settings:
+      base:
+        DEFINES_MODULE: YES
+  ScrollCore:
+    type: library.static
+    platform: macOS
+    sources:
+      - path: ScrollCore
+        excludes: [MouseControl-Bridging-Header.h, LICENSE, NOTICE]
+    settings:
+      base:
+        CLANG_ENABLE_OBJC_ARC: YES
+        GCC_PRECOMPILE_PREFIX_HEADER: NO
+    dependencies:
+      - sdk: AppKit.framework
+      - sdk: IOKit.framework
+      - sdk: CoreGraphics.framework
+  MouseControl:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/MouseControl
+      - MouseControlFeatures
+      - path: Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: local.mousecontrol.MouseControl
+        PRODUCT_NAME: MouseControl
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_FILE: Info.plist
+        SWIFT_OBJC_BRIDGING_HEADER: ScrollCore/MouseControl-Bridging-Header.h
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/ScrollCore"
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+      configs:
+        Local:
+          ENABLE_HARDENED_RUNTIME: NO
+          CODE_SIGN_STYLE: Manual
+          CODE_SIGN_IDENTITY: "-"
+    dependencies:
+      - target: OpenSnekCore
+      - target: OpenSnekProtocols
+      - target: OpenSnekHardware
+      - target: OpenSnekAppSupport
+      - target: ScrollCore
+      - framework: ../references/Scroll-Reverser/Sparkle.framework
+        embed: true
+        codeSign: true
+    scheme:
+      gatherCoverageData: false
+      testTargets: [MouseControlTests]
+  MouseControlTestHost:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/MouseControl
+      - MouseControlFeatures
+      - path: Resources
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: local.mousecontrol.MouseControl.testhost
+        PRODUCT_NAME: MouseControlTestHost
+        INFOPLIST_FILE: Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_OBJC_BRIDGING_HEADER: ScrollCore/MouseControl-Bridging-Header.h
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/ScrollCore"
+        CODE_SIGNING_ALLOWED: NO
+        ENABLE_HARDENED_RUNTIME: NO
+        LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/../Frameworks"
+    dependencies:
+      - target: OpenSnekCore
+      - target: OpenSnekProtocols
+      - target: OpenSnekHardware
+      - target: OpenSnekAppSupport
+      - target: ScrollCore
+      - framework: ../references/Scroll-Reverser/Sparkle.framework
+        embed: true
+  MouseControlTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources: [Tests/MouseControlTests]
+    dependencies:
+      - target: MouseControlTestHost
+      - target: OpenSnekCore
+      - target: OpenSnekProtocols
+      - target: OpenSnekHardware
+      - target: OpenSnekAppSupport
+      - framework: ../references/Scroll-Reverser/Sparkle.framework
+        embed: false
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+        PRODUCT_BUNDLE_IDENTIFIER: local.mousecontrol.MouseControlTests
+        SWIFT_OBJC_BRIDGING_HEADER: ScrollCore/MouseControl-Bridging-Header.h
+        HEADER_SEARCH_PATHS: "$(SRCROOT)/ScrollCore"

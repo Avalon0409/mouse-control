@@ -1,0 +1,526 @@
+import AppKit
+import OpenSnekAppSupport
+import SwiftUI
+import OpenSnekCore
+
+/// Renders the device detail view UI.
+struct DeviceDetailView: View {
+    let deviceStore: DeviceStore
+    let editorStore: EditorStore
+    let selected: MouseDevice
+    let state: MouseState
+    private let cardSpacing: CGFloat = 14
+    private let detailTwoColumnMinWidth: CGFloat = 360
+    private let twoColumnBreakpointPadding: CGFloat = 100
+    private let detailCardMaxWidth: CGFloat = 560
+    private let detailContentMaxWidth: CGFloat = 1400
+    private let horizontalPadding: CGFloat = 20
+    private let verticalPadding: CGFloat = 18
+
+    private let swatches: [LightingSwatch] = [LightingSwatch(hex: 0xFF0000), LightingSwatch(hex: 0x00FF00), LightingSwatch(hex: 0x0000FF), LightingSwatch(hex: 0xFFFF00), LightingSwatch(hex: 0x00FFFF), LightingSwatch(hex: 0xFF00FF), LightingSwatch(hex: 0xFFFFFF), LightingSwatch(hex: 0xFF8000)]
+
+    var body: some View { GeometryReader { proxy in detailScrollView(width: proxy.size.width) } }
+
+    private func detailScrollView(width: CGFloat) -> some View {
+        let isBusy = editorStore.isButtonProfileOperationInFlight || editorStore.isOnboardProfileLoadInFlight
+        let statusText = editorStore.buttonProfileOperationStatusText ?? editorStore.onboardProfileLoadStatusText
+        return detailScrollViewBase(width: width).loadingScrim(isPresented: isBusy, label: statusText).task(id: selected.id) { await deviceStore.refreshConnectionDiagnostics(for: selected) }
+    }
+
+    private func detailScrollViewBase(width: CGFloat) -> some View { ScrollView(.vertical) { detailContent(width: detailContentWidth(for: width)) }.accessibilityIdentifier("device-detail-scroll-view").frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(WindowDragBlocker()) }
+
+    private func detailContent(width: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 18) {
+            DeviceOverviewBar(deviceStore: deviceStore, editorStore: editorStore, selected: selected, state: state)
+            detailColumns
+            DiagnosticsFooter(deviceStore: deviceStore, device: selected, state: state)
+        }.frame(width: width, alignment: .leading).padding(.horizontal, horizontalPadding).padding(.vertical, verticalPadding).frame(maxWidth: .infinity, alignment: .top)
+    }
+
+    private var detailColumns: some View {
+        DetailColumnsLayout(minTwoColumnCardWidth: detailTwoColumnMinWidth, twoColumnBreakpointPadding: twoColumnBreakpointPadding, spacing: cardSpacing, maxCardWidth: detailCardMaxWidth) { ForEach(detailSections, id: \.self) { section in detailCardWithLayout(for: section) } }
+    }
+
+    private var isLightingOnlyDevice: Bool { detailSections == [.lighting] }
+
+    private func detailCardWithLayout(for section: DetailSection) -> some View {
+        detailCard(for: section).layoutValue(key: PreferredDetailColumnLayoutKey.self, value: preferredColumn(for: section)).layoutValue(key: DetailCardMaxWidthLayoutKey.self, value: isLightingOnlyDevice || section == .buttonRemap ? detailContentMaxWidth : detailCardMaxWidth)
+    }
+
+    private var detailSections: [DetailSection] {
+        var sections: [DetailSection] = []
+        if state.capabilities.dpi_stages { sections.append(.dpiStages) }
+        if editorStore.showsConnectBehaviorCard { sections.append(.onConnect) }
+        if selected.showsLightingControls, state.capabilities.lighting { sections.append(.lighting) }
+        if state.capabilities.power_management { sections.append(.powerManagement) }
+        if selected.transport != .bluetooth, state.capabilities.poll_rate { sections.append(.pollRate) }
+        if selected.transport != .bluetooth, state.low_battery_threshold_raw != nil { sections.append(.lowBatteryThreshold) }
+        if selected.transport != .bluetooth, state.scroll_mode != nil || state.scroll_acceleration != nil || state.scroll_smart_reel != nil { sections.append(.scrollControls) }
+        if state.capabilities.button_remap { sections.append(.buttonRemap) }
+        return sections
+    }
+
+    @ViewBuilder private func detailCard(for section: DetailSection) -> some View {
+        switch section {
+        case .dpiStages: DpiStagesCard(editorStore: editorStore)
+        case .onConnect: OnConnectBehaviorCard(editorStore: editorStore)
+        case .lighting: LightingCard(editorStore: editorStore, selected: selected, swatches: swatches, isLightingOnly: isLightingOnlyDevice)
+        case .pollRate: PollRateCard(editorStore: editorStore)
+        case .powerManagement: SleepTimeoutCard(editorStore: editorStore)
+        case .lowBatteryThreshold: LowBatteryThresholdCard(editorStore: editorStore)
+        case .scrollControls: ScrollControlsCard(editorStore: editorStore, state: state)
+        case .buttonRemap: ButtonMappingTableCard(deviceStore: deviceStore, editorStore: editorStore, title: "Buttons")
+        }
+    }
+
+    private func detailContentWidth(for availableWidth: CGFloat) -> CGFloat { min(max(availableWidth - (horizontalPadding * 2), 0), detailContentMaxWidth) }
+
+    private func preferredColumn(for section: DetailSection) -> Int {
+        if isLightingOnlyDevice { return 0 }
+        switch section {
+        case .lighting, .buttonRemap: return 1
+        default: return 0
+        }
+    }
+}
+
+/// Defines detail section values.
+private enum DetailSection: Hashable {
+    case dpiStages
+    case onConnect
+    case lighting
+    case pollRate
+    case powerManagement
+    case lowBatteryThreshold
+    case scrollControls
+    case buttonRemap
+}
+
+/// Identifies preferred detail column layout values.
+private struct PreferredDetailColumnLayoutKey: LayoutValueKey { static let defaultValue = -1 }
+
+/// Identifies detail card max width layout values.
+private struct DetailCardMaxWidthLayoutKey: LayoutValueKey { static let defaultValue: CGFloat = .greatestFiniteMagnitude }
+
+/// Stores detail columns layout data.
+private struct DetailColumnsLayout: Layout {
+    let minTwoColumnCardWidth: CGFloat
+    let twoColumnBreakpointPadding: CGFloat
+    let spacing: CGFloat
+    let maxCardWidth: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let frames = frames(for: proposal, subviews: subviews)
+        let width = proposal.width ?? frames.map(\.maxX).max() ?? 0
+        let height = frames.map(\.maxY).max() ?? 0
+        return CGSize(width: width, height: height)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let frames = frames(for: ProposedViewSize(width: bounds.width, height: proposal.height), subviews: subviews)
+        for (index, frame) in frames.enumerated() {
+            let placed = CGRect(x: bounds.minX + frame.minX, y: bounds.minY + frame.minY, width: frame.width, height: frame.height)
+            subviews[index].place(at: placed.origin, proposal: ProposedViewSize(width: placed.width, height: placed.height))
+        }
+    }
+
+    private func frames(for proposal: ProposedViewSize, subviews: Subviews) -> [CGRect] {
+        let availableWidth = proposal.width ?? 0
+        let useTwoColumns = availableWidth >= ((minTwoColumnCardWidth * 2) + spacing + twoColumnBreakpointPadding)
+
+        if !useTwoColumns { return singleColumnFrames(for: availableWidth, subviews: subviews) }
+
+        return twoColumnFrames(for: availableWidth, subviews: subviews)
+    }
+
+    private func singleColumnFrames(for width: CGFloat, subviews: Subviews) -> [CGRect] {
+        let resolvedWidth = max(width, 0)
+        var y: CGFloat = 0
+        var frames: [CGRect] = []
+
+        for subview in subviews {
+            let proposedWidth = resolvedWidth
+            let size = subview.sizeThatFits(ProposedViewSize(width: proposedWidth, height: nil))
+            let x = (resolvedWidth - proposedWidth) / 2
+            frames.append(CGRect(x: x, y: y, width: proposedWidth, height: size.height))
+            y += size.height + spacing
+        }
+
+        return frames
+    }
+
+    private func twoColumnFrames(for width: CGFloat, subviews: Subviews) -> [CGRect] {
+        let totalWidth = max(width, 0)
+        let nominalColumnWidth = min(maxCardWidth, floor((totalWidth - spacing) / 2))
+        let contentWidth = (nominalColumnWidth * 2) + spacing
+        let originX = max((totalWidth - contentWidth) / 2, 0)
+        var columnHeights: [CGFloat] = [0, 0]
+        var balancedColumn = 0
+        var frames: [CGRect] = Array(repeating: .zero, count: subviews.count)
+
+        for (index, subview) in subviews.enumerated() {
+            let preferredColumn = subview[PreferredDetailColumnLayoutKey.self]
+            let column = preferredColumn == 0 || preferredColumn == 1 ? preferredColumn : balancedColumn
+            if preferredColumn != 0 && preferredColumn != 1 { balancedColumn = (balancedColumn + 1) % 2 }
+
+            let cardMaxWidth = min(subview[DetailCardMaxWidthLayoutKey.self], nominalColumnWidth)
+            let proposedWidth = min(nominalColumnWidth, cardMaxWidth)
+            let size = subview.sizeThatFits(ProposedViewSize(width: proposedWidth, height: nil))
+            let x = originX + CGFloat(column) * (nominalColumnWidth + spacing) + ((nominalColumnWidth - proposedWidth) / 2)
+            let y = columnHeights[column]
+            frames[index] = CGRect(x: x, y: y, width: proposedWidth, height: size.height)
+            columnHeights[column] += size.height + spacing
+        }
+
+        return frames
+    }
+}
+
+/// Stores device overview bar data.
+struct DeviceOverviewBar: View {
+    let deviceStore: DeviceStore
+    let editorStore: EditorStore
+    let selected: MouseDevice
+    let state: MouseState
+    @State private var isProfilePickerPresented = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(localized(selected.product_name)).font(.system(size: 32, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text).accessibilityIdentifier("selected-device-name").accessibilityLabel(selected.product_name)
+                    if showsUnsupportedUSBMarker { UnsupportedUSBInlineBanner() }
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 8) {
+                    if let battery = state.battery_percent {
+                        let batteryIcon = BatteryPresentation.icon(percent: battery, charging: state.charging, thresholdRaw: state.low_battery_threshold_raw)
+                        HStack(spacing: 8) {
+                            Image(systemName: batteryIcon.symbolName, variableValue: batteryIcon.variableValue)
+                            Text("\(battery)%")
+                        }.font(.system(size: 24, weight: .semibold, design: .default)).foregroundStyle(batteryIcon.accent == .low ? BatteryPresentation.lowBatteryColor : MouseTheme.text)
+                    }
+                }
+            }
+
+            HStack(spacing: 10) {
+                Pill(text: state.connection, color: selected.transport == .bluetooth ? MouseTheme.accent : MouseTheme.secondary).accessibilityIdentifier("selected-device-connection")
+                DeviceStatusBadge(indicator: deviceStore.currentDeviceStatusIndicator, helpText: deviceStore.currentDeviceConnectionTooltip)
+
+                if editorStore.supportsProfilePicker {
+                    Spacer(minLength: 12)
+                    Text("Profile").font(.system(size: 10, weight: .bold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.50))
+                    OnboardProfilePillButton(editorStore: editorStore) { isProfilePickerPresented.toggle() }.popover(isPresented: $isProfilePickerPresented, attachmentAnchor: .rect(.bounds), arrowEdge: .top) { ProfilePickerPopover(editorStore: editorStore) }
+                }
+            }
+
+            Rectangle().fill(MouseTheme.text.opacity(0.14)).frame(height: 1)
+        }.task(id: selected.id) {
+            guard editorStore.supportsProfilePicker else { return }
+            await editorStore.refreshOnboardProfiles()
+        }.onChange(of: selected.id) { _, _ in isProfilePickerPresented = false }.zIndex(6)
+    }
+
+    private var showsUnsupportedUSBMarker: Bool { deviceStore.selectedDeviceIsUnsupportedUSB && deviceStore.selectedDeviceID == selected.id }
+}
+
+/// Renders the generic device detail view UI.
+struct GenericDeviceDetailView: View {
+    let deviceStore: DeviceStore
+    let selected: MouseDevice
+
+    var body: some View {
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 18) {
+                GenericDeviceOverviewBar(deviceStore: deviceStore, selected: selected)
+
+                if resolvedProfile == nil {
+                    Card(title: "Limited Support") {
+                        Text(localized(primaryMessage)).font(.system(size: 13, weight: .bold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.88)).frame(maxWidth: .infinity, alignment: .leading)
+
+                        Text(localized(secondaryMessage)).hintTextStyle().frame(maxWidth: .infinity, alignment: .leading)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            diagnosticRow(label: "Vendor ID", value: String(format: "0x%04X", selected.vendor_id))
+                            diagnosticRow(label: "Product ID", value: String(format: "0x%04X", selected.product_id))
+                            diagnosticRow(label: "Location ID", value: String(format: "0x%08X", selected.location_id))
+                            diagnosticRow(label: "Transport", value: selected.transport.connectionLabel)
+                            diagnosticRow(label: "Resolved profile", value: "None")
+                        }.padding(.top, 2)
+                    }
+                }
+
+                DiagnosticsFooter(deviceStore: deviceStore, device: selected, state: nil)
+            }.frame(maxWidth: 820, alignment: .leading).padding(.horizontal, 20).padding(.vertical, 18).frame(maxWidth: .infinity, alignment: .top)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(WindowDragBlocker())
+    }
+
+    private var resolvedProfile: DeviceProfile? { DeviceProfiles.resolve(vendorID: selected.vendor_id, productID: selected.product_id, transport: selected.transport) }
+
+    private var primaryMessage: String { "This mouse is not fully supported yet." }
+
+    private var secondaryMessage: String { "OpenSnek will show the controls it can verify safely. Use Diagnostics in bug reports so unsupported devices are easier to map." }
+
+    @ViewBuilder private func diagnosticRow(label: String, value: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(localized(label)).font(.system(size: 12, weight: .bold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.68)).frame(width: 110, alignment: .leading)
+            Text(localized(value)).font(.system(size: 12, weight: .medium, design: .monospaced)).foregroundStyle(MouseTheme.text.opacity(0.82)).textSelection(.enabled)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// Renders the device unavailable detail view UI.
+struct DeviceUnavailableDetailView: View {
+    let deviceStore: DeviceStore
+    let selected: MouseDevice
+
+    var body: some View {
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 18) {
+                GenericDeviceOverviewBar(deviceStore: deviceStore, selected: selected)
+
+                Card(title: deviceStore.currentDeviceStatusIndicator.label) {
+                    Text(deviceStore.selectedDeviceInteractionMessage ?? "Live telemetry is unavailable for this device right now.").font(.system(size: 13, weight: .bold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.88)).frame(maxWidth: .infinity, alignment: .leading)
+
+                    Text("The controls stay locked until the device reconnects and OpenSnek is receiving live updates again.").hintTextStyle().frame(maxWidth: .infinity, alignment: .leading)
+
+                    VStack(alignment: .leading, spacing: 6) { ForEach(deviceStore.diagnosticsConnectionLines(for: selected), id: \.self) { line in Text(localized(line)).font(.system(size: 12, weight: .medium, design: .monospaced)).foregroundStyle(MouseTheme.text.opacity(0.78)) } }.padding(.top, 2)
+                }
+
+                DiagnosticsFooter(deviceStore: deviceStore, device: selected, state: nil)
+            }.frame(maxWidth: 820, alignment: .leading).padding(.horizontal, 20).padding(.vertical, 18).frame(maxWidth: .infinity, alignment: .top)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(WindowDragBlocker()).task(id: selected.id) { await deviceStore.refreshConnectionDiagnostics(for: selected) }
+    }
+}
+
+/// Renders the device connecting detail view UI.
+struct DeviceConnectingDetailView: View {
+    let deviceStore: DeviceStore
+    let selected: MouseDevice
+
+    var body: some View {
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 18) {
+                GenericDeviceOverviewBar(deviceStore: deviceStore, selected: selected)
+
+                DeviceConnectionLoadingCard(headline: headline, subtitle: subtitle)
+
+                DiagnosticsFooter(deviceStore: deviceStore, device: selected, state: nil)
+            }.frame(maxWidth: 820, alignment: .leading).padding(.horizontal, 20).padding(.vertical, 18).frame(maxWidth: .infinity, alignment: .top)
+        }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(WindowDragBlocker()).task(id: selected.id) { await deviceStore.refreshConnectionDiagnostics(for: selected) }
+    }
+
+    private var headline: String {
+        switch selected.transport {
+        case .bluetooth: "Connecting to \(selected.product_name)"
+        case .usb: "Loading \(selected.product_name)"
+        }
+    }
+
+    private var subtitle: String {
+        switch selected.transport {
+        case .bluetooth: "Establishing the Bluetooth control link and reading your settings."
+        case .usb: "Reading device settings and preparing controls."
+        }
+    }
+}
+
+/// Renders the device connection loading card UI.
+private struct DeviceConnectionLoadingCard: View {
+    let headline: String
+    let subtitle: String
+
+    var body: some View { DeviceConnectionLoadingContent(headline: headline, subtitle: subtitle).frame(maxWidth: .infinity).padding(.horizontal, 24).padding(.vertical, 42).background(DeviceConnectionLoadingBackground()) }
+}
+
+/// Renders the device connection loading content UI.
+private struct DeviceConnectionLoadingContent: View {
+    let headline: String
+    let subtitle: String
+
+    var body: some View {
+        VStack(spacing: 18) {
+            ProgressView().controlSize(.large).tint(MouseTheme.text.opacity(0.92))
+
+            VStack(spacing: 8) {
+                Text(localized(headline)).font(.system(size: 24, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text)
+
+                Text(localized(subtitle)).font(.system(size: 13, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.68)).multilineTextAlignment(.center).frame(maxWidth: 320)
+            }
+        }
+    }
+}
+
+/// Stores device connection loading background data.
+private struct DeviceConnectionLoadingBackground: View { var body: some View { RoundedRectangle(cornerRadius: 28).fill(MouseTheme.text.opacity(0.04)).overlay(RoundedRectangle(cornerRadius: 28).stroke(MouseTheme.text.opacity(0.10), lineWidth: 1)) } }
+
+/// Stores generic device overview bar data.
+struct GenericDeviceOverviewBar: View {
+    let deviceStore: DeviceStore
+    let selected: MouseDevice
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(localized(selected.product_name)).font(.system(size: 32, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text)
+                    if showsUnsupportedUSBMarker { UnsupportedUSBInlineBanner() }
+                }
+
+                Spacer()
+            }
+
+            HStack(spacing: 10) {
+                Pill(text: selected.connectionLabel, color: selected.transport == .bluetooth ? MouseTheme.accent : MouseTheme.secondary)
+                DeviceStatusBadge(indicator: deviceStore.currentDeviceStatusIndicator, helpText: deviceStore.currentDeviceConnectionTooltip)
+            }
+
+            Rectangle().fill(MouseTheme.text.opacity(0.14)).frame(height: 1)
+        }.zIndex(6)
+    }
+
+    private var showsUnsupportedUSBMarker: Bool { deviceStore.selectedDeviceIsUnsupportedUSB && deviceStore.selectedDeviceID == selected.id }
+}
+
+/// Stores unsupported USB inline banner data.
+private struct UnsupportedUSBInlineBanner: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("⚠️").font(.system(size: 12))
+            Text("Unsupported USB device. Only verified controls are shown.").font(.system(size: 11, weight: .bold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.88)).lineLimit(2)
+        }.padding(.horizontal, 10).padding(.vertical, 6).background(Capsule().fill(MouseTheme.secondary.opacity(0.18)).overlay(Capsule().stroke(MouseTheme.secondary.opacity(0.42), lineWidth: 1))).fixedSize(horizontal: false, vertical: true).frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+/// Renders the diagnostics footer UI.
+struct DiagnosticsFooter: View {
+    let deviceStore: DeviceStore
+    let device: MouseDevice
+    let state: MouseState?
+
+    var body: some View {
+        HStack {
+            Spacer()
+            DeviceDiagnosticsButton(deviceStore: deviceStore, device: device, state: state)
+            Spacer()
+        }.frame(maxWidth: .infinity).padding(.top, 2)
+    }
+}
+
+/// Stores device status badge data.
+struct DeviceStatusBadge: View {
+    let indicator: DeviceStatusIndicator
+    var helpText: String?
+
+    var body: some View {
+        DeviceStatusBadgeContent(indicator: indicator).padding(.horizontal, 10).padding(.vertical, 6).background(Capsule().fill(MouseTheme.text.opacity(0.06)).overlay(Capsule().stroke(MouseTheme.text.opacity(0.10), lineWidth: 1))).contentShape(Capsule()).hoverTooltip(
+            helpText, xOffset: 6, yOffset: 34, maxWidth: 360
+        ).accessibilityElement(children: .combine).accessibilityLabel(indicator.label).accessibilityIdentifier("device-status-badge")
+    }
+}
+
+/// Renders the device status badge content UI.
+private struct DeviceStatusBadgeContent: View {
+    let indicator: DeviceStatusIndicator
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Circle().fill(indicator.color).frame(width: 9, height: 9)
+
+            Text(localized(indicator.label)).font(.system(size: 11, weight: .semibold, design: .default)).foregroundStyle(MouseTheme.text.opacity(0.82)).accessibilityIdentifier("device-status-label").accessibilityLabel(indicator.label)
+        }
+    }
+}
+
+/// Renders the device diagnostics button UI.
+struct DeviceDiagnosticsButton: View {
+    let deviceStore: DeviceStore
+    let device: MouseDevice
+    let state: MouseState?
+    @State private var showsDiagnostics = false
+
+    var body: some View {
+        Button {
+            showsDiagnostics = true
+        } label: {
+            Label("Diagnostics", systemImage: "doc.text.magnifyingglass").font(.system(size: 11, weight: .semibold, design: .default))
+        }.buttonStyle(.bordered).controlSize(.small).tint(MouseTheme.text.opacity(0.2)).sheet(isPresented: $showsDiagnostics) { DeviceDiagnosticsSheet(deviceStore: deviceStore, device: device, state: state) }
+    }
+}
+
+/// Renders the device diagnostics sheet UI.
+struct DeviceDiagnosticsSheet: View {
+    let deviceStore: DeviceStore
+    let device: MouseDevice
+    let state: MouseState?
+    @Environment(\.dismiss) private var dismiss
+
+    private var diagnosticsText: String { deviceStore.diagnosticsDump(for: device, state: state) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            DeviceDiagnosticsSheetHeader(deviceName: device.product_name, copy: copyDiagnostics, done: { dismiss() })
+
+            Text("Use this dump in bug reports when a device is unsupported, partially supported, or behaving unexpectedly.").hintTextStyle()
+
+            DeviceDiagnosticsConnectionPanel(lines: deviceStore.diagnosticsConnectionLines(for: device))
+
+            DeviceDiagnosticsTextPanel(text: diagnosticsText)
+        }.padding(18).frame(minWidth: 760, minHeight: 540, alignment: .topLeading).task(id: device.id) { await deviceStore.refreshConnectionDiagnostics(for: device) }
+    }
+
+    private func copyDiagnostics() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(diagnosticsText, forType: .string)
+    }
+}
+
+/// Renders the device diagnostics sheet header UI.
+private struct DeviceDiagnosticsSheetHeader: View {
+    let deviceName: String
+    let copy: () -> Void
+    let done: () -> Void
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Device Diagnostics").font(.system(size: 21, weight: .semibold, design: .default))
+                Text(localized(deviceName)).font(.system(size: 12, weight: .bold, design: .default)).foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Button("Copy", action: copy).buttonStyle(.borderedProminent)
+
+            Button("Done", action: done).buttonStyle(.bordered)
+        }
+    }
+}
+
+/// Renders the device diagnostics connection panel UI.
+private struct DeviceDiagnosticsConnectionPanel: View {
+    let lines: [String]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Connection Paths").font(.system(size: 12, weight: .semibold, design: .default))
+            ForEach(lines, id: \.self) { line in connectionLine(line) }
+        }.frame(maxWidth: .infinity, alignment: .leading).padding(12).background(panelBackground)
+    }
+
+    private func connectionLine(_ line: String) -> some View { Text(localized(line)).font(.system(size: 12, weight: .medium, design: .default)).foregroundStyle(.secondary) }
+
+    private var panelBackground: some View { RoundedRectangle(cornerRadius: 12).fill(MouseTheme.text.opacity(0.04)).overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.08), lineWidth: 1)) }
+}
+
+/// Renders the device diagnostics text panel UI.
+private struct DeviceDiagnosticsTextPanel: View {
+    let text: String
+
+    var body: some View {
+        ScrollView { Text(localized(text)).font(.system(size: 12, weight: .medium, design: .monospaced)).foregroundStyle(.primary).frame(maxWidth: .infinity, alignment: .leading).textSelection(.enabled).padding(12) }.background(
+            RoundedRectangle(cornerRadius: 12).fill(MouseTheme.text.opacity(0.05)).overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.primary.opacity(0.08), lineWidth: 1)))
+    }
+}

@@ -1,0 +1,672 @@
+import Foundation
+import IOKit.hid
+import OpenSnekCore
+import OpenSnekHardware
+import OpenSnekProtocols
+import OpenSnekAppSupport
+
+/// Serializes bridge client state and operations.
+actor BridgeClient {
+    /// Captures USB DPI stage state.
+    struct USBDpiStageSnapshot: Equatable, Sendable {
+        let active: Int
+        let values: [Int]
+        let pairs: [DpiPair]
+        let stageIDs: [UInt8]
+    }
+
+    /// Stores Bluetooth expected DPI state.
+    struct BluetoothExpectedDpiState: Equatable, Sendable {
+        let active: Int
+        let values: [Int]
+        let pairs: [DpiPair]
+        let previousActive: Int?
+        let previousValues: [Int]?
+        let previousPairs: [DpiPair]?
+        let expiresAt: Date
+        var remainingMasks: Int
+    }
+
+    /// Stores Bluetooth resolved DPI stage write data.
+    struct BluetoothResolvedDpiStageWrite: Equatable, Sendable {
+        let active: Int
+        let stages: [Int]
+        let pairs: [DpiPair]
+    }
+
+    /// Carries USB DPI apply log context.
+    struct USBDpiApplyLogContext {
+        let device: MouseDevice
+        let patch: DevicePatch
+        let cachedDpiStages: DpiStages?
+        let current: USBDpiStageSnapshot?
+        let activeClamped: Int
+        let livePair: DpiPair
+        let stages: [Int]
+    }
+
+    /// Carries USB active DPI only apply context.
+    struct USBActiveDpiOnlyApplyContext {
+        let device: MouseDevice
+        let patch: DevicePatch
+        let cachedState: MouseState?
+        let activeClamped: Int
+        let livePair: DpiPair
+    }
+
+    /// Carries USB resolved DPI stages apply context.
+    struct USBResolvedDpiStagesApplyContext {
+        let device: MouseDevice
+        let stages: [Int]
+        let activeClamped: Int
+        let livePair: DpiPair
+        let resolvedStagePairs: [DpiPair]
+        let stageIDs: [UInt8]?
+        let usesProjectedReadback: Bool
+    }
+
+    nonisolated static func resolveBluetoothDpiStageWrite(device: MouseDevice, patch: DevicePatch, current: BLEVendorProtocol.DpiStageSnapshot?) throws -> BluetoothResolvedDpiStageWrite {
+        let resolvedValues = patch.dpiStagePairs?.map(\.x) ?? patch.dpiStages ?? current.map { Array($0.slots.prefix($0.count)) }
+        guard let resolvedValues, !resolvedValues.isEmpty else { throw BridgeError.commandFailed("Failed to resolve Bluetooth DPI stages") }
+        let stages = resolvedValues.map { DeviceProfiles.clampDPI($0, device: device) }
+        let stagePairs =
+            Self.resolveDpiStagePairs(values: patch.dpiStages, pairs: patch.dpiStagePairs, fallbackPairs: current.map { Array($0.pairs.prefix($0.count)) })?.map { pair in DpiPair(x: DeviceProfiles.clampDPI(pair.x, device: device), y: DeviceProfiles.clampDPI(pair.y, device: device)) }
+            ?? stages.map { DpiPair(x: $0, y: $0) }
+        let active = patch.activeStage ?? current?.active ?? 0
+        return BluetoothResolvedDpiStageWrite(active: active, stages: stages, pairs: stagePairs)
+    }
+
+    nonisolated static func resolvedUSBActiveStage(stages: USBDpiStageSnapshot, liveDpi: DpiPair?) -> Int {
+        guard let liveDpi else { return stages.active }
+        let pairs = stages.pairs.isEmpty ? stages.values.map { DpiPair(x: $0, y: $0) } : stages.pairs
+        let visiblePairs = Array(pairs.prefix(max(1, min(stages.values.count, pairs.count))))
+        let matchingIndices = visiblePairs.enumerated().compactMap { index, pair in pair == liveDpi ? index : nil }
+        return matchingIndices.count == 1 ? matchingIndices[0] : stages.active
+    }
+
+    nonisolated static func resolvedUSBFastDpiActiveStage(stages: USBDpiStageSnapshot, liveDpi: Int?) -> Int { resolvedUSBActiveStage(stages: stages, liveDpi: liveDpi.map { DpiPair(x: $0, y: $0) }) }
+    static let bluetoothPassiveHeartbeatHealthyInterval: TimeInterval = 1.5
+    static let usbReconnectSettleInterval: TimeInterval = 2.0
+    static let emptyHIDManagerRefreshInterval: TimeInterval = 1.0
+
+    var deviceSessions: [String: USBHIDControlSession] = [:]
+    var deviceSessionCandidates: [String: [USBHIDControlSession]] = [:]
+    var lastStateByDeviceID: [String: MouseState] = [:]
+    var usbReconnectSettleUntilByDeviceID: [String: Date] = [:]
+    let devicePresenceEvents = BroadcastStream<HIDDevicePresenceEvent>()
+    let passiveDpiEvents = BroadcastStream<PassiveDPIEvent>()
+    let passiveDpiHeartbeatEvents = BroadcastStream<PassiveDPIHeartbeatEvent>()
+    let passiveProfileSwitchEvents = BroadcastStream<PassiveProfileSwitchEvent>()
+    var passiveDpiArmedDeviceIDs: Set<String> = []
+    var passiveDpiHeartbeatDeviceIDs: Set<String> = []
+    var passiveDpiObservedDeviceIDs: Set<String> = []
+    var passiveDpiLastHeartbeatAtByDeviceID: [String: Date] = [:]
+    var passiveDpiLastObservedAtByDeviceID: [String: Date] = [:]
+    var passiveDpiTargetIDsByDeviceID: [String: Set<String>] = [:]
+    var passiveDpiTargetsByDeviceID: [String: [PassiveDPIEventMonitor.WatchTarget]] = [:]
+    var passiveDpiUpgradeNotBeforeByDeviceID: [String: Date] = [:]
+    var btReqID: UInt8 = 0x30
+    var btDpiSnapshotByDeviceID: [String: BLEVendorProtocol.DpiStageSnapshot] = [:]
+    var btExpectedDpiByDeviceID: [String: BluetoothExpectedDpiState] = [:]
+    var usbLogicalOnboardDPIByDeviceID: [String: [Int: OnboardDPIProfileSnapshot]] = [:]
+    let btVendorClient: BLEVendorTransportClient
+    var knownDeviceSerialByID: [String: String] = [:]
+    var usbConnectionInstanceByDeviceID: [String: String] = [:]
+    let devicePreferenceStore = DevicePreferenceStore()
+    var btSerialReadNotBeforeByDeviceID: [String: Date] = [:]
+    let hidDevicePresenceMonitor = HIDDevicePresenceMonitor(includeGenericMice: true)
+    let passiveDpiMonitor = PassiveDPIEventMonitor()
+    var btExchangeLocked = false
+    var btExchangeWaiters: [CheckedContinuation<Void, Never>] = []
+    var hidAccessDenied = false
+    var managerAccessDenied = false
+    var lastOpenDeniedLogAt: Date?
+
+    let usbVID = 0x1532
+    let btVID = 0x068E
+    private var hidManager: IOHIDManager?
+    private var hidManagerOpenResult: IOReturn?
+    private var hidManagerInputMonitoringGrantedAtOpen: Bool?
+    private var lastLoggedHIDManagerOpenFailure: IOReturn?
+    private var lastLoggedHIDManagerAccessDenied: Bool?
+    private var lastEmptyHIDManagerRefreshAt: Date?
+
+    init(startHIDMonitoring: Bool = true, requiredBluetoothPeripheralIdentifier: UUID? = nil) {
+        btVendorClient = BLEVendorTransportClient(requiredPeripheralIdentifier: requiredBluetoothPeripheralIdentifier)
+        hidDevicePresenceMonitor.onChange = { [weak self] event in Task { await self?.handleHIDDevicePresenceEvent(event) } }
+        passiveDpiMonitor.onEvent = { [weak self] event in Task { await self?.handlePassiveDpiEvent(event) } }
+        passiveDpiMonitor.onHeartbeat = { [weak self] event in Task { await self?.handlePassiveDpiHeartbeat(event) } }
+        passiveDpiMonitor.onProfileSwitch = { [weak self] event in Task { await self?.handlePassiveProfileSwitch(event) } }
+        if startHIDMonitoring { hidDevicePresenceMonitor.start() }
+    }
+
+    func devicePresenceEventStream() -> AsyncStream<HIDDevicePresenceEvent> { devicePresenceEvents.makeStream() }
+
+    private func handleHIDDevicePresenceEvent(_ event: HIDDevicePresenceEvent) {
+        updateUSBReconnectSettleDeadline(for: event)
+        AppLog.event("Bridge", "hidPresence change=\(event.change.rawValue) device=\(event.deviceID)")
+        invalidateDiscoveryState(for: event.deviceID, reason: "hid-\(event.change.rawValue)")
+        devicePresenceEvents.yield(event)
+    }
+
+    private func invalidateDiscoveryState(for deviceID: String, reason: String) {
+        knownDeviceSerialByID.removeValue(forKey: deviceID)
+        usbConnectionInstanceByDeviceID.removeValue(forKey: deviceID)
+        btSerialReadNotBeforeByDeviceID.removeValue(forKey: deviceID)
+        deviceSessions.removeValue(forKey: deviceID)
+        deviceSessionCandidates.removeValue(forKey: deviceID)
+        lastStateByDeviceID.removeValue(forKey: deviceID)
+        passiveDpiArmedDeviceIDs.remove(deviceID)
+        passiveDpiHeartbeatDeviceIDs.remove(deviceID)
+        passiveDpiLastHeartbeatAtByDeviceID.removeValue(forKey: deviceID)
+        passiveDpiLastObservedAtByDeviceID.removeValue(forKey: deviceID)
+        passiveDpiTargetIDsByDeviceID.removeValue(forKey: deviceID)
+        passiveDpiTargetsByDeviceID.removeValue(forKey: deviceID)
+        passiveDpiUpgradeNotBeforeByDeviceID.removeValue(forKey: deviceID)
+        usbLogicalOnboardDPIByDeviceID.removeValue(forKey: deviceID)
+        clearPassiveDpiObservation(deviceID: deviceID, reason: reason)
+        clearManagedHIDManager()
+    }
+
+    func usbDeviceIsAbsentAfterDiscoveryRefresh(device: MouseDevice, operation: String) async -> Bool {
+        guard device.transport == .usb else { return false }
+
+        // Stale IOHIDDevice handles can report telemetry failures after a dongle is pulled.
+        // Always re-run discovery before calling that a sleeping/off mouse; absence means the
+        // receiver itself is gone and the UI must leave the dongle-only state on replug.
+        clearManagedHIDManager()
+        do {
+            let devices = try await listDevices()
+            let isPresent = devices.contains { $0.id == device.id }
+            AppLog.debug("Bridge", "usb discovery refresh after \(operation) device=\(device.id) " + "present=\(isPresent) candidates=\(deviceSessionCandidates[device.id]?.count ?? 0)")
+            if !isPresent { invalidateDiscoveryState(for: device.id, reason: "\(operation)-absent") }
+            return !isPresent
+        } catch {
+            AppLog.debug("Bridge", "usb discovery refresh after \(operation) failed device=\(device.id): \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    // A bulk IOHIDManagerOpen can return kIOReturnNotPermitted even with Input
+    // Monitoring granted when the matched set includes protected keyboard input
+    // interfaces (e.g. Razer Huntsman Mini / Tartarus Pro). Per-device opens still
+    // succeed, so that state is not a TCC denial and the manager stays reusable.
+    nonisolated static func resolvedManagerAccessDenied(openResult: IOReturn, inputMonitoringGranted: Bool) -> Bool { openResult == kIOReturnNotPermitted && !inputMonitoringGranted }
+
+    nonisolated static func shouldReuseHIDManager(openResult: IOReturn, inputMonitoringGrantedAtOpen: Bool, inputMonitoringGrantedNow: Bool) -> Bool {
+        guard inputMonitoringGrantedAtOpen == inputMonitoringGrantedNow else { return false }
+        return openResult == kIOReturnSuccess || (openResult == kIOReturnNotPermitted && inputMonitoringGrantedNow)
+    }
+
+    nonisolated static func shouldLogHIDManagerOpenFailure(openResult: IOReturn, managerAccessDenied: Bool, lastOpenResult: IOReturn?, lastManagerAccessDenied: Bool?) -> Bool {
+        guard openResult != kIOReturnSuccess else { return false }
+        return lastOpenResult != openResult || lastManagerAccessDenied != managerAccessDenied
+    }
+
+    nonisolated static func inputMonitoringGranted() -> Bool { IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) == kIOHIDAccessTypeGranted }
+
+    private func managedHIDManager() -> (manager: IOHIDManager, openResult: IOReturn) {
+        let inputMonitoringGrantedNow = Self.inputMonitoringGranted()
+        if let hidManager, let hidManagerOpenResult, let hidManagerInputMonitoringGrantedAtOpen, Self.shouldReuseHIDManager(openResult: hidManagerOpenResult, inputMonitoringGrantedAtOpen: hidManagerInputMonitoringGrantedAtOpen, inputMonitoringGrantedNow: inputMonitoringGrantedNow) {
+            return (hidManager, hidManagerOpenResult)
+        }
+
+        clearManagedHIDManager()
+
+        let manager = IOHIDManagerCreate(kCFAllocatorDefault, IOOptionBits(kIOHIDOptionsTypeNone))
+        IOHIDManagerSetDeviceMatchingMultiple(manager, [[kIOHIDVendorIDKey: usbVID] as CFDictionary, [kIOHIDVendorIDKey: btVID] as CFDictionary, [kIOHIDPrimaryUsagePageKey: 1, kIOHIDPrimaryUsageKey: 2] as CFDictionary] as CFArray)
+
+        let openResult = IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
+        let inputMonitoringGranted = Self.inputMonitoringGranted()
+        managerAccessDenied = Self.resolvedManagerAccessDenied(openResult: openResult, inputMonitoringGranted: inputMonitoringGranted)
+        if openResult == kIOReturnSuccess {
+            lastLoggedHIDManagerOpenFailure = nil
+            lastLoggedHIDManagerAccessDenied = nil
+        } else if Self.shouldLogHIDManagerOpenFailure(openResult: openResult, managerAccessDenied: managerAccessDenied, lastOpenResult: lastLoggedHIDManagerOpenFailure, lastManagerAccessDenied: lastLoggedHIDManagerAccessDenied) {
+            lastLoggedHIDManagerOpenFailure = openResult
+            lastLoggedHIDManagerAccessDenied = managerAccessDenied
+            if managerAccessDenied {
+                AppLog.error("Bridge", "IOHIDManagerOpen failed (\(openResult)); continuing best-effort discovery")
+                AppLog.error("Bridge", "IOHID access not permitted; USB access may be blocked unless Input Monitoring permission is granted")
+            } else {
+                AppLog.warning("Bridge", "IOHIDManagerOpen failed (\(openResult)) with Input Monitoring granted; protected keyboard interfaces refuse the bulk open, using per-device opens")
+            }
+        }
+
+        hidManager = manager
+        hidManagerOpenResult = openResult
+        hidManagerInputMonitoringGrantedAtOpen = inputMonitoringGranted
+        return (manager, openResult)
+    }
+
+    private func currentHIDDeviceSnapshot() -> (devices: [IOHIDDevice], openResult: IOReturn) {
+        let (manager, openResult) = managedHIDManager()
+        guard let set = IOHIDManagerCopyDevices(manager) as? Set<IOHIDDevice> else { return ([], openResult) }
+        return (Array(set), openResult)
+    }
+
+    private func clearManagedHIDManager() {
+        if let hidManager {
+            IOHIDManagerClose(hidManager, IOOptionBits(kIOHIDOptionsTypeNone))
+            self.hidManager = nil
+        }
+        hidManagerOpenResult = nil
+        hidManagerInputMonitoringGrantedAtOpen = nil
+        managerAccessDenied = false
+        lastEmptyHIDManagerRefreshAt = nil
+    }
+
+    func hidAccessStatus(forceRefresh: Bool = true) -> HIDAccessStatus {
+        if forceRefresh {
+            AppLog.debug("Bridge", "hidAccessStatus forcing IOHIDManager refresh")
+            clearManagedHIDManager()
+        } else {
+            AppLog.debug("Bridge", "hidAccessStatus reusing shared IOHIDManager")
+        }
+
+        let (_, openResult) = managedHIDManager()
+        let authorization: HIDAccessAuthorization
+        let detail: String?
+
+        switch openResult {
+        case kIOReturnSuccess:
+            authorization = .granted
+            detail = nil
+        case kIOReturnNotPermitted where !managerAccessDenied:
+            authorization = .granted
+            detail = "Input Monitoring is granted; macOS refuses the bulk HID-manager open because protected keyboard interfaces are present, so OpenSnek uses per-device opens."
+        case kIOReturnNotPermitted:
+            authorization = .denied
+            detail = "Input Monitoring is required before macOS will allow HID listeners and feature-report access."
+        default:
+            authorization = .unavailable
+            detail = "IOHIDManagerOpen failed (\(openResult))."
+        }
+
+        return HIDAccessStatus(authorization: authorization, hostLabel: PermissionSupport.currentHostLabel(), bundleIdentifier: Bundle.main.bundleIdentifier, detail: detail)
+    }
+
+    func listDevices() async throws -> [MouseDevice] {
+        let start = Date()
+        var hidSnapshot = currentHIDDeviceSnapshot()
+        if hidSnapshot.devices.isEmpty {
+            let now = Date()
+            if Self.shouldRefreshEmptyHIDManagerSnapshot(openResult: hidSnapshot.openResult, inputMonitoringGranted: !managerAccessDenied, lastRefreshAt: lastEmptyHIDManagerRefreshAt, now: now) {
+                // macOS can show a replugged receiver in IORegistry while a previously opened
+                // IOHIDManager keeps returning an empty device set and never emits another
+                // presence callback. Reopen the manager so polling can rediscover the device.
+                clearManagedHIDManager()
+                hidSnapshot = currentHIDDeviceSnapshot()
+                if hidSnapshot.devices.isEmpty {
+                    lastEmptyHIDManagerRefreshAt = now
+                    AppLog.debug("Bridge", "listDevices refreshed empty HID manager snapshot; still empty")
+                } else {
+                    lastEmptyHIDManagerRefreshAt = nil
+                    AppLog.event("Bridge", "listDevices recovered stale empty HID manager snapshot devices=\(hidSnapshot.devices.count)")
+                }
+            }
+        } else {
+            lastEmptyHIDManagerRefreshAt = nil
+        }
+        let managerAccessDeniedForSnapshot = managerAccessDenied
+        let connectedBluetoothPeripherals = await btVendorClient.connectedPeripheralSummaries()
+        let connectedBluetoothPeripheralNames = connectedBluetoothPeripherals?.map(\.name)
+
+        let devices = hidSnapshot.devices
+
+        var modelsByID: [String: MouseDevice] = [:]
+        var sessionsByID: [String: [(score: Int, session: USBHIDControlSession)]] = [:]
+        var passiveDpiTargets: [PassiveDPIEventMonitor.WatchTarget] = []
+        for device in devices {
+            guard !USBHIDSupport.isTrackpad(device), let vendor = USBHIDSupport.intProperty(device, key: kIOHIDVendorIDKey as CFString), let product = USBHIDSupport.intProperty(device, key: kIOHIDProductIDKey as CFString) else { continue }
+            let isMouse = USBHIDSupport.isMouseInterface(device)
+            guard vendor == usbVID || vendor == btVID || isMouse else { continue }
+
+            let name = USBHIDSupport.stringProperty(device, key: kIOHIDProductKey as CFString) ?? "Razer Mouse"
+            let registrySerial = USBHIDSupport.stringProperty(device, key: kIOHIDSerialNumberKey as CFString)
+            let transportRaw = (USBHIDSupport.stringProperty(device, key: kIOHIDTransportKey as CFString) ?? "").lowercased()
+            let transport: DeviceTransportKind = transportRaw.contains("bluetooth") || vendor == btVID ? .bluetooth : .usb
+            let location = USBHIDSupport.intProperty(device, key: kIOHIDLocationIDKey as CFString) ?? 0
+            let id = String(format: "%04x:%04x:%08x:%@", vendor, product, location, transport.rawValue)
+            let profile = DeviceProfiles.resolve(vendorID: vendor, productID: product, transport: transport)
+            guard profile != nil || isMouse else { continue }
+            let generic = profile == nil && isMouse
+            if !generic, transport == .bluetooth, !Self.shouldIncludeBluetoothHIDDevice(hidDeviceName: name, connectedPeripheralNames: connectedBluetoothPeripheralNames) { continue }
+            if !generic, transport == .usb, let instance = USBHIDSupport.connectionInstanceID(device) {
+                if let previous = usbConnectionInstanceByDeviceID[id], previous != instance {
+                    knownDeviceSerialByID.removeValue(forKey: id)
+                }
+                usbConnectionInstanceByDeviceID[id] = instance
+                if knownDeviceSerialByID[id] == nil,
+                   let serial = devicePreferenceStore.verifiedUSBSerial(connectionInstance: instance) { knownDeviceSerialByID[id] = serial }
+            }
+            let serial = knownDeviceSerialByID[id] ?? registrySerial
+            let bluetoothPeripheral = transport == .bluetooth ? Self.uniqueBluetoothPeripheral(name: name, serial: registrySerial, peripherals: connectedBluetoothPeripherals ?? []) : nil
+
+            let model = MouseDevice(
+                id: id, vendor_id: vendor, product_id: product, product_name: name, transport: transport, path_b64: "", serial: serial, firmware: bluetoothPeripheral?.firmware, location_id: location, profile_id: profile?.id, button_layout: profile?.buttonLayout,
+                supports_advanced_lighting_effects: profile?.supportsAdvancedLightingEffects ?? false, onboard_profile_count: profile?.onboardProfileCount ?? 1, bluetooth_peripheral_id: bluetoothPeripheral?.identifier, uses_generic_controls: generic)
+            if modelsByID[id] == nil { modelsByID[id] = model }
+
+            if let passiveTarget = passiveDpiWatchTarget(for: device, deviceID: id, profile: profile, transport: transport) { passiveDpiTargets.append(passiveTarget) }
+
+            if !generic {
+                let score = USBHIDSupport.handlePreferenceScore(device: device)
+                sessionsByID[id, default: []].append((score: score, session: USBHIDControlSession(device: device, deviceID: id)))
+            }
+        }
+        var preferredSessionsByID: [String: USBHIDControlSession] = [:]
+        var candidatesByID: [String: [USBHIDControlSession]] = [:]
+        for (id, scoredHandles) in sessionsByID {
+            let sorted = scoredHandles.sorted { lhs, rhs in
+                if lhs.score == rhs.score { return false }
+                return lhs.score > rhs.score
+            }
+            let sessions = sorted.map(\.session)
+            candidatesByID[id] = sessions
+            if let first = sessions.first { preferredSessionsByID[id] = first }
+        }
+        if !candidatesByID.isEmpty {
+            let candidateSummary = candidatesByID.keys.sorted().map { id in "\(id)=\(candidatesByID[id]?.count ?? 0)" }.joined(separator: ",")
+            AppLog.debug("Bridge", "listDevices hid candidates \(candidateSummary)")
+        }
+        deviceSessionCandidates = candidatesByID
+        deviceSessions = preferredSessionsByID
+        await updatePassiveDpiTracking(with: passiveDpiTargets)
+        var result = Array(modelsByID.values)
+
+        if Self.discoveryIsBlockedByHIDAccess(discoveredDeviceCount: result.count, managerAccessDenied: managerAccessDeniedForSnapshot) {
+            do {
+                _ = try await btExchange([], timeout: 0.8)
+                guard let summary = await btVendorClient.currentPeripheralSummary() else { throw BridgeError.commandFailed("Bluetooth fallback discovery resolved no peripheral identity") }
+                let fallback = Self.makeBluetoothFallbackDevice(summary: summary)
+                result.append(fallback)
+                AppLog.event("Bridge", "listDevices added Bluetooth fallback device after HID permission denial " + "name=\(fallback.product_name) product=0x\(String(format: "%04x", fallback.product_id)) " + "supported=\(fallback.profile_id != nil)")
+            } catch { AppLog.error("Bridge", "Bluetooth fallback discovery failed: \(error.localizedDescription)") }
+        }
+
+        let sorted = result.sorted { $0.product_name < $1.product_name }
+        if Self.discoveryIsBlockedByHIDAccess(discoveredDeviceCount: sorted.count, managerAccessDenied: managerAccessDeniedForSnapshot) {
+            throw BridgeError.commandFailed("HID access denied by macOS (kIOReturnNotPermitted). " + "Enable Input Monitoring for OpenSnek (or Terminal/Xcode when running via swift run/Xcode), " + "or ensure a supported Bluetooth device is connected.")
+        }
+        AppLog.event("Bridge", "listDevices count=\(sorted.count) elapsed=\(String(format: "%.3f", Date().timeIntervalSince(start)))s")
+        return sorted
+    }
+
+    nonisolated static func uniqueBluetoothPeripheral(name: String, serial: String?, peripherals: [BLEVendorTransportClient.ConnectedPeripheralSummary]) -> BLEVendorTransportClient.ConnectedPeripheralSummary? {
+        let ranked = peripherals.compactMap { peripheral in BluetoothNameMatcher.matchRank(peripheral.name, name).map { (peripheral, $0) } }
+        guard let rank = ranked.map(\.1).max() else { return nil }
+        let matches = ranked.filter { $0.1 == rank }.map(\.0)
+        if let serial = DevicePersistenceKeys.normalizedStableSerial(serial) {
+            let serialMatches = matches.filter { DevicePersistenceKeys.normalizedStableSerial($0.serial) == serial }
+            if serialMatches.count == 1 { return serialMatches[0] }
+        }
+        return matches.count == 1 ? matches[0] : nil
+    }
+
+    nonisolated static func shouldIncludeBluetoothHIDDevice(hidDeviceName: String, connectedPeripheralNames: [String?]?) -> Bool {
+        guard let connectedPeripheralNames else { return true }
+        guard !connectedPeripheralNames.isEmpty else { return false }
+        guard let normalizedHIDName = normalizedPeripheralName(hidDeviceName) else { return true }
+
+        var sawUnknownConnectedName = false
+        for connectedName in connectedPeripheralNames {
+            guard let normalizedConnectedName = normalizedPeripheralName(connectedName) else {
+                sawUnknownConnectedName = true
+                continue
+            }
+            if normalizedHIDName == normalizedConnectedName || normalizedHIDName.contains(normalizedConnectedName) || normalizedConnectedName.contains(normalizedHIDName) { return true }
+        }
+
+        return sawUnknownConnectedName
+    }
+
+    private nonisolated static func normalizedPeripheralName(_ value: String?) -> String? { BluetoothNameMatcher.normalized(value) }
+
+    nonisolated static func isUSBTelemetryUnavailableError(_ error: any Error) -> Bool {
+        if let bridgeError = error as? BridgeError, case .usbMouseUnavailable = bridgeError { return true }
+        let lowered = error.localizedDescription.lowercased()
+        return lowered.contains("telemetry unavailable") || lowered.contains("usable responses")
+    }
+
+    // Message matching keeps classification working across the IPC service
+    // boundary, where errors arrive as strings rather than typed BridgeErrors.
+    nonisolated static func isUSBNoControlInterfaceError(_ error: any Error) -> Bool {
+        if let bridgeError = error as? BridgeError, case .usbNoControlInterface = bridgeError { return true }
+        return error.localizedDescription.lowercased().contains("razer usb control interface")
+    }
+
+    nonisolated static func usbReconnectSettleDeadline(for event: HIDDevicePresenceEvent) -> Date? {
+        guard event.transport == .usb, event.change == .connected else { return nil }
+        return event.observedAt.addingTimeInterval(Self.usbReconnectSettleInterval)
+    }
+
+    nonisolated static func shouldDeferUSBReconnectRead(until settleDeadline: Date?, now: Date = Date()) -> Bool {
+        guard let settleDeadline else { return false }
+        return now < settleDeadline
+    }
+
+    nonisolated static func shouldRefreshEmptyHIDManagerSnapshot(openResult: IOReturn, inputMonitoringGranted: Bool, lastRefreshAt: Date?, now: Date = Date()) -> Bool {
+        let canEnumerate = openResult == kIOReturnSuccess || (openResult == kIOReturnNotPermitted && inputMonitoringGranted)
+        guard canEnumerate else { return false }
+        guard let lastRefreshAt else { return true }
+        return now.timeIntervalSince(lastRefreshAt) >= Self.emptyHIDManagerRefreshInterval
+    }
+
+    nonisolated static func discoveryIsBlockedByHIDAccess(discoveredDeviceCount: Int, managerAccessDenied: Bool) -> Bool { discoveredDeviceCount == 0 && managerAccessDenied }
+
+    private func updateUSBReconnectSettleDeadline(for event: HIDDevicePresenceEvent) {
+        guard event.transport == .usb else { return }
+        if let settleDeadline = Self.usbReconnectSettleDeadline(for: event) { usbReconnectSettleUntilByDeviceID[event.deviceID] = settleDeadline } else { usbReconnectSettleUntilByDeviceID.removeValue(forKey: event.deviceID) }
+    }
+
+    func deferUSBReconnectReadIfNeeded(deviceID: String, operation: String) async throws {
+        while let settleDeadline = usbReconnectSettleUntilByDeviceID[deviceID] {
+            let now = Date()
+            if Self.shouldDeferUSBReconnectRead(until: settleDeadline, now: now) {
+                let remaining = settleDeadline.timeIntervalSince(now)
+                AppLog.debug("Bridge", "usb reconnect settle device=\(deviceID) operation=\(operation) " + "remaining=\(String(format: "%.3f", remaining))s")
+                try await Task.sleep(nanoseconds: UInt64(max(0, remaining) * 1_000_000_000))
+                continue
+            }
+
+            guard usbReconnectSettleUntilByDeviceID[deviceID] == settleDeadline else { continue }
+            usbReconnectSettleUntilByDeviceID.removeValue(forKey: deviceID)
+            await refreshUSBDiscoveryAfterReconnectSettle(deviceID: deviceID, operation: operation)
+            return
+        }
+    }
+
+    private func refreshUSBDiscoveryAfterReconnectSettle(deviceID: String, operation: String) async {
+        deviceSessions.removeValue(forKey: deviceID)
+        deviceSessionCandidates.removeValue(forKey: deviceID)
+        clearManagedHIDManager()
+
+        do {
+            _ = try await listDevices()
+            AppLog.debug("Bridge", "usb reconnect discovery refreshed device=\(deviceID) operation=\(operation) " + "candidates=\(deviceSessionCandidates[deviceID]?.count ?? 0)")
+        } catch { AppLog.debug("Bridge", "usb reconnect discovery refresh failed device=\(deviceID) operation=\(operation): " + error.localizedDescription) }
+    }
+
+    nonisolated static func makeBluetoothFallbackDevice(summary: BLEVendorTransportClient.ConnectedPeripheralSummary) -> MouseDevice {
+        let profile = DeviceProfiles.resolveBluetoothFallback(name: summary.name)
+        let productID = profile?.supportedProducts.first ?? 0
+        let productName = summary.name?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false ? summary.name!.trimmingCharacters(in: .whitespacesAndNewlines) : (profile?.productName ?? "Razer Bluetooth Device")
+        let locationID = DevicePersistenceKeys.stablePeripheralLocationID(summary.identifier)
+        let id = String(format: "%04x:%04x:%08x:%@", 0x068E, productID, locationID, DeviceTransportKind.bluetooth.rawValue)
+
+        return MouseDevice(
+            id: id, vendor_id: 0x068E, product_id: productID, product_name: productName, transport: .bluetooth, path_b64: "", serial: summary.serial, firmware: summary.firmware, location_id: locationID, profile_id: profile?.id, button_layout: profile?.buttonLayout,
+            supports_advanced_lighting_effects: profile?.supportsAdvancedLightingEffects ?? false, onboard_profile_count: profile?.onboardProfileCount ?? 1, bluetooth_peripheral_id: summary.identifier)
+    }
+
+    nonisolated static func preferredBluetoothControlWarmupName(vendorID: Int, productID: Int, transport: DeviceTransportKind) -> String? {
+        guard transport == .bluetooth else { return nil }
+        return DeviceProfiles.resolve(vendorID: vendorID, productID: productID, transport: transport)?.productName
+    }
+
+    func prepareBluetoothControlConnection(preferredPeripheralName: String?) async -> Bool {
+        let trimmedName = preferredPeripheralName?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let start = Date()
+
+        do {
+            _ = try await btExchange([], timeout: 1.0, preferredPeripheralName: trimmedName)
+            AppLog.debug("Bridge", "btPrepareConnection ready name=\(trimmedName ?? "any") " + "elapsed=\(String(format: "%.3f", Date().timeIntervalSince(start)))s")
+            return true
+        } catch {
+            AppLog.debug("Bridge", "btPrepareConnection failed name=\(trimmedName ?? "any"): \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    func readState(device: MouseDevice) async throws -> MouseState {
+        let start = Date()
+        if device.usesGenericControls {
+            let state = Self.genericMouseState(device: device)
+            lastStateByDeviceID[device.id] = state
+            return state
+        }
+        if device.transport == .bluetooth {
+            do {
+                let session = sessionFor(device: device)
+                let previous = lastStateByDeviceID[device.id]
+                let state = try await readBluetoothState(device: device, session: session)
+                let resolved: MouseState
+                if passiveDpiObservedDeviceIDs.contains(device.id), let previous {
+                    resolved = previous.mergedWithStableReadTelemetry(from: state)
+                    AppLog.debug("Bridge", "readState bt preserved passive DPI device=\(device.id) " + "previousActive=\(previous.dpi_stages.active_stage.map(String.init) ?? "nil") " + "readActive=\(state.dpi_stages.active_stage.map(String.init) ?? "nil")")
+                } else {
+                    resolved = state
+                }
+                lastStateByDeviceID[device.id] = resolved
+                AppLog.debug("Bridge", "readState bt device=\(device.id) elapsed=\(String(format: "%.3f", Date().timeIntervalSince(start)))s")
+                return resolved
+            } catch {
+                clearPassiveDpiObservation(deviceID: device.id, reason: "read-state-failed")
+                throw error
+            }
+        }
+
+        try await deferUSBReconnectReadIfNeeded(deviceID: device.id, operation: "read-state")
+
+        let sessions = sessionsFor(device: device)
+        guard !sessions.isEmpty else {
+            if managerAccessDenied { throw BridgeError.commandFailed("USB HID access denied by macOS. Enable Input Monitoring for OpenSnek " + "(or Terminal/Xcode when running via swift run/Xcode), then relaunch.") }
+            throw BridgeError.commandFailed("Device not available")
+        }
+        // A device with HID interfaces but no 90-byte feature-report channel (e.g. a
+        // headset exposing only consumer controls) can never answer Razer commands;
+        // fail with a distinct error instead of masquerading as a sleeping mouse.
+        guard sessions.contains(where: \.supportsControlReports) else { throw BridgeError.usbNoControlInterface }
+
+        var firstError: Error?
+        for (index, session) in sessions.enumerated() {
+            do {
+                let state = try await readUSBState(device: device, session: session)
+                if index > 0 {
+                    deviceSessions[device.id] = session
+                    AppLog.debug("Bridge", "readState usb switched to alternate session index=\(index) device=\(device.id)")
+                }
+                lastStateByDeviceID[device.id] = state
+                await maybeUpgradeUSBPassiveDpiFromPolling(device: device, reason: "read-state-ok")
+                AppLog.debug("Bridge", "readState usb device=\(device.id) " + "elapsed=\(String(format: "%.3f", Date().timeIntervalSince(start)))s")
+                return state
+            } catch {
+                if firstError == nil { firstError = error }
+                AppLog.debug("Bridge", "readState usb candidate index=\(index) failed: \(error.localizedDescription)")
+            }
+        }
+
+        deviceSessions[device.id]?.invalidateCachedTransaction()
+        if let firstError {
+            if Self.isUSBTelemetryUnavailableError(firstError), await usbDeviceIsAbsentAfterDiscoveryRefresh(device: device, operation: "read-state") { throw BridgeError.commandFailed("Device not available") }
+            throw firstError
+        }
+        throw BridgeError.commandFailed("USB device telemetry unavailable")
+    }
+
+    nonisolated static func genericMouseState(device: MouseDevice) -> MouseState {
+        MouseState(device: DeviceSummary(id: device.id, product_name: device.product_name, serial: device.serial, transport: device.transport, firmware: device.firmware),
+                   connection: device.connectionLabel, battery_percent: nil, charging: nil, dpi: nil,
+                   dpi_stages: DpiStages(active_stage: nil, values: nil), poll_rate: nil, device_mode: nil, led_value: nil,
+                   capabilities: Capabilities(dpi_stages: false, poll_rate: false, power_management: false, button_remap: false, lighting: false))
+    }
+
+    func rememberUSBSerial(_ rawSerial: String?, device: MouseDevice) {
+        guard let serial = DevicePersistenceKeys.normalizedStableSerial(rawSerial) else { return }
+        knownDeviceSerialByID[device.id] = serial
+        guard let instance = usbConnectionInstanceByDeviceID[device.id] else { return }
+        devicePreferenceStore.persistVerifiedUSBSerial(serial, connectionInstance: instance)
+    }
+
+    func readDpiStagesFast(device: MouseDevice) async throws -> (active: Int, values: [Int])? {
+        // Devices without DPI hardware must never receive DPI commands from the
+        // fast-poll path; the UI is capability-gated, but this backend entry is
+        // also reachable directly through the background-service protocol.
+        guard device.supportsDPIControls else { return nil }
+        if device.transport == .bluetooth {
+            let supportsMappedOnboardProfiles = DeviceProfiles.resolve(vendorID: device.vendor_id, productID: device.product_id, transport: device.transport)?.supportsMappedOnboardProfileCRUD == true
+            if passiveDpiObservedDeviceIDs.contains(device.id), let state = lastStateByDeviceID[device.id], let active = state.dpi_stages.active_stage, let values = state.dpi_stages.values, !values.isEmpty { return (active: max(0, min(values.count - 1, active)), values: values) }
+            if supportsMappedOnboardProfiles {
+                guard let state = lastStateByDeviceID[device.id], let values = state.dpi_stages.values, !values.isEmpty else { return nil }
+                let active = max(0, min(values.count - 1, state.dpi_stages.active_stage ?? 0))
+                return (active: active, values: values)
+            }
+            guard let parsed = try await btGetDpiStages(device: device) else { return nil }
+            let now = Date()
+            if passiveDpiObservedDeviceIDs.contains(device.id),
+                Self.shouldResetBluetoothPassiveObservation(
+                    BluetoothPassiveObservationResetContext(previousState: lastStateByDeviceID[device.id], active: parsed.active, values: parsed.values, lastHeartbeatAt: passiveDpiLastHeartbeatAtByDeviceID[device.id], lastObservedAt: passiveDpiLastObservedAtByDeviceID[device.id], now: now))
+            {
+                AppLog.debug("Bridge", "passiveDpi reset device=\(device.id) reason=watchdog-miss; fast polling will resume")
+                clearPassiveDpiObservation(deviceID: device.id, reason: "watchdog-miss")
+                await rearmPassiveDpi(deviceID: device.id, reason: "watchdog-miss")
+            }
+            return (active: parsed.active, values: parsed.values)
+        }
+
+        guard device.transport == .usb else { return nil }
+        try await deferUSBReconnectReadIfNeeded(deviceID: device.id, operation: "fast-dpi-read")
+        let orderedSessions = sessionsFor(device: device)
+        guard !orderedSessions.isEmpty else { return nil }
+        guard orderedSessions.contains(where: \.supportsControlReports) else { return nil }
+
+        var firstError: Error?
+        for session in orderedSessions {
+            do {
+                let snapshot = try session.withExclusiveDeviceAccess { () throws -> (active: Int, values: [Int])? in
+                    guard let stages = try getDPIStageSnapshot(session, device) else { return nil }
+                    let liveDpi = try getDPI(session, device)?.0
+                    let active = Self.resolvedUSBFastDpiActiveStage(stages: stages, liveDpi: liveDpi)
+                    AppLog.debug("Bridge", "readDpiStagesFast usb device=\(device.id) tableActive=\(stages.active) " + "liveX=\(liveDpi.map(String.init) ?? "nil") resolved=\(active) " + "values=\(stages.values.map(String.init).joined(separator: ","))")
+                    return (active: active, values: stages.values)
+                }
+                guard let snapshot else { continue }
+                deviceSessions[device.id] = session
+                await maybeUpgradeUSBPassiveDpiFromPolling(device: device, reason: "fast-poll-ok")
+                return snapshot
+            } catch { if firstError == nil { firstError = error } }
+        }
+
+        if let firstError {
+            if Self.isUSBTelemetryUnavailableError(firstError), await usbDeviceIsAbsentAfterDiscoveryRefresh(device: device, operation: "fast-dpi-read") { throw BridgeError.commandFailed("Device not available") }
+            throw firstError
+        }
+        return nil
+    }
+
+    func readLightingColor(device: MouseDevice) async throws -> RGBPatch? {
+        guard device.transport == .bluetooth else { return nil }
+        if usesBluetoothZoneStateLighting(device) {
+            let ledIDs = bluetoothLightingLEDIDs(device: device)
+            var colors: [(UInt8, RGBPatch)] = []
+            for ledID in ledIDs { if let color = try await btReadLightingColor(device: device, ledID: ledID) { colors.append((ledID, color)) } }
+            guard let first = colors.first?.1 else { return nil }
+            if colors.contains(where: { $0.1 != first }) { AppLog.debug("Bridge", "readLightingColor zone-mismatch device=\(device.id) colors=\(formatLightingZoneColors(colors))") }
+            return first
+        }
+
+        return try await btReadLightingColor(device: device, ledID: 0x01)
+    }
+
+}

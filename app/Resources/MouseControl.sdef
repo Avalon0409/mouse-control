@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dictionary xmlns:xi="http://www.w3.org/2003/XInclude">
+    <xi:include href="file:///System/Library/ScriptingDefinitions/CocoaStandard.sdef" xpointer="xpointer(/dictionary/suite)"/>
+    <suite name="MouseControl Suite" code="MCSC" description="MouseControl scroll controls.">
+        <class-extension extends="application">
+            <property name="enabled" code="MCen" type="boolean" description="Enable or disable independent scroll processing.">
+                <cocoa key="scrollEnabled"/>
+            </property>
+        </class-extension>
+    </suite>
+</dictionary>

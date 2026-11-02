@@ -1,0 +1,110 @@
+import Foundation
+import OpenSnekCore
+
+/// Groups dependencies used to build the app environment.
+private struct AppEnvironmentConfiguration {
+    let launchRole: OpenSnekProcessRole
+    let releaseUpdateChecker: any ReleaseUpdateChecking
+    let softwareUpdateInstaller: any SoftwareUpdateInstalling
+    let currentAppVersion: String?
+    let shouldCheckForReleaseUpdates: Bool
+    let backend: any DeviceBackend
+    let serviceCoordinator: BackgroundServiceCoordinator
+}
+
+/// Coordinates app state behavior.
+@MainActor final class AppState {
+    let environment: AppEnvironment
+    let deviceStore: DeviceStore
+    let editorStore: EditorStore
+    let runtimeStore: RuntimeStore
+    let deviceController: AppStateDeviceController
+    let editorController: AppStateEditorController
+    let applyController: AppStateApplyController
+    let runtimeController: AppStateRuntimeController
+    private var autoStartRuntimeTask: Task<Void, Never>?
+
+    init(
+        launchRole: OpenSnekProcessRole = .current, backend: (any DeviceBackend)? = nil, releaseUpdateChecker: (any ReleaseUpdateChecking)? = nil, currentAppVersion: String? = ReleaseUpdateChecker.currentAppVersion(), shouldCheckForReleaseUpdates: Bool = ReleaseUpdateChecker.shouldCheckForUpdates(),
+        serviceCoordinator: BackgroundServiceCoordinator = .shared, softwareUpdateInstaller: (any SoftwareUpdateInstalling)? = nil, autoStart: Bool = true, statusItemDpiDisplayDuration: TimeInterval = 3.0
+    ) {
+        let initialBackend: any DeviceBackend = backend ?? Self.initialBackend(launchRole: launchRole, serviceCoordinator: serviceCoordinator)
+        let updateChecker: any ReleaseUpdateChecking = releaseUpdateChecker ?? ReleaseUpdateChecker()
+        let updateInstaller: any SoftwareUpdateInstalling = softwareUpdateInstaller ?? SparkleSoftwareUpdateInstaller.shared
+        let environmentConfiguration = AppEnvironmentConfiguration(
+            launchRole: launchRole, releaseUpdateChecker: updateChecker, softwareUpdateInstaller: updateInstaller, currentAppVersion: currentAppVersion, shouldCheckForReleaseUpdates: shouldCheckForReleaseUpdates, backend: initialBackend, serviceCoordinator: serviceCoordinator)
+        let environment = Self.makeEnvironment(environmentConfiguration)
+        let buttonSlots: [ButtonSlotDescriptor] = ButtonSlotDescriptor.defaults
+        self.environment = environment
+        self.deviceStore = DeviceStore(environment: environment)
+        self.editorStore = EditorStore(deviceStore: deviceStore)
+        self.runtimeStore = Self.makeRuntimeStore(environment: environment, serviceCoordinator: serviceCoordinator, statusItemDpiDisplayDuration: statusItemDpiDisplayDuration)
+        self.deviceController = AppStateDeviceController(environment: environment, deviceStore: deviceStore)
+        self.editorController = AppStateEditorController(environment: environment, deviceStore: deviceStore, editorStore: editorStore, buttonSlots: buttonSlots)
+        self.applyController = AppStateApplyController(environment: environment, deviceStore: deviceStore, editorStore: editorStore, runtimeStore: runtimeStore)
+        self.runtimeController = AppStateRuntimeController(environment: environment, deviceStore: deviceStore, runtimeStore: runtimeStore)
+
+        wireGraph(backendWasInjected: backend != nil, autoStart: autoStart)
+    }
+
+    private static func initialBackend(launchRole: OpenSnekProcessRole, serviceCoordinator: BackgroundServiceCoordinator) -> any DeviceBackend {
+        #if DEBUG
+            if OpenSnekUITestSupport.forcesLocalBackend { return LocalBridgeBackend.shared }
+        #endif
+        if launchRole.isService || !serviceCoordinator.backgroundServiceEnabled { return LocalBridgeBackend.shared }
+        return BootstrapPendingBackend.shared
+    }
+
+    private static func makeEnvironment(_ configuration: AppEnvironmentConfiguration) -> AppEnvironment {
+        AppEnvironment(
+            launchRole: configuration.launchRole, releaseUpdateChecker: configuration.releaseUpdateChecker, currentAppVersion: configuration.currentAppVersion, shouldCheckForReleaseUpdates: configuration.shouldCheckForReleaseUpdates, backend: configuration.backend,
+            serviceCoordinator: configuration.serviceCoordinator, softwareUpdateInstaller: configuration.softwareUpdateInstaller)
+    }
+
+    private static func makeRuntimeStore(environment: AppEnvironment, serviceCoordinator: BackgroundServiceCoordinator, statusItemDpiDisplayDuration: TimeInterval) -> RuntimeStore {
+        RuntimeStore(environment: environment, backgroundServiceEnabled: serviceCoordinator.backgroundServiceEnabled, launchAtStartupEnabled: serviceCoordinator.launchAtStartupEnabled, statusItemDpiDisplayDuration: statusItemDpiDisplayDuration)
+    }
+
+    deinit {
+        let autoStartRuntimeTask = self.autoStartRuntimeTask
+        let deviceController = self.deviceController
+        let applyController = self.applyController
+        let editorController = self.editorController
+        let runtimeController = self.runtimeController
+
+        @MainActor func tearDownControllers() {
+            autoStartRuntimeTask?.cancel()
+            deviceController.tearDown()
+            applyController.tearDown()
+            editorController.tearDown()
+            runtimeController.tearDown()
+        }
+
+        if Thread.isMainThread {
+            MainActor.assumeIsolated { tearDownControllers() }
+        } else {
+            let group = DispatchGroup()
+            group.enter()
+            Task { @MainActor in
+                tearDownControllers()
+                group.leave()
+            }
+            group.wait()
+        }
+    }
+
+    private func wireGraph(backendWasInjected: Bool, autoStart: Bool) {
+        deviceController.bind(editorController: editorController, applyController: applyController, runtimeController: runtimeController)
+        editorController.bind(applyController: applyController)
+        applyController.bind(deviceController: deviceController, editorController: editorController, runtimeController: runtimeController)
+        runtimeController.bind(deviceController: deviceController)
+
+        deviceStore.bind(deviceController: deviceController, applyController: applyController, runtimeController: runtimeController, runtimeStore: runtimeStore, editorStore: editorStore)
+        editorStore.bind(editorController: editorController, applyController: applyController)
+        runtimeStore.bind(runtimeController: runtimeController)
+
+        runtimeController.setBackendReady(environment.launchRole.isService || backendWasInjected || !environment.serviceCoordinator.backgroundServiceEnabled)
+        runtimeController.scheduleBackendStateUpdatesBootstrap()
+        if environment.launchRole.isService, autoStart { autoStartRuntimeTask = Task { [weak self] in await self?.runtimeController.start() } }
+    }
+}

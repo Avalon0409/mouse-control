@@ -1,0 +1,420 @@
+import Foundation
+
+/// Groups button binding support helpers.
+public enum ButtonBindingSupport {
+    public static let defaultBasiliskDPIClutchDPI = 400
+    public static let defaultTurboRate = 0x8E
+    public static let minimumTurboRate = 1
+    public static let maximumTurboRate = 255
+    public static let minimumTurboPressesPerSecond = 1
+    public static let maximumTurboPressesPerSecond = 20
+
+    // Basilisk V3-family USB wheel tilt stores 0x68/0x69 inside a mouse-turbo block.
+    private static let horizontalScrollLeftButtonID: UInt8 = 0x68
+    private static let horizontalScrollRightButtonID: UInt8 = 0x69
+    private static let basiliskV3FamilyHorizontalScrollTurboRate = 0x14
+
+    // Naga Pro USB wheel tilt reuses the vertical scroll button IDs (0x09/0x0A) inside the same class-0x0E block.
+    private static let nagaProHorizontalScrollLeftButtonID: UInt8 = 0x09
+    private static let nagaProHorizontalScrollRightButtonID: UInt8 = 0x0A
+
+    // Native Naga-family side-plate defaults, captured from the firmware's unassigned onboard banks:
+    // Naga Pro (2.4 GHz receiver 1532:0090, firmware 0x00112100), Naga V2 Pro (1532:00A8, firmware
+    // 0x02142000), and Naga V3 Pro (1532:00E8, firmware 0x02010201). All three answer the same
+    // length-0x01 keyboard encoding, where the 12-button plate defaults to keyboard 1..9, 0, -, =
+    // and the 6-button plate to keyboard 1..6. Native blocks declare a function-data length of 0x01
+    // while still placing the HID key in byte 3, and the Naga family keeps the Basilisk-family
+    // wheel-tilt button IDs 0x68 / 0x69.
+    // See captures/usb/2026-10-05-naga-pro-native-default-banks/,
+    // captures/usb/2026-10-06-naga-pro-side-panel-validation/,
+    // captures/usb/2026-10-06-naga-v2-pro-wireless/, and captures/usb/2026-10-17-naga-v3-pro/.
+    private static let nagaFamilyNativeKeyboardKeyBySlot: [Int: UInt8] = [64: 0x1E, 65: 0x1F, 66: 0x20, 67: 0x21, 68: 0x22, 69: 0x23, 70: 0x24, 71: 0x25, 72: 0x26, 73: 0x27, 74: 0x2D, 75: 0x2E, 80: 0x1E, 81: 0x1F, 82: 0x20, 83: 0x21, 84: 0x22, 85: 0x23]
+
+    private static let nagaFamilyNativeHorizontalScrollRate: UInt8 = 0x14
+
+    private static func nagaFamilyNativeKeyboardBlock(hidKey: UInt8) -> [UInt8] { [0x02, 0x01, 0x00, hidKey, 0x00, 0x00, 0x00] }
+
+    private static func nagaFamilyNativeHorizontalScrollBlock(buttonID: UInt8) -> [UInt8] { [0x0E, 0x01, buttonID, 0x00, nagaFamilyNativeHorizontalScrollRate, 0x00, 0x00] }
+
+    // Naga V3 Pro factory blocks for the body buttons that carry vendor-specific actions. Physical
+    // press validation identified each one (see captures/usb/2026-10-17-naga-v3-pro/), and every
+    // slot round-tripped a same-value write on both the live and persistent layers, so these stay
+    // editable and keep their factory block as the restore target.
+    private static let nagaV3ProNativeBlockBySlot: [Int: [UInt8]] = [
+        11: [0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00],  // front index-finger button (factory DPI action)
+        12: [0x06, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00],  // rear index-finger button (factory DPI action)
+        14: [0x07, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00],  // underside profile button (factory onboard-profile cycle)
+        57: [0x0C, 0x01, 0x39, 0x00, 0x00, 0x00, 0x00],  // pinky button
+        106: [0x12, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00],  // front scroll-wheel button (factory scroll wheel mode cycle)
+        128: [0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00]  // rear scroll-wheel button (factory no-action form)
+    ]
+
+    private static func horizontalScrollButtonID(for kind: ButtonBindingKind, profileID: DeviceProfileID?) -> UInt8? {
+        switch kind {
+        case .scrollLeft: return profileID == .nagaPro ? nagaProHorizontalScrollLeftButtonID : horizontalScrollLeftButtonID
+        case .scrollRight: return profileID == .nagaPro ? nagaProHorizontalScrollRightButtonID : horizontalScrollRightButtonID
+        default: return nil
+        }
+    }
+
+    private static func horizontalScrollKind(forButtonID buttonID: UInt8, profileID: DeviceProfileID?) -> ButtonBindingKind? {
+        guard profileID == .nagaPro else { return nil }
+        switch buttonID {
+        case nagaProHorizontalScrollLeftButtonID: return .scrollLeft
+        case nagaProHorizontalScrollRightButtonID: return .scrollRight
+        default: return nil
+        }
+    }
+
+    public static func clampTurboRate(_ turboRate: Int) -> Int { max(minimumTurboRate, min(maximumTurboRate, turboRate)) }
+
+    public static func clampTurboPressesPerSecond(_ pressesPerSecond: Int) -> Int { max(minimumTurboPressesPerSecond, min(maximumTurboPressesPerSecond, pressesPerSecond)) }
+
+    private static func basiliskDPIClutchBlock(dpi: Int = defaultBasiliskDPIClutchDPI, profileID: DeviceProfileID = .basiliskV3Pro) -> [UInt8] {
+        let clamped = UInt16(DeviceProfiles.clampDPI(dpi, profileID: profileID))
+        let hi = UInt8((clamped >> 8) & 0xFF)
+        let lo = UInt8(clamped & 0xFF)
+        // Observed Basilisk clutch payload encodes symmetric X/Y DPI.
+        return [0x06, 0x05, 0x05, hi, lo, hi, lo]
+    }
+
+    private static func basiliskDPIClutchDPI(from functionBlock: [UInt8], profileID: DeviceProfileID) -> Int? {
+        guard functionBlock.count == 7, functionBlock[0] == 0x06, functionBlock[1] == 0x05, functionBlock[2] == 0x05 else { return nil }
+        let dpiX = (Int(functionBlock[3]) << 8) | Int(functionBlock[4])
+        let dpiY = (Int(functionBlock[5]) << 8) | Int(functionBlock[6])
+        guard dpiX == dpiY else { return nil }
+        return DeviceProfiles.clampDPI(dpiX, profileID: profileID)
+    }
+
+    private static func basiliskV3FamilyHorizontalScrollBlock(buttonID: UInt8, turboRate: Int = basiliskV3FamilyHorizontalScrollTurboRate) -> [UInt8] {
+        let turbo = UInt16(clampTurboRate(turboRate))
+        let turboHi = UInt8((turbo >> 8) & 0xFF)
+        let turboLo = UInt8(turbo & 0xFF)
+        return [0x0E, 0x03, buttonID, turboHi, turboLo, 0x00, 0x00]
+    }
+
+    private static func basiliskV3FamilyShortHorizontalScrollBlock(buttonID: UInt8, turboRate: Int = basiliskV3FamilyHorizontalScrollTurboRate) -> [UInt8] {
+        let turbo = UInt16(clampTurboRate(turboRate))
+        let turboHi = UInt8((turbo >> 8) & 0xFF)
+        let turboLo = UInt8(turbo & 0xFF)
+        return [0x0E, 0x01, buttonID, turboHi, turboLo, 0x00, 0x00]
+    }
+
+    private static func usesBasiliskV3FamilyHorizontalScrollBlock(_ profileID: DeviceProfileID?) -> Bool { isBasiliskV3Family(profileID) }
+
+    // The Naga family writes wheel tilt as a class-0x0E horizontal-scroll block. The Naga V2 Pro
+    // accepts both the firmware-native length-0x01 block and the turbo length-0x03 block; remaps use
+    // the same turbo-capable form as the Basilisk family, which the attached device round-trips.
+    private static func supportsTurboHorizontalScrollBlocks(_ profileID: DeviceProfileID?) -> Bool { isBasiliskV3Family(profileID) || isNagaFamily(profileID) }
+
+    private static func usesNativeNagaHorizontalScrollDefaults(_ profileID: DeviceProfileID?) -> Bool { profileID == .nagaV2Pro || profileID == .nagaV3Pro }
+
+    private static func isNagaFamily(_ profileID: DeviceProfileID?) -> Bool { profileID?.isNagaFamily == true }
+
+    private static func isBasiliskV3Family(_ profileID: DeviceProfileID?) -> Bool {
+        switch profileID {
+        case .basiliskV3, .basiliskV3Pro, .basiliskV335K, .basiliskV3Pro35K: return true
+        case .basiliskV3XHyperspeed, .orochiV2, .nagaPro, .nagaV2Pro, .nagaV3Pro, .basilisk, .lanceheadTournamentEdition, .huntsmanMini, .tartarusPro, .mouseDock, .mouseDockPro, .none: return false
+        }
+    }
+
+    private static func defaultHorizontalScrollButtonID(forSlot slot: UInt8) -> UInt8? {
+        switch slot {
+        case 0x34: return horizontalScrollLeftButtonID
+        case 0x35: return horizontalScrollRightButtonID
+        default: return nil
+        }
+    }
+
+    public static func defaultDPIClutchDPI(for profileID: DeviceProfileID?) -> Int? {
+        switch profileID {
+        case .basiliskV3, .basiliskV3Pro, .basiliskV335K, .basiliskV3Pro35K: return defaultBasiliskDPIClutchDPI
+        case .basiliskV3XHyperspeed, .orochiV2, .nagaPro, .nagaV2Pro, .nagaV3Pro, .basilisk, .lanceheadTournamentEdition, .huntsmanMini, .tartarusPro, .mouseDock, .mouseDockPro, .none: return nil
+        }
+    }
+
+    public static func defaultButtonBinding(for slot: Int, profileID: DeviceProfileID? = nil) -> ButtonBindingDraft {
+        let fallback = ButtonBindingDraft(kind: .default, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate)
+        let visibleSlots = buttonSlotDescriptors(for: profileID)
+        guard visibleSlots.contains(where: { $0.slot == slot }) else { return fallback }
+        return fallback
+    }
+
+    public static func supportsDefaultRestore(for slot: Int, profileID: DeviceProfileID? = nil) -> Bool { defaultUSBFunctionBlock(for: slot, profileID: profileID) != nil }
+
+    public static func completeDefaultUSBFunctionBlocks(for slots: [Int], profileID: DeviceProfileID? = nil) -> [Int: [UInt8]]? {
+        let blocks = slots.reduce(into: [Int: [UInt8]]()) { result, slot in result[slot] = defaultUSBFunctionBlock(for: slot, profileID: profileID) }
+        return blocks.count == Set(slots).count ? blocks : nil
+    }
+
+    public static func semanticDefaultButtonBinding(for slot: Int, profileID: DeviceProfileID? = nil) -> ButtonBindingDraft? {
+        switch slot {
+        case 15 where isBasiliskV3Family(profileID): return ButtonBindingDraft(kind: .dpiClutch, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate, clutchDPI: defaultDPIClutchDPI(for: profileID))
+        case 52 where isBasiliskV3Family(profileID): return ButtonBindingDraft(kind: .scrollLeft, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate)
+        case 53 where isBasiliskV3Family(profileID): return ButtonBindingDraft(kind: .scrollRight, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate)
+        case 96:
+            switch profileID {
+            case .basiliskV3, .basiliskV3Pro, .basiliskV335K, .basiliskV3Pro35K, .basiliskV3XHyperspeed, .orochiV2, .nagaPro, .nagaV2Pro, .basilisk, .lanceheadTournamentEdition, .none: return ButtonBindingDraft(kind: .dpiCycle, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate)
+            case .nagaV3Pro, .huntsmanMini, .tartarusPro, .mouseDock, .mouseDockPro: return nil
+            }
+        default: return nil
+        }
+    }
+
+    public static func normalizedDefaultRepresentation(for slot: Int, draft: ButtonBindingDraft, profileID: DeviceProfileID? = nil) -> ButtonBindingDraft {
+        guard let semanticDefault = semanticDefaultButtonBinding(for: slot, profileID: profileID) else { return draft }
+        guard draft == semanticDefault || draft.kind == .default else { return draft }
+        return defaultButtonBinding(for: slot, profileID: profileID)
+    }
+
+    public static func usbFunctionBlockForWrite(slot: Int, draft: ButtonBindingDraft, profileID: DeviceProfileID? = nil) -> [UInt8] {
+        let resolved = draft.kind == .default ? semanticDefaultButtonBinding(for: slot, profileID: profileID) ?? draft : draft
+        return buildUSBFunctionBlock(slot: slot, kind: resolved.kind, hidKey: resolved.hidKey, hidModifiers: resolved.hidModifiers, turboEnabled: resolved.turboEnabled && resolved.kind.supportsTurbo, turboRate: resolved.turboRate, clutchDPI: resolved.clutchDPI, profileID: profileID)
+    }
+
+    public static func buttonBindingDraftFromUSBFunctionBlock(slot: Int, functionBlock: [UInt8], profileID: DeviceProfileID? = nil) -> ButtonBindingDraft? {
+        guard functionBlock.count == 7 else { return nil }
+
+        if let defaultBlock = defaultUSBFunctionBlock(for: slot, profileID: profileID), functionBlock == defaultBlock { return defaultButtonBinding(for: slot, profileID: profileID) }
+
+        if let semanticDefault = semanticDefaultButtonBinding(for: slot, profileID: profileID),
+            functionBlock
+                == buildUSBFunctionBlock(slot: slot, kind: semanticDefault.kind, hidKey: semanticDefault.hidKey, hidModifiers: semanticDefault.hidModifiers, turboEnabled: semanticDefault.turboEnabled, turboRate: semanticDefault.turboRate, clutchDPI: semanticDefault.clutchDPI, profileID: profileID)
+        {
+            return defaultButtonBinding(for: slot, profileID: profileID)
+        }
+
+        if usesBasiliskV3FamilyHorizontalScrollBlock(profileID), let defaultButtonID = defaultHorizontalScrollButtonID(forSlot: UInt8(max(0, min(255, slot)))), functionBlock == basiliskV3FamilyShortHorizontalScrollBlock(buttonID: defaultButtonID) {
+            return defaultButtonBinding(for: slot, profileID: profileID)
+        }
+
+        let fnClass = functionBlock[0]
+        let length = max(0, min(5, Int(functionBlock[1])))
+        let data = Array(functionBlock[2..<(2 + length)])
+
+        switch fnClass {
+        case 0x00:
+            guard functionBlock == [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] else { return nil }
+            return ButtonBindingDraft(kind: .clearLayer, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate)
+        case 0x04:
+            if slot == 96, functionBlock == [0x04, 0x02, 0x0F, 0x7B, 0x00, 0x00, 0x00] { return ButtonBindingDraft(kind: .dpiCycle, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate) }
+            return nil
+        case 0x06:
+            if functionBlock == [0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00] { return ButtonBindingDraft(kind: .dpiCycle, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate) }
+            if let profileID, isBasiliskV3Family(profileID), let dpi = basiliskDPIClutchDPI(from: functionBlock, profileID: profileID) {
+                return ButtonBindingDraft(kind: .dpiClutch, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate, clutchDPI: DeviceProfiles.clampDPI(dpi, profileID: profileID))
+            }
+            return nil
+        case 0x01:
+            guard let mouseButton = data.first, let kind = buttonKindFromUSBMouseButton(mouseButton) else { return nil }
+            return ButtonBindingDraft(kind: kind, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate)
+        case 0x02:
+            guard !data.isEmpty else { return nil }
+            // Native default blocks declare function-data length 0x01 while still placing the HID key
+            // in byte 3. The Naga Pro and Naga V2 Pro native banks both store `02 01 00 1e` for
+            // keyboard `1`, so fall back to byte 3 when the declared length omits the key.
+            // See captures/usb/2026-10-06-naga-v2-pro-wireless/ and
+            // captures/usb/2026-10-05-naga-pro-native-default-banks/.
+            let hidModifiers = Int(data[0])
+            let hidKey = data.count >= 2 ? Int(data[1]) : Int(functionBlock[3])
+            return ButtonBindingDraft(kind: .keyboardSimple, hidKey: max(4, min(231, hidKey)), hidModifiers: max(0, min(255, hidModifiers)), turboEnabled: false, turboRate: defaultTurboRate)
+        case 0x0D:
+            guard data.count >= 4 else { return nil }
+            let hidModifiers = Int(data[0])
+            let hidKey = Int(data[1])
+            let rawRate = (Int(data[2]) << 8) | Int(data[3])
+            return ButtonBindingDraft(kind: .keyboardSimple, hidKey: max(4, min(231, hidKey)), hidModifiers: max(0, min(255, hidModifiers)), turboEnabled: true, turboRate: clampTurboRate(rawRate))
+        case 0x0E:
+            guard let buttonID = data.first, let kind = horizontalScrollKind(forButtonID: buttonID, profileID: profileID) ?? buttonKindFromUSBMouseButton(buttonID) else { return nil }
+            guard data.count >= 3 else { return ButtonBindingDraft(kind: kind, hidKey: 4, turboEnabled: false, turboRate: defaultTurboRate) }
+            let rawRate = (Int(data[1]) << 8) | Int(data[2])
+            return ButtonBindingDraft(kind: kind, hidKey: 4, turboEnabled: true, turboRate: clampTurboRate(rawRate))
+        default: return nil
+        }
+    }
+
+    public static func extractUSBFunctionBlock(response: [UInt8], profile: UInt8, slot: UInt8, hypershift: UInt8, profileID: DeviceProfileID? = nil) -> [UInt8]? {
+        guard response.count >= 18, response[8] == profile, response[9] == slot else { return nil }
+
+        if usesExtendedBasiliskUSBReadLayout(profileID) { return Array(response[11..<18]) }
+
+        // Naga Pro returns the stored layer flag at byte 10, which need not match the request.
+        // Keep the layer-echo check for other profiles: a flagless keyboard shortcut can also
+        // parse at byte 11, silently changing its key and modifiers instead of using the fallback.
+        var candidates: [[UInt8]] = []
+        if profileID == .nagaPro || response[10] == hypershift { candidates.append(Array(response[11..<18])) }
+        candidates.append(Array(response[10..<17]))
+
+        if let defaultBlock = defaultUSBFunctionBlock(for: Int(slot), profileID: profileID), let matchedDefault = candidates.first(where: { $0 == defaultBlock }) { return matchedDefault }
+
+        if let parsed = candidates.first(where: { buttonBindingDraftFromUSBFunctionBlock(slot: Int(slot), functionBlock: $0, profileID: profileID) != nil }) { return parsed }
+
+        return candidates.first
+    }
+
+    public static func turboRawToPressesPerSecond(_ rawRate: Int) -> Int {
+        let raw = clampTurboRate(rawRate)
+        let rawSpan = Double(maximumTurboRate - minimumTurboRate)
+        let ppsSpan = Double(maximumTurboPressesPerSecond - minimumTurboPressesPerSecond)
+        let scaled = Double(maximumTurboPressesPerSecond) - (Double(raw - minimumTurboRate) * ppsSpan / rawSpan)
+        return clampTurboPressesPerSecond(Int(round(scaled)))
+    }
+
+    public static func turboPressesPerSecondToRaw(_ pressesPerSecond: Int) -> Int {
+        let pps = clampTurboPressesPerSecond(pressesPerSecond)
+        let rawSpan = Double(maximumTurboRate - minimumTurboRate)
+        let ppsSpan = Double(maximumTurboPressesPerSecond - minimumTurboPressesPerSecond)
+        let scaled = Double(minimumTurboRate) + (Double(maximumTurboPressesPerSecond - pps) * rawSpan / ppsSpan)
+        return clampTurboRate(Int(round(scaled)))
+    }
+
+    public static func buttonKindFromUSBMouseButton(_ value: UInt8) -> ButtonBindingKind? {
+        switch value {
+        case 0x01: return .leftClick
+        case 0x02: return .rightClick
+        case 0x03: return .middleClick
+        case 0x04: return .mouseBack
+        case 0x05: return .mouseForward
+        case 0x09: return .scrollUp
+        case 0x0A: return .scrollDown
+        case horizontalScrollLeftButtonID: return .scrollLeft
+        case horizontalScrollRightButtonID: return .scrollRight
+        default: return nil
+        }
+    }
+
+    public static func usbMouseButtonID(for kind: ButtonBindingKind) -> UInt8? {
+        switch kind {
+        case .leftClick: return 0x01
+        case .rightClick: return 0x02
+        case .middleClick: return 0x03
+        case .mouseBack: return 0x04
+        case .mouseForward: return 0x05
+        case .scrollUp: return 0x09
+        case .scrollDown: return 0x0A
+        case .scrollLeft: return horizontalScrollLeftButtonID
+        case .scrollRight: return horizontalScrollRightButtonID
+        default: return nil
+        }
+    }
+
+    public static func buildUSBFunctionBlock(slot: Int, kind: ButtonBindingKind, hidKey: Int, hidModifiers: Int = 0, turboEnabled: Bool, turboRate: Int, clutchDPI: Int? = nil, profileID: DeviceProfileID? = nil) -> [UInt8] {
+        let clampedKey = UInt8(max(0, min(255, hidKey)))
+        let clampedModifiers = UInt8(max(0, min(255, hidModifiers)))
+        let turbo = UInt16(clampTurboRate(turboRate))
+        let turboHi = UInt8((turbo >> 8) & 0xFF)
+        let turboLo = UInt8(turbo & 0xFF)
+
+        switch kind {
+        case .default: return defaultUSBFunctionBlock(for: slot, profileID: profileID) ?? [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+        case .dpiCycle: return [0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00]
+        case .dpiClutch: return basiliskDPIClutchBlock(dpi: clutchDPI ?? defaultBasiliskDPIClutchDPI, profileID: profileID ?? .basiliskV3Pro)
+        case .clearLayer: return [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+        case .keyboardSimple:
+            if turboEnabled { return [0x0D, 0x04, clampedModifiers, clampedKey, turboHi, turboLo, 0x00] }
+            return [0x02, 0x02, clampedModifiers, clampedKey, 0x00, 0x00, 0x00]
+        default:
+            if kind == .scrollLeft || kind == .scrollRight, let buttonID = horizontalScrollButtonID(for: kind, profileID: profileID), supportsTurboHorizontalScrollBlocks(profileID) {
+                let defaultRate = profileID == .nagaPro ? defaultTurboRate : basiliskV3FamilyHorizontalScrollTurboRate
+                return basiliskV3FamilyHorizontalScrollBlock(buttonID: buttonID, turboRate: turboEnabled ? turboRate : defaultRate)
+            }
+            if let buttonID = usbMouseButtonID(for: kind) {
+                if turboEnabled { return [0x0E, 0x03, buttonID, turboHi, turboLo, 0x00, 0x00] }
+                return [0x01, 0x01, buttonID, 0x00, 0x00, 0x00, 0x00]
+            }
+            return [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+        }
+    }
+
+    public static func defaultUSBFunctionBlock(for slot: Int, profileID: DeviceProfileID? = nil) -> [UInt8]? {
+        switch slot {
+        case 15 where usesCompactBasiliskDPIClutchDefault(profileID): return compactBasiliskDPIClutchDefaultBlock
+        case 15 where profileID == .basiliskV3Pro: return basiliskDPIClutchBlock(profileID: .basiliskV3Pro)
+        case 52 where usesExtendedBasiliskUSBReadLayout(profileID): return basiliskV3FamilyHorizontalScrollBlock(buttonID: horizontalScrollLeftButtonID)
+        case 53 where usesExtendedBasiliskUSBReadLayout(profileID): return basiliskV3FamilyHorizontalScrollBlock(buttonID: horizontalScrollRightButtonID)
+        // The Naga Pro's factory tilt blocks use the turbo length-0x03 form, unlike the V2 and V3
+        // Pro's firmware-native length-0x01 form.
+        case 52 where profileID == .nagaPro: return basiliskV3FamilyHorizontalScrollBlock(buttonID: nagaProHorizontalScrollLeftButtonID, turboRate: defaultTurboRate)
+        case 53 where profileID == .nagaPro: return basiliskV3FamilyHorizontalScrollBlock(buttonID: nagaProHorizontalScrollRightButtonID, turboRate: defaultTurboRate)
+        case 52 where usesNativeNagaHorizontalScrollDefaults(profileID): return nagaFamilyNativeHorizontalScrollBlock(buttonID: horizontalScrollLeftButtonID)
+        case 53 where usesNativeNagaHorizontalScrollDefaults(profileID): return nagaFamilyNativeHorizontalScrollBlock(buttonID: horizontalScrollRightButtonID)
+        // Bottom button factory block; cycles onboard profiles. Synapse rewrites the class-0x06
+        // `06 01 06` form when the button is remapped to DPI-stage cycling. Both Naga families ship
+        // this button at slot 14; the Naga Pro's unassigned banks hold the same `07 01 04` block.
+        case 14 where isNagaFamily(profileID): return [0x07, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00]
+        // The Naga Pro's DPI buttons share the V3 Pro's factory blocks; both were read from the
+        // device's unassigned banks, and both slots round-trip writes on the receiver.
+        case 11 where profileID == .nagaPro: return [0x06, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00]
+        case 12 where profileID == .nagaPro: return [0x06, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00]
+        case 96:
+            switch profileID {
+            case .basiliskV3, .basiliskV335K: return [0x04, 0x02, 0x0F, 0x7B, 0x00, 0x00, 0x00]
+            case .basiliskV3Pro, .basiliskV3Pro35K: return [0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00]
+            case .basiliskV3XHyperspeed, .orochiV2, .nagaPro, .nagaV2Pro, .basilisk, .lanceheadTournamentEdition, .none: return [0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00]
+            case .nagaV3Pro, .huntsmanMini, .tartarusPro, .mouseDock, .mouseDockPro: return nil
+            }
+        default: break
+        }
+        if isNagaFamily(profileID), let hidKey = nagaFamilyNativeKeyboardKeyBySlot[slot] { return nagaFamilyNativeKeyboardBlock(hidKey: hidKey) }
+        if profileID == .nagaV3Pro, let factoryBlock = nagaV3ProNativeBlockBySlot[slot] { return factoryBlock }
+        switch slot {
+        case 1: return [0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00]
+        case 2: return [0x01, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00]
+        case 3: return [0x01, 0x01, 0x03, 0x00, 0x00, 0x00, 0x00]
+        case 4: return [0x01, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00]
+        case 5: return [0x01, 0x01, 0x05, 0x00, 0x00, 0x00, 0x00]
+        case 9: return [0x01, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00]
+        case 10: return [0x01, 0x01, 0x0A, 0x00, 0x00, 0x00, 0x00]
+        case 96: return [0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00]
+        default: return nil
+        }
+    }
+
+    public static func describeUSBFunctionBlock(_ block: [UInt8]) -> String {
+        let hex = block.map { String(format: "%02x", $0) }.joined()
+        guard block.count == 7 else { return "block=\(hex)" }
+        let classID = block[0]
+        let length = Int(min(5, block[1]))
+        let data = Array(block[2..<(2 + length)])
+        let dataHex = data.map { String(format: "%02x", $0) }.joined()
+        if let clutchDPI = basiliskDPIClutchDPI(from: block, profileID: .basiliskV3Pro) { return "block=\(hex) class=0x\(String(format: "%02x", classID)) len=\(length) data=\(dataHex) dpi_clutch=\(clutchDPI)" }
+        return "block=\(hex) class=0x\(String(format: "%02x", classID)) len=\(length) data=\(dataHex)"
+    }
+
+    public static func availableButtonBindingKinds(profileID: DeviceProfileID?) -> [ButtonBindingKind] {
+        ButtonBindingKind.allCases.filter { kind in
+            switch kind {
+            case .dpiClutch: return isBasiliskV3Family(profileID)
+            default: return true
+            }
+        }
+    }
+
+    public static func availableButtonBindingKinds(for slot: Int, profileID: DeviceProfileID?) -> [ButtonBindingKind] { availableButtonBindingKinds(profileID: profileID).filter { kind in kind != .default || supportsDefaultRestore(for: slot, profileID: profileID) } }
+
+    private static func buttonSlotDescriptors(for profileID: DeviceProfileID?) -> [ButtonSlotDescriptor] {
+        switch profileID {
+        case .basiliskV3, .basiliskV3Pro, .basiliskV335K, .basiliskV3Pro35K: return DeviceProfiles.basiliskV3FamilyButtonSlots
+        case .basiliskV3XHyperspeed, .none: return DeviceProfiles.basiliskV3XButtonSlots
+        case .orochiV2: return DeviceProfiles.orochiV2BluetoothButtonSlots
+        case .nagaPro: return DeviceProfiles.nagaProUSBButtonSlots
+        case .nagaV2Pro: return DeviceProfiles.nagaV2ProUSBButtonSlots
+        case .nagaV3Pro: return DeviceProfiles.nagaV3ProUSBButtonSlots
+        case .basilisk, .lanceheadTournamentEdition: return ButtonSlotDescriptor.defaults
+        case .huntsmanMini, .tartarusPro, .mouseDock, .mouseDockPro: return []
+        }
+    }
+
+    private static func usesExtendedBasiliskUSBReadLayout(_ profileID: DeviceProfileID?) -> Bool { isBasiliskV3Family(profileID) }
+
+    // Factory sensitivity-clutch block (400 DPI) read back from untouched stored profiles. The
+    // Basilisk V3 Pro instead ships the `06 05 05` clutch form that `basiliskDPIClutchBlock` builds.
+    private static let compactBasiliskDPIClutchDefaultBlock: [UInt8] = [0x06, 0x01, 0x05, 0x01, 0x90, 0x01, 0x90]
+
+    private static func usesCompactBasiliskDPIClutchDefault(_ profileID: DeviceProfileID?) -> Bool {
+        switch profileID {
+        case .basiliskV3, .basiliskV335K, .basiliskV3Pro35K: return true
+        case .basiliskV3Pro, .basiliskV3XHyperspeed, .orochiV2, .nagaPro, .nagaV2Pro, .nagaV3Pro, .basilisk, .lanceheadTournamentEdition, .huntsmanMini, .tartarusPro, .mouseDock, .mouseDockPro, .none: return false
+        }
+    }
+}

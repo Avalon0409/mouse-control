@@ -1,0 +1,336 @@
+import AppKit
+import Foundation
+import Observation
+import OpenSnekCore
+import OpenSnekHardware
+import SwiftUI
+
+/// Coordinates persisted device state.
+@MainActor @Observable final class DeviceStore {
+    let environment: AppEnvironment
+    var devices: [MouseDevice] = []
+    var detectedDevices: [MouseDevice] = []
+    /// Keep every connection available to telemetry and recovery; show one row per physical mouse.
+    var visibleDevices: [MouseDevice] {
+        _ = connectionDiagnosticsRevision
+        _ = stateByDeviceID
+        return deviceController.physicalDevices(in: devices)
+    }
+    var selectedDeviceID: String?
+    var state: MouseState?
+    var stateByDeviceID: [String: MouseState] = [:]
+    /// Mirrors the controller's USB control availability so views can react to a device dropping
+    /// off the USB link without losing its last known state.
+    var usbControlAvailabilityByDeviceID: [String: USBControlAvailability] = [:]
+    var availableUpdate: ReleaseAvailability?
+    var updateInstallState: SoftwareUpdateInstallState = .idle
+    var isLoading = false
+    var isApplying = false
+    var isRefreshingState = false
+    var errorMessage: String?
+    var warningMessage: String?
+    var lastUpdated: Date?
+    var connectionDiagnosticsRevision = 0
+    var softwareLightingStatusByDeviceID: [String: SoftwareLightingEngineStatus] = [:]
+
+    @ObservationIgnored private weak var deviceControllerStorage: AppStateDeviceController?
+    @ObservationIgnored private weak var applyControllerStorage: AppStateApplyController?
+    @ObservationIgnored private weak var runtimeControllerStorage: AppStateRuntimeController?
+    @ObservationIgnored private weak var runtimeStoreStorage: RuntimeStore?
+    @ObservationIgnored private weak var editorStoreStorage: EditorStore?
+
+    init(environment: AppEnvironment) { self.environment = environment }
+
+    func bind(deviceController: AppStateDeviceController, applyController: AppStateApplyController, runtimeController: AppStateRuntimeController, runtimeStore: RuntimeStore, editorStore: EditorStore) {
+        self.deviceControllerStorage = deviceController
+        self.applyControllerStorage = applyController
+        self.runtimeControllerStorage = runtimeController
+        self.runtimeStoreStorage = runtimeStore
+        self.editorStoreStorage = editorStore
+    }
+
+    private var deviceController: AppStateDeviceController {
+        guard let deviceControllerStorage else { preconditionFailure("DeviceStore accessed before deviceController was bound") }
+        return deviceControllerStorage
+    }
+
+    private var applyController: AppStateApplyController {
+        guard let applyControllerStorage else { preconditionFailure("DeviceStore accessed before applyController was bound") }
+        return applyControllerStorage
+    }
+
+    private var runtimeController: AppStateRuntimeController {
+        guard let runtimeControllerStorage else { preconditionFailure("DeviceStore accessed before runtimeController was bound") }
+        return runtimeControllerStorage
+    }
+
+    private var editorStore: EditorStore {
+        guard let editorStoreStorage else { preconditionFailure("DeviceStore accessed before editorStore was bound") }
+        return editorStoreStorage
+    }
+
+    private var runtimeStore: RuntimeStore {
+        guard let runtimeStoreStorage else { preconditionFailure("DeviceStore accessed before runtimeStore was bound") }
+        return runtimeStoreStorage
+    }
+
+    var selectedDevice: MouseDevice? {
+        guard let selectedDeviceID else { return nil }
+        return devices.first(where: { $0.id == selectedDeviceID })
+    }
+
+    var hasRemovedDevices: Bool { _ = detectedDevices; return deviceController.hasRemovedDevices }
+    func removeDevice(_ device: MouseDevice) { deviceController.removeDevice(device) }
+    func restoreRemovedDevices() { deviceController.restoreRemovedDevices() }
+
+    /// Device IDs that are present but cannot currently be reached over USB.
+    var usbUnavailableDeviceIDs: Set<String> { Set(usbControlAvailabilityByDeviceID.filter { $0.value.blocksUSBControlInteraction }.keys) }
+
+    var usesRemoteServiceTransport: Bool { environment.usesRemoteServiceTransport }
+
+    var selectedDeviceIsStrictlyUnsupported: Bool {
+        guard let selectedDevice else { return false }
+        return deviceController.isStrictlyUnsupported(selectedDevice)
+    }
+
+    var selectedDeviceIsUnsupportedUSB: Bool {
+        guard let selectedDevice else { return false }
+        return !selectedDevice.usesGenericControls && selectedDevice.transport == .usb && resolvedProfile(for: selectedDevice) == nil
+    }
+
+    var selectedDeviceControlsEnabled: Bool {
+        _ = connectionDiagnosticsRevision
+        guard let selectedDevice else { return false }
+        return deviceController.connectionState(for: selectedDevice).allowsInteraction
+    }
+
+    func connectionState(for device: MouseDevice) -> DeviceConnectionState {
+        _ = connectionDiagnosticsRevision
+        return deviceController.connectionState(for: device)
+    }
+
+    var selectedDeviceSupportsPassiveDPIInput: Bool {
+        guard let selectedDevice else { return false }
+        return resolvedProfile(for: selectedDevice)?.passiveDPIInput != nil
+    }
+
+    /// Whether the menu bar should offer DPI editing for the selected device. Lighting-only
+    /// devices (the Mouse Dock, Huntsman Mini, Tartarus Pro) have no DPI controls to edit.
+    var selectedDeviceSupportsDPIControls: Bool { selectedDevice?.supportsDPIControls == true }
+
+    /// Whether the selected device is a connected lighting-only device that the menu bar can
+    /// point at the full app instead of showing DPI controls.
+    var selectedDeviceIsLightingOnly: Bool {
+        guard let selectedDevice else { return false }
+        return !selectedDevice.supportsDPIControls && selectedDevice.showsLightingControls
+    }
+
+    var selectedSoftwareLightingStatus: SoftwareLightingEngineStatus? {
+        guard let selectedDeviceID else { return nil }
+        return softwareLightingStatusByDeviceID[selectedDeviceID]
+    }
+
+    var currentBuildChannel: AppBuildChannel { ReleaseUpdateChecker.currentBuildChannel() }
+
+    func installAvailableUpdate() { Task { await runtimeController.installAvailableUpdate() } }
+
+    func openAvailableUpdateChangelog() {
+        guard let availableUpdate else { return }
+        NSWorkspace.shared.open(availableUpdate.releaseURL)
+    }
+
+    func resetUpdateInstallState() { updateInstallState = .idle }
+
+    var selectedDeviceInteractionMessage: String? {
+        _ = connectionDiagnosticsRevision
+        guard let selectedDevice else { return nil }
+        switch deviceController.connectionState(for: selectedDevice) {
+        case .reconnecting: return "Reconnecting to live telemetry. Controls will unlock automatically."
+        case .disconnected:
+            if selectedDevice.transport == .usb {
+                if deviceController.usbControlAvailability(for: selectedDevice) == .receiverAbsent { return "The USB receiver is not detected. Reconnect the dongle to continue." }
+                return "The USB dongle is connected, but the device is not responding. Wake or power on the device to reconnect."
+            }
+            return "This device is disconnected. Controls will unlock after it reconnects."
+        case .error: return errorMessage ?? "Live telemetry is unavailable right now."
+        case .unsupported:
+            if selectedDevice.transport == .usb, deviceController.usbControlAvailability(for: selectedDevice) == .noControlInterface {
+                return "This Razer device does not expose the standard Razer USB control interface on macOS, so OpenSnek cannot configure it. Its normal functions (such as audio and media keys) are unaffected."
+            }
+            return nil
+        case .connected: return nil
+        }
+    }
+
+    var currentDeviceStatusIndicator: DeviceStatusIndicator {
+        _ = connectionDiagnosticsRevision
+        guard let selectedDevice else { return DeviceConnectionState.disconnected.indicator }
+        let base = deviceController.statusIndicator(for: selectedDevice)
+        guard deviceController.connectionState(for: selectedDevice) == .connected, selectedDeviceSupportsPassiveDPIInput, deviceController.dpiUpdateTransportStatus(for: selectedDevice) == .pollingFallback else { return base }
+        return DeviceStatusIndicator(label: base.label, color: Color(hex: 0xF4C65D))
+    }
+
+    var currentDeviceStatusTooltip: String? {
+        _ = connectionDiagnosticsRevision
+        guard let selectedDevice else { return nil }
+        let telemetryStatus = deviceController.connectionState(for: selectedDevice)
+        let realtimeStatus = deviceController.dpiUpdateTransportStatus(for: selectedDevice)
+        let controlTransport = state?.connection ?? selectedDevice.connectionLabel
+
+        let realtimeLabel: String
+        if selectedDeviceSupportsPassiveDPIInput { realtimeLabel = realtimeStatus.diagnosticsLabel } else { realtimeLabel = "Not used on this device" }
+
+        return [
+            "Control transport: \(controlTransport)", "Telemetry: \(telemetryStatus.diagnosticsLabel)", selectedDevice.transport == .usb ? "USB control: \(deviceController.usbControlAvailability(for: selectedDevice).diagnosticsLabel)" : nil, "Real-time HID: \(realtimeLabel)",
+            "Input Monitoring: \(runtimeStore.hidAccessStatus.diagnosticsLabel)"
+        ].compactMap { $0 }.joined(separator: "\n")
+    }
+
+    var currentDeviceConnectionTooltip: String? {
+        _ = connectionDiagnosticsRevision
+        guard let selectedDevice else { return nil }
+        let telemetryStatus = deviceController.connectionState(for: selectedDevice)
+        let realtimeStatus = deviceController.dpiUpdateTransportStatus(for: selectedDevice)
+        let controlTransport = state?.connection ?? selectedDevice.connectionLabel
+
+        var lines = ["Transport: \(selectedDevice.connectionLabel)", "Connection state: \(telemetryStatus.diagnosticsLabel)", "Control transport: \(controlTransport)"]
+
+        if selectedDevice.transport == .usb { lines.append("USB control: \(deviceController.usbControlAvailability(for: selectedDevice).diagnosticsLabel)") }
+
+        if selectedDeviceSupportsPassiveDPIInput {
+            lines.append("Real-time HID: \(realtimeStatus.diagnosticsLabel)")
+            lines.append("Input Monitoring: \(runtimeStore.hidAccessStatus.diagnosticsLabel)")
+        }
+
+        return lines.joined(separator: "\n")
+    }
+
+    var visibleButtonSlots: [ButtonSlotDescriptor] { selectedDevice?.button_layout?.visibleSlots ?? ButtonSlotDescriptor.defaults }
+
+    var hiddenUnsupportedButtonSlots: [DocumentedButtonSlot] {
+        guard let selectedDevice, let layout = selectedDevice.button_layout else { return [] }
+        let visible = Set(layout.visibleSlots.map(\.slot))
+        let suppressHardwareProfileButton = resolvedProfile(for: selectedDevice)?.supportsMappedOnboardProfileCRUD == true
+        return layout.documentedSlots.filter { slot in
+            if suppressHardwareProfileButton, slot.slot == 106 { return false }
+            return slot.access != .editable && !visible.contains(slot.slot)
+        }
+    }
+
+    func selectDevice(_ deviceID: String) { deviceController.selectDevice(deviceID) }
+    func lastTelemetryUpdate(for device: MouseDevice) -> Date? { deviceController.lastUpdatedTimestamp(for: device) }
+
+    func refreshDevices() async {
+        await runtimeController.ensureBackendStateUpdatesStarted()
+        await runtimeController.refreshHIDAccessStatus(forceRefresh: false)
+        await deviceController.refreshDevices()
+    }
+
+    func refreshState() async {
+        await runtimeController.ensureBackendStateUpdatesStarted()
+        await deviceController.refreshState()
+    }
+
+    func pollDevicePresence() async {
+        await runtimeController.ensureBackendStateUpdatesStarted()
+        await deviceController.pollDevicePresence()
+    }
+
+    func refreshDpiFast() async {
+        await runtimeController.ensureBackendStateUpdatesStarted()
+        await deviceController.refreshDpiFast()
+    }
+
+    func applyRemoteServiceSnapshot(_ snapshot: SharedServiceSnapshot) { deviceController.applyRemoteServiceSnapshot(snapshot) }
+
+    func refreshConnectionDiagnostics(for device: MouseDevice) async { await deviceController.refreshConnectionDiagnostics(for: device) }
+
+    func diagnosticsConnectionLines(for device: MouseDevice) -> [String] {
+        _ = connectionDiagnosticsRevision
+        return deviceController.diagnosticsConnectionLines(for: device)
+    }
+
+    func invalidateConnectionDiagnostics() { connectionDiagnosticsRevision &+= 1 }
+
+    func diagnosticsDump(for device: MouseDevice, state explicitState: MouseState? = nil) -> String {
+        let resolvedProfile = resolvedProfile(for: device)
+        let liveState = diagnosticsState(for: device, explicitState: explicitState)
+        let deviceStatusIndicator = deviceController.statusIndicator(for: device)
+        let deviceConnectionState = deviceController.connectionState(for: device)
+        let deviceLastUpdated = deviceController.lastUpdatedTimestamp(for: device)
+        var lines = diagnosticsAppContextLines(statusIndicator: deviceStatusIndicator, connectionState: deviceConnectionState, deviceLastUpdated: deviceLastUpdated)
+        if let hidAccessDetail = runtimeStore.hidAccessStatus.detail { lines.append("Input Monitoring detail: \(hidAccessDetail)") }
+        appendSelectedEditorDiagnostics(to: &lines, device: device)
+        return DeviceDiagnosticsFormatter.format(device: device, state: liveState, profile: resolvedProfile, appContextLines: lines)
+    }
+
+    private func diagnosticsState(for device: MouseDevice, explicitState: MouseState?) -> MouseState? { explicitState ?? deviceController.cachedState(for: device.id) ?? (device.id == selectedDeviceID ? state : nil) }
+
+    private func appendSelectedEditorDiagnostics(to lines: inout [String], device: MouseDevice) {
+        guard device.id == selectedDeviceID else { return }
+        lines.append("Editable lighting effect: \(editorStore.editableLightingEffect.label)")
+        lines.append("Editable lighting zone: \(editorStore.editableUSBLightingZoneID)")
+        lines.append("Editable button profile: \(editorStore.editableUSBButtonProfile)")
+        lines.append("Editable color: \(diagnosticsRGB(editorStore.editableColor))")
+        lines.append("Editable secondary color: \(diagnosticsRGB(editorStore.editableSecondaryColor))")
+    }
+
+    private func diagnosticsAppContextLines(statusIndicator: DeviceStatusIndicator, connectionState: DeviceConnectionState, deviceLastUpdated: Date?) -> [String] {
+        diagnosticsVersionLines() + diagnosticsStateLines(statusIndicator: statusIndicator, connectionState: connectionState, deviceLastUpdated: deviceLastUpdated) + diagnosticsRuntimeLines()
+    }
+
+    private func diagnosticsVersionLines() -> [String] { ["App version: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown")", "Build: \(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown")", "Selected device ID: \(selectedDeviceID ?? "none")"] }
+
+    private func diagnosticsStateLines(statusIndicator: DeviceStatusIndicator, connectionState: DeviceConnectionState, deviceLastUpdated: Date?) -> [String] {
+        [
+            "Refreshing state: \(isRefreshingState ? "Yes" : "No")", "Applying changes: \(isApplying ? "Yes" : "No")", "Pending local edits: \(applyController.hasPendingLocalEdits ? "Yes" : "No")", "Current status badge: \(statusIndicator.label)",
+            "Current connection state: \(connectionState.diagnosticsLabel)", "Last updated: \(deviceLastUpdated.map(diagnosticsTimestamp) ?? "Never")", "Last selected-state update: \(lastUpdated.map(diagnosticsTimestamp) ?? "Never")", "Current error: \(errorMessage ?? "none")",
+            "Current warning: \(warningMessage ?? "none")"
+        ]
+    }
+
+    private func diagnosticsRuntimeLines() -> [String] {
+        [
+            "Input Monitoring: \(runtimeStore.hidAccessStatus.diagnosticsLabel)", "Input Monitoring host: \(runtimeStore.hidAccessStatus.hostLabel)", "Polling profile: \(pollingProfileLabel(runtimeController.pollingProfile(at: Date())))",
+            "Remote service transport: \(usesRemoteServiceTransport ? "Enabled" : "Disabled")", "Compact menu service: \(runtimeStore.backgroundServiceEnabled ? "Enabled" : "Disabled")"
+        ]
+    }
+
+    func githubIssueDiagnosticsPayload() -> String {
+        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
+        let deviceEntries = devices.map { device in
+            let resolvedProfile = resolvedProfile(for: device)
+            let summary = "\(device.product_name) (\(device.transport.connectionLabel), " + "\(String(format: "0x%04X", device.vendor_id)):\(String(format: "0x%04X", device.product_id)), " + "profile \(resolvedProfile?.id.rawValue ?? "generic"))"
+            let stateForDevice = device.id == selectedDeviceID ? state : deviceController.cachedState(for: device.id)
+            return IssueReportDeviceEntry(title: "\(device.product_name) [\(device.transport.connectionLabel)]", summary: summary, diagnostics: diagnosticsDump(for: device, state: stateForDevice))
+        }
+
+        return IssueReportFormatter.format(
+            IssueReportContext(
+                appInfo: IssueReportAppInfo(appVersion: appVersion, build: build, logLevel: AppLog.currentLevel.label, logPath: AppLog.path),
+                status: IssueReportStatus(selectedDevice: selectedDevice.map { "\($0.product_name) [\($0.transport.connectionLabel)]" }, warning: warningMessage, error: errorMessage), devices: deviceEntries))
+    }
+
+    func isButtonSlotEditable(_ slot: Int) -> Bool { selectedDevice?.button_layout?.isEditable(slot) ?? true }
+
+    func buttonSlotNotice(_ slot: Int) -> String? { selectedDevice?.button_layout?.notice(for: slot) }
+
+    private func resolvedProfile(for device: MouseDevice) -> DeviceProfile? { DeviceProfiles.resolve(vendorID: device.vendor_id, productID: device.product_id, transport: device.transport) }
+
+    private func diagnosticsTimestamp(_ date: Date) -> String {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter.string(from: date)
+    }
+
+    private func diagnosticsRGB(_ color: RGBColor) -> String { String(format: "#%02X%02X%02X", color.r, color.g, color.b) }
+
+    private func pollingProfileLabel(_ profile: PollingProfile) -> String {
+        switch profile {
+        case .foreground: "foreground"
+        case .serviceIdle: "serviceIdle"
+        case .serviceInteractive: "serviceInteractive"
+        }
+    }
+}

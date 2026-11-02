@@ -1,0 +1,265 @@
+import XCTest
+@testable import MouseControlTestHost
+import OpenSnekCore
+import OpenSnekHardware
+import OpenSnekProtocols
+
+/// Exercises bridge client Bluetooth fallback behavior.
+final class BridgeClientBluetoothFallbackTests: XCTestCase {
+    private func makeBluetoothDevice(productID: Int, profileID: DeviceProfileID?) -> MouseDevice {
+        MouseDevice(id: "bt-device-\(productID)", vendor_id: 0x068E, product_id: productID, product_name: "Test Device", transport: .bluetooth, path_b64: "", serial: nil, firmware: nil, profile_id: profileID)
+    }
+
+    func testResolveBluetoothBatteryStateIgnoresVendorChargingForBasiliskV3ProBluetooth() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00AC, profileID: .basiliskV3Pro), vendorRaw: 77, vendorStatus: 1, usbFallback: (12, false))
+
+        XCTAssertEqual(resolved.percent, 77)
+        XCTAssertEqual(resolved.charging, false)
+    }
+
+    func testResolveBluetoothBatteryStateIgnoresVendorChargingForBasiliskV3Pro35KBluetooth() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00D8, profileID: .basiliskV3Pro35K), vendorRaw: 77, vendorStatus: 1, usbFallback: (12, false))
+
+        XCTAssertEqual(resolved.percent, 30)
+        XCTAssertEqual(resolved.charging, false)
+    }
+
+    func testResolveBluetoothBatteryStateScalesBasiliskV3Pro35KRawOn255Scale() {
+        let device = makeBluetoothDevice(productID: 0x00D8, profileID: .basiliskV3Pro35K)
+        // Captured raw byte 0x7B; values at or below 100 must not be read as a percentage.
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 0x7B, vendorStatus: 1, usbFallback: nil).percent, 48)
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 90, vendorStatus: 1, usbFallback: nil).percent, 35)
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00D8, profileID: nil), vendorRaw: 90, vendorStatus: 1, usbFallback: nil).percent, 35)
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 255, vendorStatus: 1, usbFallback: nil).percent, 100)
+    }
+
+    func testBasiliskV3Pro35KBluetoothUsesZoneStateLighting() async {
+        let client = BridgeClient(startHIDMonitoring: false)
+        let byProfile = await client.usesBluetoothZoneStateLighting(makeBluetoothDevice(productID: 0x00D8, profileID: .basiliskV3Pro35K))
+        let byProductID = await client.usesBluetoothZoneStateLighting(makeBluetoothDevice(productID: 0x00D8, profileID: nil))
+        let v3X = await client.usesBluetoothZoneStateLighting(makeBluetoothDevice(productID: 0x00BA, profileID: .basiliskV3XHyperspeed))
+
+        XCTAssertTrue(byProfile)
+        XCTAssertTrue(byProductID)
+        XCTAssertFalse(v3X)
+    }
+
+    func testNagaV3ProBluetoothUsesZoneStateLighting() async {
+        let client = BridgeClient(startHIDMonitoring: false)
+        let device = makeBluetoothDevice(productID: 0x00E9, profileID: .nagaV3Pro)
+        let usesZoneState = await client.usesBluetoothZoneStateLighting(device)
+        XCTAssertTrue(usesZoneState)
+    }
+
+    func testNagaV3ProBluetoothBatteryIgnoresUnreliableChargingStatus() {
+        let device = makeBluetoothDevice(productID: 0x00E9, profileID: .nagaV3Pro)
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 0xC7, vendorStatus: 1, usbFallback: nil)
+        XCTAssertEqual(resolved.percent, 78)
+        XCTAssertNil(resolved.charging, "The unplugged mouse reported vendor status 1; it is not evidence of charging")
+        let lowRaw = BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 90, vendorStatus: 1, usbFallback: nil)
+        XCTAssertEqual(lowRaw.percent, 35)
+    }
+
+    func testResolveBluetoothBatteryStateScalesNagaV2ProByteRaw() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00A9, profileID: .nagaV2Pro), vendorRaw: 0x45, vendorStatus: 1, usbFallback: nil)
+
+        XCTAssertEqual(resolved.percent, 27)
+        XCTAssertNil(resolved.charging)
+    }
+
+    func testResolveBluetoothBatteryStateUsesUSBFallbackChargingForNagaV2Pro() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00A9, profileID: .nagaV2Pro), vendorRaw: 0x45, vendorStatus: 1, usbFallback: (27, false))
+
+        XCTAssertEqual(resolved.percent, 27)
+        XCTAssertEqual(resolved.charging, false)
+    }
+
+    func testResolveBluetoothBatteryStateForcesNotChargingForBasiliskV3XBluetooth() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00BA, profileID: .basiliskV3XHyperspeed), vendorRaw: 77, vendorStatus: 1, usbFallback: (12, true))
+
+        XCTAssertEqual(resolved.percent, 30)
+        XCTAssertEqual(resolved.charging, false)
+    }
+
+    func testResolveBluetoothBatteryStateScalesBasiliskV3XRawOn255Scale() {
+        let device = makeBluetoothDevice(productID: 0x00BA, profileID: .basiliskV3XHyperspeed)
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 82, vendorStatus: 1, usbFallback: nil).percent, 32)
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 87, vendorStatus: 1, usbFallback: nil).percent, 34)
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 255, vendorStatus: 1, usbFallback: nil).percent, 100)
+        XCTAssertEqual(BridgeClient.resolveBluetoothBatteryState(device: device, vendorRaw: 0, vendorStatus: 1, usbFallback: nil).percent, 0)
+    }
+
+    func testResolveBluetoothBatteryStateForcesNotChargingForOrochiV2Bluetooth() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x0095, profileID: .orochiV2), vendorRaw: 77, vendorStatus: 1, usbFallback: (12, true))
+
+        XCTAssertEqual(resolved.percent, 77)
+        XCTAssertEqual(resolved.charging, false)
+    }
+
+    func testBluetoothDeltaStateDisablesLightingForOrochiV2() async throws {
+        let client = BridgeClient(startHIDMonitoring: false)
+        let state = try await client.buildBluetoothDeltaState(device: makeBluetoothDevice(productID: 0x0095, profileID: .orochiV2), includeDpi: false, includeLighting: false, includePower: false)
+
+        XCTAssertFalse(state.capabilities.lighting)
+        XCTAssertNil(state.led_value)
+    }
+
+    func testBluetoothDpiStageWriteResolvesCompletePatchWithoutCurrentRead() throws {
+        let device = makeBluetoothDevice(productID: 0x00AC, profileID: .basiliskV3Pro)
+        let pairs = [DpiPair(x: 500, y: 500), DpiPair(x: 900, y: 900), DpiPair(x: 1400, y: 1400)]
+        let resolved = try BridgeClient.resolveBluetoothDpiStageWrite(device: device, patch: DevicePatch(dpiStages: pairs.map(\.x), dpiStagePairs: pairs, activeStage: 2), current: nil)
+
+        XCTAssertEqual(resolved.active, 2)
+        XCTAssertEqual(resolved.stages, [500, 900, 1400])
+        XCTAssertEqual(resolved.pairs, pairs)
+    }
+
+    func testBluetoothOnboardActiveOnlyProjectionDoesNotCarryStaleDpi() async throws {
+        let device = makeBluetoothDevice(productID: 0x00AC, profileID: .basiliskV3Pro)
+        let profile = try XCTUnwrap(DeviceProfiles.resolve(vendorID: device.vendor_id, productID: device.product_id, transport: device.transport))
+        let client = BridgeClient(startHIDMonitoring: false)
+        let loadedSnapshot = OnboardProfileSnapshot(
+            profileID: 2, metadata: OnboardProfileMetadata(name: "Stored 2"), dpi: OnboardDPIProfileSnapshot(scalar: DpiPair(x: 1200, y: 1200), activeStage: 1, pairs: [DpiPair(x: 400, y: 400), DpiPair(x: 1200, y: 1200), DpiPair(x: 1300, y: 1300)], stageIDs: [1, 2, 3], marker: 0x03))
+
+        let loadedState = await client.storeProjectedActiveOnboardProfileState(device: device, profile: profile, activeProfileID: 2, snapshot: loadedSnapshot)
+        XCTAssertEqual(loadedState.dpi_stages.values, [400, 1200, 1300])
+
+        let activeOnly = await client.storeProjectedActiveOnboardProfileState(device: device, profile: profile, activeProfileID: 2)
+        XCTAssertNil(activeOnly.dpi)
+        XCTAssertNil(activeOnly.dpi_stages.active_stage)
+        XCTAssertNil(activeOnly.dpi_stages.values)
+        XCTAssertEqual(activeOnly.active_onboard_profile, 2)
+    }
+
+    func testBluetoothOnboardSnapshotDrivesPassiveDpiExpectation() {
+        let dpi = OnboardDPIProfileSnapshot(scalar: DpiPair(x: 1200, y: 1200), activeStage: 1, pairs: [DpiPair(x: 400, y: 400), DpiPair(x: 1200, y: 1200), DpiPair(x: 1300, y: 1300)], stageIDs: [1, 2, 3], marker: 0x03)
+        let snapshot = BridgeClient.bluetoothDpiSnapshot(from: dpi)
+        let expected = BridgeClient.bluetoothPassiveDpiExpectation(event: PassiveDPIEvent(deviceID: "bt-device:bluetooth", dpiX: 1200, dpiY: 1200, observedAt: Date()), snapshot: snapshot, state: nil)
+
+        XCTAssertEqual(snapshot.count, 3)
+        XCTAssertEqual(Array(snapshot.slots.prefix(snapshot.count)), [400, 1200, 1300])
+        XCTAssertEqual(expected?.active, 1)
+        XCTAssertEqual(expected?.values, [400, 1200, 1300])
+    }
+
+    func testBluetoothOnboardProfileReadStateSkipsGenericTelemetryPolling() {
+        XCTAssertFalse(BridgeClient.shouldPollBluetoothGenericTelemetryForReadState(supportsMappedOnboardProfiles: true))
+        XCTAssertTrue(BridgeClient.shouldPollBluetoothGenericTelemetryForReadState(supportsMappedOnboardProfiles: false))
+    }
+
+    func testCompleteBluetoothOnboardProfileMetadataRequiresAllIdentityFields() throws {
+        let identifier = try XCTUnwrap(UUID(uuidString: "01234567-89ab-4cde-8f01-23456789abcd"))
+        let owner = "5ed8944a85a9763fd315852f448cb7de36c5e928e13b3be427f98f7dc455f141"
+        let complete = BridgeClient.completeBluetoothOnboardProfileMetadata(USBHIDProtocol.OnboardProfileMetadata(identifier: identifier, name: "Slot 2", owner: owner))
+
+        XCTAssertEqual(complete?.identifier, identifier)
+        XCTAssertEqual(complete?.name, "Slot 2")
+        XCTAssertEqual(complete?.owner, owner)
+        XCTAssertNil(BridgeClient.completeBluetoothOnboardProfileMetadata(USBHIDProtocol.OnboardProfileMetadata(identifier: nil, name: "Slot 2", owner: owner)))
+        XCTAssertNil(BridgeClient.completeBluetoothOnboardProfileMetadata(USBHIDProtocol.OnboardProfileMetadata(identifier: identifier, name: nil, owner: owner)))
+        XCTAssertNil(BridgeClient.completeBluetoothOnboardProfileMetadata(USBHIDProtocol.OnboardProfileMetadata(identifier: identifier, name: "Slot 2", owner: nil)))
+        XCTAssertNil(BridgeClient.completeBluetoothOnboardProfileMetadata(USBHIDProtocol.OnboardProfileMetadata(identifier: identifier, name: "Slot 2", owner: "MouseControl")))
+
+        let erased = BLEVendorProtocol.parseProfileMetadata([UInt8](repeating: 0xFF, count: BLEVendorProtocol.onboardProfileMetadataLength))
+        XCTAssertNil(BridgeClient.completeBluetoothOnboardProfileMetadata(erased))
+    }
+
+    func testResolveBluetoothBatteryStateKeepsChargingUnknownWhenStatusMissing() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00AC, profileID: .basiliskV3Pro), vendorRaw: 87, vendorStatus: nil, usbFallback: nil)
+
+        XCTAssertEqual(resolved.percent, 87)
+        XCTAssertNil(resolved.charging)
+    }
+
+    func testResolveBluetoothBatteryStateFillsOnlyMissingFieldsFromUSBFallback() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00AC, profileID: .basiliskV3Pro), vendorRaw: 240, vendorStatus: nil, usbFallback: (20, true))
+
+        XCTAssertEqual(resolved.percent, 94)
+        XCTAssertEqual(resolved.charging, true)
+    }
+
+    func testResolveBluetoothBatteryStateKeepsV3ProChargingUnknownWithoutUSBFallback() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00AC, profileID: .basiliskV3Pro), vendorRaw: 77, vendorStatus: 1, usbFallback: nil)
+
+        XCTAssertEqual(resolved.percent, 77)
+        XCTAssertNil(resolved.charging)
+    }
+
+    func testResolveBluetoothBatteryStateUsesUSBFallbackWhenVendorBatteryMissing() {
+        let resolved = BridgeClient.resolveBluetoothBatteryState(device: makeBluetoothDevice(productID: 0x00AC, profileID: .basiliskV3Pro), vendorRaw: nil, vendorStatus: 0, usbFallback: (64, true))
+
+        XCTAssertEqual(resolved.percent, 64)
+        XCTAssertEqual(resolved.charging, true)
+    }
+
+    func testSupportedBluetoothFallbackUsesResolvedProfile() {
+        let summary = BLEVendorTransportClient.ConnectedPeripheralSummary(name: "Razer Basilisk V3 X HyperSpeed", identifier: UUID(uuidString: "11111111-2222-3333-4444-555555555555")!)
+
+        let device = BridgeClient.makeBluetoothFallbackDevice(summary: summary)
+
+        XCTAssertEqual(device.vendor_id, 0x068E)
+        XCTAssertEqual(device.product_id, 0x00BA)
+        XCTAssertEqual(device.profile_id, .basiliskV3XHyperspeed)
+        XCTAssertEqual(device.product_name, "Razer Basilisk V3 X HyperSpeed")
+        XCTAssertEqual(device.transport, .bluetooth)
+        XCTAssertNotNil(device.button_layout)
+    }
+
+    func testSupportedBluetoothFallbackUsesResolvedProfileForBasiliskV3ProAlias() {
+        let summary = BLEVendorTransportClient.ConnectedPeripheralSummary(name: "BSK V3 PRO", identifier: UUID(uuidString: "99999999-2222-3333-4444-555555555555")!)
+
+        let device = BridgeClient.makeBluetoothFallbackDevice(summary: summary)
+
+        XCTAssertEqual(device.vendor_id, 0x068E)
+        XCTAssertEqual(device.product_id, 0x00AC)
+        XCTAssertEqual(device.profile_id, .basiliskV3Pro)
+        XCTAssertEqual(device.product_name, "BSK V3 PRO")
+        XCTAssertEqual(device.transport, .bluetooth)
+        XCTAssertNotNil(device.button_layout)
+    }
+
+    func testSupportedBluetoothFallbackUsesResolvedProfileForBasiliskV3Pro35KAlias() {
+        let summary = BLEVendorTransportClient.ConnectedPeripheralSummary(name: "BSKV3P 35K", identifier: UUID(uuidString: "88888888-2222-3333-4444-555555555555")!)
+
+        let device = BridgeClient.makeBluetoothFallbackDevice(summary: summary)
+
+        XCTAssertEqual(device.vendor_id, 0x068E)
+        XCTAssertEqual(device.product_id, 0x00D8)
+        XCTAssertEqual(device.profile_id, .basiliskV3Pro35K)
+        XCTAssertEqual(device.product_name, "BSKV3P 35K")
+        XCTAssertEqual(device.transport, .bluetooth)
+        XCTAssertNotNil(device.button_layout)
+    }
+
+    func testUnsupportedBluetoothFallbackRemainsGeneric() {
+        let summary = BLEVendorTransportClient.ConnectedPeripheralSummary(name: "Razer Cobra Pro", identifier: UUID(uuidString: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")!)
+
+        let device = BridgeClient.makeBluetoothFallbackDevice(summary: summary)
+
+        XCTAssertEqual(device.vendor_id, 0x068E)
+        XCTAssertEqual(device.product_id, 0x0000)
+        XCTAssertNil(device.profile_id)
+        XCTAssertEqual(device.product_name, "Razer Cobra Pro")
+        XCTAssertEqual(device.transport, .bluetooth)
+        XCTAssertNil(device.button_layout)
+        XCTAssertFalse(device.supports_advanced_lighting_effects)
+    }
+
+    func testPreferredBluetoothControlWarmupNameUsesResolvedProfile() {
+        let preferredName = BridgeClient.preferredBluetoothControlWarmupName(vendorID: 0x068E, productID: 0x00BA, transport: .bluetooth)
+
+        XCTAssertEqual(preferredName, "Basilisk V3 X HyperSpeed")
+    }
+
+    func testPreferredBluetoothControlWarmupNameUsesResolvedProfileForBasiliskV3Pro() {
+        let preferredName = BridgeClient.preferredBluetoothControlWarmupName(vendorID: 0x068E, productID: 0x00AC, transport: .bluetooth)
+
+        XCTAssertEqual(preferredName, "Basilisk V3 Pro")
+    }
+
+    func testPreferredBluetoothControlWarmupNameSkipsNonBluetoothDevices() {
+        let preferredName = BridgeClient.preferredBluetoothControlWarmupName(vendorID: 0x1532, productID: 0x00B9, transport: .usb)
+
+        XCTAssertNil(preferredName)
+    }
+}

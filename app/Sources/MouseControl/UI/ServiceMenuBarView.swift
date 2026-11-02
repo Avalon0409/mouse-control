@@ -1,0 +1,423 @@
+import AppKit
+import OpenSnekCore
+import SwiftUI
+
+/// Stores battery icon presentation data.
+struct BatteryIconPresentation: Equatable {
+    /// Defines accent values.
+    enum Accent: Equatable {
+        case normal
+        case low
+    }
+
+    let symbolName: String
+    let variableValue: Double
+    let accent: Accent
+}
+
+/// Defines battery presentation values.
+enum BatteryPresentation {
+    static let lowBatteryNSColor = NSColor(calibratedRed: 1.0, green: 0.36, blue: 0.39, alpha: 1.0)
+    static let lowBatteryColor = Color(nsColor: lowBatteryNSColor)
+
+    static func icon(percent: Int, charging: Bool?, thresholdRaw: Int? = nil) -> BatteryIconPresentation {
+        let clampedPercent = max(0, min(100, percent))
+        let isLow = isLowBattery(percent: clampedPercent, charging: charging, thresholdRaw: thresholdRaw)
+        return BatteryIconPresentation(symbolName: symbolName(percent: clampedPercent, charging: charging), variableValue: tieredBatteryValue(percent: clampedPercent, charging: charging), accent: isLow ? .low : .normal)
+    }
+
+    static func symbolName(percent: Int, charging: Bool?) -> String {
+        if charging == true { return "battery.100percent.bolt" }
+
+        switch percent {
+        case ..<13: return "battery.0percent"
+        case ..<38: return "battery.25percent"
+        case ..<63: return "battery.50percent"
+        case ..<88: return "battery.75percent"
+        default: return "battery.100percent"
+        }
+    }
+
+    static func tieredBatteryValue(percent: Int, charging: Bool?) -> Double {
+        if charging == true { return Double(max(0, min(100, percent))) / 100.0 }
+
+        switch percent {
+        case ..<13: return 0.0
+        case ..<38: return 0.25
+        case ..<63: return 0.50
+        case ..<88: return 0.75
+        default: return 1.0
+        }
+    }
+
+    static func isLowBattery(percent: Int, charging: Bool?, thresholdRaw: Int?) -> Bool {
+        guard charging != true, let thresholdPercent = approximateThresholdPercent(raw: thresholdRaw) else { return false }
+        return max(0, min(100, percent)) <= thresholdPercent
+    }
+
+    static func approximateThresholdPercent(raw: Int?) -> Int? {
+        guard let raw else { return nil }
+        let clamped = max(0x0C, min(0x3F, raw))
+        let ratio = Double(clamped - 0x0C) / Double(0x3F - 0x0C)
+        return Int(round(5.0 + (ratio * 20.0)))
+    }
+}
+
+/// Defines service menu bar presentation values.
+enum ServiceMenuBarPresentation {
+    /// Defines compact DPI control mode values.
+    enum CompactDpiControlMode: Equatable {
+        case scalar(Int)
+        case split(DpiPair)
+    }
+
+    static func batteryIcon(percent: Int, charging: Bool?, thresholdRaw: Int? = nil) -> BatteryIconPresentation { BatteryPresentation.icon(percent: percent, charging: charging, thresholdRaw: thresholdRaw) }
+
+    static func statusGlyphBatteryIcon(state: MouseState?) -> BatteryIconPresentation? {
+        guard let state, let percent = state.battery_percent else { return nil }
+        let icon = batteryIcon(percent: percent, charging: state.charging, thresholdRaw: state.low_battery_threshold_raw)
+        return icon.accent == .low ? icon : nil
+    }
+
+    static func compactDpiText(for dpi: Int?) -> String? {
+        guard let dpi, dpi > 0 else { return nil }
+        guard dpi >= 1000 else { return "\(dpi)" }
+
+        let thousands = Double(dpi) / 1000.0
+        if dpi < 10_000 {
+            let rounded = (thousands * 10).rounded() / 10
+            if rounded == rounded.rounded() { return "\(Int(rounded))k" }
+            return String(format: "%.1fk", rounded)
+        }
+
+        return "\(Int(thousands.rounded()))k"
+    }
+
+    static func compactDpiControlMode(for pair: DpiPair, supportsIndependentXYDPI: Bool) -> CompactDpiControlMode {
+        guard supportsIndependentXYDPI, pair.x != pair.y else { return .scalar(pair.x) }
+        return .split(pair)
+    }
+}
+
+/// Renders the service menu bar view UI.
+struct ServiceMenuBarView: View {
+    private static let menuActionRowHeight: CGFloat = 34
+
+    let deviceStore: DeviceStore
+    let editorStore: EditorStore
+    let runtimeStore: RuntimeStore
+    @ObservedObject private var features = FeatureStore.shared
+
+    private var showsDeviceControls: Bool { deviceStore.selectedDevice != nil && deviceStore.state != nil && deviceStore.selectedDeviceSupportsDPIControls }
+
+    private var controlsEnabled: Bool { deviceStore.selectedDeviceControlsEnabled }
+
+    private var showsDevicePicker: Bool { deviceStore.visibleDevices.count > 1 }
+
+    /// Renders menu message text that wraps to multiple lines instead of truncating inside the panel.
+    private func menuMessage(_ message: String, weight: Font.Weight = .medium) -> some View { Text(localized(message)).font(.system(size: 11, weight: weight, design: .default)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true) }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            header
+            statusRow
+            if showsDeviceControls {
+                VStack(alignment: .leading, spacing: 10) {
+                    if !controlsEnabled, let message = deviceStore.selectedDeviceInteractionMessage { menuMessage(message, weight: .bold) }
+
+                    stagePicker.disabled(!controlsEnabled).opacity(controlsEnabled ? 1.0 : 0.45)
+
+                    if let message = runtimeStore.compactStatusMessage { menuMessage(message, weight: .bold) }
+                }
+            } else if let message = deviceStore.selectedDeviceInteractionMessage {
+                menuMessage(message)
+            } else if deviceStore.selectedDeviceIsLightingOnly {
+                VStack(alignment: .leading, spacing: 10) {
+                    menuMessage("This device has lighting controls only. Open MouseControl to edit its lighting.")
+                    if let message = runtimeStore.compactStatusMessage { menuMessage(message, weight: .bold) }
+                }
+            } else {
+                menuMessage("Connect a supported mouse to edit DPI from the menu bar.")
+            }
+            Divider()
+            toggleRow("独立滚动", systemImage: "arrow.up.arrow.down", isOn: $features.settings.scrollEnabled)
+            actionRow("Show MouseControl", systemImage: "rectangle.on.rectangle") { runtimeStore.openFullAppFromService() }
+            actionRow("Settings…", systemImage: "gearshape") { runtimeStore.openSettingsFromService() }
+            toggleRow("Start at login", systemImage: "checkmark.circle", isOn: Binding(get: { runtimeStore.launchAtStartupEnabled }, set: { runtimeStore.setLaunchAtStartupEnabled($0) }))
+            actionRow("Quit", systemImage: "power") { runtimeStore.terminateServiceProcess() }
+        }.padding(16).frame(width: 320).task {
+            await runtimeStore.start()
+            await refreshCompactMenuDiagnostics()
+        }.task(id: deviceStore.selectedDeviceID) { await refreshCompactMenuDiagnostics() }.onAppear {
+            runtimeStore.setCompactMenuPresented(true)
+            Task { await refreshCompactMenuDiagnostics() }
+        }.onDisappear { runtimeStore.setCompactMenuPresented(false) }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: showsDevicePicker ? 8 : 3) {
+            if showsDevicePicker {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Device").font(.system(size: 10, weight: .bold, design: .default)).foregroundStyle(.secondary)
+                    Menu {
+                        ForEach(deviceStore.visibleDevices) { device in
+                            Button {
+                                deviceStore.selectDevice(device.id)
+                            } label: {
+                                if device.id == deviceStore.selectedDeviceID { Label(devicePickerTitle(for: device), systemImage: "checkmark") } else { Text(devicePickerTitle(for: device)) }
+                            }
+                        }
+                    } label: {
+                        HStack(spacing: 10) {
+                            Text(localized(selectedDevicePickerTitle)).lineLimit(1).minimumScaleFactor(0.8)
+
+                            Spacer(minLength: 8)
+
+                            Image(systemName: "chevron.up.chevron.down").font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+                        }.font(.system(size: 15, weight: .semibold, design: .default)).padding(.horizontal, 12).padding(.vertical, 9).frame(maxWidth: .infinity, alignment: .leading).background(
+                            RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.04)).overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.08), lineWidth: 1))
+                        ).contentShape(RoundedRectangle(cornerRadius: 10))
+                    }.menuStyle(.borderlessButton).menuIndicator(.hidden).frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else {
+                Text(deviceStore.selectedDevice?.product_name ?? "No device connected").font(.system(size: 15, weight: .semibold, design: .default))
+            }
+            Text(deviceStore.selectedDevice?.connectionLabel ?? "Waiting for a supported mouse").font(.system(size: 11, weight: .bold, design: .default)).foregroundStyle(.secondary)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var statusRow: some View {
+        HStack(spacing: 10) {
+            Label(deviceStore.currentDeviceStatusIndicator.label, systemImage: "circle.fill").foregroundStyle(deviceStore.currentDeviceStatusIndicator.color).font(.system(size: 11, weight: .bold, design: .default)).help(deviceStore.currentDeviceStatusTooltip ?? "")
+
+            Spacer()
+
+            if let battery = deviceStore.state?.battery_percent {
+                let batteryIcon = ServiceMenuBarPresentation.batteryIcon(percent: battery, charging: deviceStore.state?.charging, thresholdRaw: deviceStore.state?.low_battery_threshold_raw)
+                HStack(spacing: 4) {
+                    Image(systemName: batteryIcon.symbolName, variableValue: batteryIcon.variableValue)
+                    Text("\(battery)%")
+                }.font(.system(size: 11, weight: .bold, design: .monospaced)).foregroundStyle(batteryIcon.accent == .low ? BatteryPresentation.lowBatteryColor : .secondary)
+            }
+        }
+    }
+
+    private var stagePicker: some View { HStack(spacing: 8) { ForEach(0..<stagePickerCount, id: \.self) { index in stagePickerButton(index: index) } } }
+
+    private var stagePickerCount: Int { max(1, editorStore.editableStageCount) }
+
+    private func stagePickerButton(index: Int) -> some View {
+        let stage = index + 1
+        let stagePair = editorStore.stagePair(index)
+        let isSelected = editorStore.editableActiveStage == stage
+        return CompactStagePickerButton(title: stageDisplayText(stagePair), isSelected: isSelected, color: DpiStageIndicator.color(stage: stage, profileID: editorStore.selectedDeviceProfileID)) {
+            guard !isSelected else { return }
+            editorStore.setEditableActiveStage(stage, source: "ui.menu.stagePicker")
+            editorStore.scheduleAutoApplyActiveStage()
+        }
+    }
+
+    private var selectedDevicePickerTitle: String {
+        guard let selected = deviceStore.selectedDevice else { return "No device connected" }
+        return devicePickerTitle(for: selected)
+    }
+
+    private func devicePickerTitle(for device: MouseDevice) -> String { "\(device.product_name) (\(device.transport.shortLabel))" }
+
+    private func stageDisplayText(_ pair: DpiPair) -> String {
+        if editorStore.selectedDeviceSupportsIndependentXYDPI, pair.x != pair.y { return "\(pair.x)/\(pair.y)" }
+        return "\(pair.x)"
+    }
+
+    private func actionRow(_ title: String, systemImage: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: systemImage).font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                Text(localized(title)).font(.system(size: 12, weight: .bold, design: .default))
+                Spacer()
+            }.padding(.horizontal, 10).frame(height: Self.menuActionRowHeight).frame(maxWidth: .infinity, alignment: .leading).background(
+                RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.04)).overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.08), lineWidth: 1))
+            ).contentShape(RoundedRectangle(cornerRadius: 10))
+        }.buttonStyle(.plain)
+    }
+
+    private func toggleRow(_ title: String, systemImage: String, isOn: Binding<Bool>) -> some View {
+        Toggle(isOn: isOn) {
+            HStack(spacing: 10) {
+                Image(systemName: systemImage).font(.system(size: 12, weight: .semibold)).foregroundStyle(.secondary)
+                Text(localized(title)).font(.system(size: 12, weight: .bold, design: .default))
+                Spacer()
+            }
+        }.toggleStyle(.switch).padding(.horizontal, 10).frame(height: Self.menuActionRowHeight).frame(maxWidth: .infinity, alignment: .leading).background(
+            RoundedRectangle(cornerRadius: 10).fill(Color.primary.opacity(0.04)).overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.primary.opacity(0.08), lineWidth: 1)))
+    }
+
+    private func refreshCompactMenuDiagnostics() async {
+        // Reopening the compact menu should not tear down the shared HID discovery
+        // manager; that can interrupt a passive stream when polling is disabled.
+        await runtimeStore.refreshHIDAccessStatus(forceRefresh: false)
+        guard let device = deviceStore.selectedDevice else { return }
+        await deviceStore.refreshConnectionDiagnostics(for: device)
+    }
+}
+
+/// Renders the compact stage picker button UI.
+private struct CompactStagePickerButton: View {
+    let title: String
+    let isSelected: Bool
+    let color: Color
+    let action: () -> Void
+
+    var body: some View { Button(action: action) { stageLabel }.buttonStyle(.plain) }
+
+    private var stageLabel: some View {
+        HStack(spacing: 4) {
+            Circle().fill(color).frame(width: 5, height: 5)
+            Text(title).font(.system(size: 11, weight: .medium)).lineLimit(1).minimumScaleFactor(0.7).foregroundStyle(.primary)
+        }.frame(maxWidth: .infinity, minHeight: 34).background(stageBackground).overlay(stageBorder).contentShape(Capsule())
+    }
+
+    private var stageBackground: some View { Capsule().fill(isSelected ? color.opacity(0.07) : Color.primary.opacity(0.03)) }
+
+    private var stageBorder: some View { Capsule().stroke(isSelected ? color.opacity(0.45) : Color.primary.opacity(0.06), lineWidth: 1) }
+}
+
+/// Stores service menu bar status item label data.
+struct ServiceMenuBarStatusItemLabel: View {
+    let deviceStore: DeviceStore
+    let editorStore: EditorStore
+    let runtimeStore: RuntimeStore
+
+    private var currentDpi: Int? {
+        guard deviceStore.state != nil else { return nil }
+
+        if let liveDpi = deviceStore.state?.dpi?.x, liveDpi > 0 { return liveDpi }
+
+        let fallback = editorStore.compactActiveStageValue
+        return fallback > 0 ? fallback : nil
+    }
+
+    var body: some View {
+        Group {
+            if runtimeStore.isServiceProcess {
+                serviceLabel
+            } else {
+                // Workaround: MenuBarExtra(isInserted: .constant(false)) still
+                // creates a visible NSStatusItem on some macOS versions (see
+                // FB10185325, orchetect/MenuBarExtraAccess#1). Suppress it.
+                SpuriousStatusItemSuppressor()
+            }
+        }.help(helpText).accessibilityLabel(helpText)
+    }
+
+    private var serviceLabel: some View {
+        Group {
+            if let transientDpi = runtimeStore.statusItemTransientDpi {
+                ServiceMenuBarStatusDpiBadge(dpi: transientDpi).frame(width: OpenSnekBranding.menuBarIconSide, height: OpenSnekBranding.menuBarIconSide)
+            } else {
+                ServiceMenuBarStatusGlyph(isConnected: deviceStore.selectedDevice != nil, batteryPresentation: ServiceMenuBarPresentation.statusGlyphBatteryIcon(state: deviceStore.state)).frame(height: OpenSnekBranding.menuBarIconSide).fixedSize()
+            }
+        }
+    }
+
+    private var helpText: String {
+        if let device = deviceStore.selectedDevice, let currentDpi { return "\(device.product_name), \(currentDpi) DPI" }
+        if let device = deviceStore.selectedDevice { return device.product_name }
+        return "MouseControl"
+    }
+}
+
+/// Stores service menu bar status DPI badge data.
+private struct ServiceMenuBarStatusDpiBadge: View {
+    let dpi: Int
+
+    var body: some View { Image(nsImage: OpenSnekBranding.menuBarDpiBadge(dpi: dpi)).interpolation(.high).antialiased(true) }
+}
+
+/// Hides the status-item window that SwiftUI's MenuBarExtra erroneously
+/// creates when `isInserted` is `.constant(false)` on some macOS versions.
+///
+/// This is a known class of SwiftUI MenuBarExtra bugs: the scene machinery
+/// eagerly instantiates the underlying NSStatusItem regardless of the
+/// `isInserted` binding value. Related reports include FB10185325 (MenuBarExtra
+/// needs a non-presenting style) and orchetect/MenuBarExtraAccess discussions
+/// #1 and #10 which document phantom status items and inverted state. No
+/// first-party fix exists as of macOS 15.
+///
+/// When the label view is rendered inside the spurious status item, this
+/// NSViewRepresentable walks up the view hierarchy to the containing
+/// NSStatusBarButton and hides its window, making the item invisible.
+/// If the status item is never created (bug doesn't manifest), this view
+/// is never rendered, so it's a no-op in that case.
+private struct SpuriousStatusItemSuppressor: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView { SuppressorView() }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
+
+    /// Coordinates suppressor view behavior.
+    final class SuppressorView: NSView {
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            suppress()
+        }
+
+        override func viewWillMove(toWindow newWindow: NSWindow?) {
+            super.viewWillMove(toWindow: newWindow)
+            guard newWindow != nil else { return }
+            suppress()
+        }
+
+        private func suppress() {
+            var current: NSView? = self
+            while let view = current {
+                if view is NSStatusBarButton {
+                    view.window?.orderOut(nil)
+                    view.isHidden = true
+                    return
+                }
+                current = view.superview
+            }
+        }
+    }
+}
+
+/// Stores service menu bar status glyph data.
+private struct ServiceMenuBarStatusGlyph: View {
+    let isConnected: Bool
+    let batteryPresentation: BatteryIconPresentation?
+
+    private var iconOpacity: Double { isConnected ? 0.88 : 0.46 }
+
+    private var statusImage: NSImage? {
+        if let batteryPresentation { return OpenSnekBranding.menuBarSymbolIcon(symbolName: batteryPresentation.symbolName, color: BatteryPresentation.lowBatteryNSColor) }
+        return OpenSnekBranding.menuIcon
+    }
+
+    private var statusImageID: String {
+        if let batteryPresentation { return "battery:\(batteryPresentation.symbolName)" }
+        return "menu"
+    }
+
+    private var statusImageWidth: CGFloat {
+        if let batteryPresentation { return OpenSnekBranding.menuBarSymbolWidth(symbolName: batteryPresentation.symbolName) }
+        return OpenSnekBranding.menuBarIconSide
+    }
+
+    var body: some View {
+        Group {
+            if let statusImage {
+                Image(nsImage: statusImage).interpolation(.high).antialiased(true).id(statusImageID)
+            } else {
+                ZStack {
+                    Circle().stroke(Color.primary.opacity(iconOpacity), lineWidth: 1.2)
+
+                    Rectangle().fill(Color.primary.opacity(iconOpacity)).frame(width: 1, height: 11)
+
+                    Rectangle().fill(Color.primary.opacity(iconOpacity)).frame(width: 11, height: 1)
+
+                    Circle().fill(Color.primary.opacity(iconOpacity)).frame(width: 3.5, height: 3.5)
+                }
+            }
+        }.opacity(iconOpacity).frame(width: statusImageWidth, height: OpenSnekBranding.menuBarIconSide)
+    }
+}

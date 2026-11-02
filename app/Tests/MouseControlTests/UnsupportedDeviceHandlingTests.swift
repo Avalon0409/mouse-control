@@ -1,0 +1,183 @@
+import XCTest
+import IOKit
+@testable import MouseControlTestHost
+import OpenSnekCore
+import OpenSnekHardware
+
+/// Exercises unsupported device handling behavior.
+final class UnsupportedDeviceHandlingTests: XCTestCase {
+    func testUSBTelemetryUnavailableErrorClassification() {
+        let unavailable = BridgeError.commandFailed("USB device telemetry unavailable. Feature-report interface did not return usable responses.")
+        let typedUnavailable = BridgeError.usbMouseUnavailable
+        let transient = BridgeError.commandFailed("USB transaction timed out")
+
+        XCTAssertTrue(BridgeClient.isUSBTelemetryUnavailableError(unavailable))
+        XCTAssertTrue(BridgeClient.isUSBTelemetryUnavailableError(typedUnavailable))
+        XCTAssertFalse(BridgeClient.isUSBTelemetryUnavailableError(transient))
+    }
+
+    func testUSBControlAvailabilityWithoutSessionsReportsReceiverAbsent() async throws {
+        let client = BridgeClient(startHIDMonitoring: false)
+        await client.testConfigureUSBAccessFlags(hidAccessDenied: false, managerAccessDenied: false)
+
+        let device = MouseDevice(id: "usb-no-session", vendor_id: 0x1532, product_id: 0x00AB, product_name: "Razer Basilisk V3 Pro", transport: .usb, path_b64: "", serial: nil, firmware: nil)
+
+        let availability = try await client.usbControlAvailability(device: device)
+        XCTAssertEqual(availability, .receiverAbsent)
+    }
+
+    func testUSBHIDUnavailableOpenResultsClassifyAsDeviceUnavailable() {
+        XCTAssertTrue(USBHIDSupport.isDeviceUnavailableOpenResult(kIOReturnNoDevice))
+        XCTAssertTrue(USBHIDSupport.isDeviceUnavailableOpenResult(kIOReturnOffline))
+        XCTAssertTrue(USBHIDSupport.isDeviceUnavailableOpenResult(kIOReturnNotOpen))
+        XCTAssertFalse(USBHIDSupport.isDeviceUnavailableOpenResult(kIOReturnSuccess))
+        XCTAssertFalse(USBHIDSupport.isDeviceUnavailableOpenResult(kIOReturnNotPermitted))
+    }
+
+    func testUSBReconnectSettleDeadlineOnlyAppliesToUSBConnectEvents() {
+        let observedAt = Date(timeIntervalSince1970: 1234)
+        let usbConnected = HIDDevicePresenceEvent(deviceID: "usb-device", vendorID: 0x1532, productID: 0x00CB, locationID: 1, transport: .usb, change: .connected, observedAt: observedAt)
+        let usbDisconnected = HIDDevicePresenceEvent(deviceID: "usb-device", vendorID: 0x1532, productID: 0x00CB, locationID: 1, transport: .usb, change: .disconnected, observedAt: observedAt)
+        let btConnected = HIDDevicePresenceEvent(deviceID: "bt-device", vendorID: 0x068E, productID: 0x00AC, locationID: 1, transport: .bluetooth, change: .connected, observedAt: observedAt)
+
+        let deadline = BridgeClient.usbReconnectSettleDeadline(for: usbConnected)
+        XCTAssertEqual(deadline, observedAt.addingTimeInterval(BridgeClient.usbReconnectSettleInterval))
+        XCTAssertNil(BridgeClient.usbReconnectSettleDeadline(for: usbDisconnected))
+        XCTAssertNil(BridgeClient.usbReconnectSettleDeadline(for: btConnected))
+    }
+
+    func testUSBReconnectReadDeferralUsesSettleDeadline() {
+        let now = Date(timeIntervalSince1970: 2000)
+        XCTAssertTrue(BridgeClient.shouldDeferUSBReconnectRead(until: now.addingTimeInterval(0.5), now: now))
+        XCTAssertFalse(BridgeClient.shouldDeferUSBReconnectRead(until: now.addingTimeInterval(-0.5), now: now))
+        XCTAssertFalse(BridgeClient.shouldDeferUSBReconnectRead(until: nil, now: now))
+    }
+
+    func testUSBReconnectSettleIntervalIsTwoSeconds() { XCTAssertEqual(BridgeClient.usbReconnectSettleInterval, 2.0) }
+
+    func testEmptyHIDManagerSnapshotRefreshSupportsNormalAndStructuralOpenResults() {
+        let now = Date(timeIntervalSince1970: 3000)
+
+        XCTAssertTrue(BridgeClient.shouldRefreshEmptyHIDManagerSnapshot(openResult: kIOReturnSuccess, inputMonitoringGranted: true, lastRefreshAt: nil, now: now))
+        XCTAssertTrue(BridgeClient.shouldRefreshEmptyHIDManagerSnapshot(openResult: kIOReturnNotPermitted, inputMonitoringGranted: true, lastRefreshAt: nil, now: now))
+        XCTAssertFalse(BridgeClient.shouldRefreshEmptyHIDManagerSnapshot(openResult: kIOReturnNotPermitted, inputMonitoringGranted: false, lastRefreshAt: nil, now: now))
+        XCTAssertFalse(BridgeClient.shouldRefreshEmptyHIDManagerSnapshot(openResult: kIOReturnSuccess, inputMonitoringGranted: true, lastRefreshAt: now.addingTimeInterval(-0.25), now: now))
+        XCTAssertTrue(BridgeClient.shouldRefreshEmptyHIDManagerSnapshot(openResult: kIOReturnNotPermitted, inputMonitoringGranted: true, lastRefreshAt: now.addingTimeInterval(-BridgeClient.emptyHIDManagerRefreshInterval), now: now))
+    }
+
+    func testStaleSessionPermissionFlagDoesNotMasqueradeAsManagerDenial() async {
+        let client = BridgeClient(startHIDMonitoring: false)
+        await client.testConfigureUSBAccessFlags(hidAccessDenied: true, managerAccessDenied: false)
+
+        let device = MouseDevice(id: "usb-stale-denial", vendor_id: 0x1532, product_id: 0x00AB, product_name: "Razer Basilisk V3 Pro", transport: .usb, path_b64: "", serial: nil, firmware: nil)
+
+        do {
+            _ = try await client.readState(device: device)
+            XCTFail("Expected readState to fail without any HID sessions")
+        } catch { XCTAssertEqual(error.localizedDescription, "Device not available") }
+    }
+
+    func testUnsupportedUSBUsesProbedCapabilitiesOnly() async {
+        let client = BridgeClient(startHIDMonitoring: false)
+
+        let capabilities = await client.resolvedUSBStateCapabilities(profile: nil, stages: (1, [800, 1600, 3200]), poll: 1000, sleepTimeout: nil, led: 64)
+
+        XCTAssertTrue(capabilities.dpi_stages)
+        XCTAssertTrue(capabilities.poll_rate)
+        XCTAssertFalse(capabilities.power_management)
+        XCTAssertFalse(capabilities.button_remap)
+        XCTAssertTrue(capabilities.lighting)
+    }
+
+    func testProfiledDeviceCapabilitiesFollowProfileControlFlags() async {
+        let client = BridgeClient(startHIDMonitoring: false)
+
+        let lightingOnly = DeviceProfile(
+            id: .orochiV2, productName: "Lighting-Only Test Device", transport: .usb, supportedProducts: [0x7777], buttonLayout: ButtonSlotLayout(visibleSlots: [], writableSlots: []), supportsAdvancedLightingEffects: true, formFactor: .keyboard, supportsDPIControls: false,
+            supportsPollRateControls: false, supportsPowerManagementControls: false, supportsButtonRemapControls: false)
+        let keyboard = await client.resolvedUSBStateCapabilities(profile: lightingOnly, stages: Optional<(Int, [Int])>.none, poll: nil, sleepTimeout: nil, led: 128)
+        XCTAssertFalse(keyboard.dpi_stages)
+        XCTAssertFalse(keyboard.poll_rate)
+        XCTAssertFalse(keyboard.power_management)
+        XCTAssertFalse(keyboard.button_remap)
+        XCTAssertTrue(keyboard.lighting)
+
+        let fullMouse = await client.resolvedUSBStateCapabilities(profile: DeviceProfiles.basiliskV3ProUSB, stages: Optional<(Int, [Int])>.none, poll: nil, sleepTimeout: nil, led: nil)
+        XCTAssertTrue(fullMouse.dpi_stages)
+        XCTAssertTrue(fullMouse.poll_rate)
+        XCTAssertTrue(fullMouse.power_management)
+        XCTAssertTrue(fullMouse.button_remap)
+        XCTAssertTrue(fullMouse.lighting)
+    }
+
+    func testFastDpiPollingKeepsCurrentBehaviorForDPICapableDevices() {
+        let unprofiled = MouseDevice(id: "usb-unprofiled", vendor_id: 0x1532, product_id: 0x1234, product_name: "Razer USB Mystery Mouse", transport: .usb, path_b64: "", serial: nil, firmware: nil)
+        let profiledMouse = MouseDevice(id: "usb-v3pro", vendor_id: 0x1532, product_id: 0x00AB, product_name: "Razer Basilisk V3 Pro", transport: .usb, path_b64: "", serial: nil, firmware: nil)
+
+        XCTAssertTrue(unprofiled.supportsDPIControls)
+        XCTAssertTrue(profiledMouse.supportsDPIControls)
+        XCTAssertTrue(BridgeClient.shouldUseFastDPIPolling(device: unprofiled, armedPassiveDpiDeviceIDs: [], observedPassiveDpiDeviceIDs: []))
+        XCTAssertTrue(BridgeClient.shouldUseFastDPIPolling(device: profiledMouse, armedPassiveDpiDeviceIDs: [], observedPassiveDpiDeviceIDs: []))
+        XCTAssertFalse(BridgeClient.shouldUseFastDPIPolling(device: profiledMouse, armedPassiveDpiDeviceIDs: [profiledMouse.id], observedPassiveDpiDeviceIDs: [profiledMouse.id]))
+    }
+
+    func testManagerNotPermittedWithInputMonitoringGrantedIsNotADenial() {
+        XCTAssertFalse(BridgeClient.resolvedManagerAccessDenied(openResult: kIOReturnNotPermitted, inputMonitoringGranted: true))
+        XCTAssertTrue(BridgeClient.resolvedManagerAccessDenied(openResult: kIOReturnNotPermitted, inputMonitoringGranted: false))
+        XCTAssertFalse(BridgeClient.resolvedManagerAccessDenied(openResult: kIOReturnSuccess, inputMonitoringGranted: false))
+
+        XCTAssertTrue(BridgeClient.shouldReuseHIDManager(openResult: kIOReturnSuccess, inputMonitoringGrantedAtOpen: true, inputMonitoringGrantedNow: true))
+        XCTAssertTrue(BridgeClient.shouldReuseHIDManager(openResult: kIOReturnNotPermitted, inputMonitoringGrantedAtOpen: true, inputMonitoringGrantedNow: true))
+        XCTAssertFalse(BridgeClient.shouldReuseHIDManager(openResult: kIOReturnNotPermitted, inputMonitoringGrantedAtOpen: false, inputMonitoringGrantedNow: false))
+        XCTAssertFalse(BridgeClient.shouldReuseHIDManager(openResult: kIOReturnNoDevice, inputMonitoringGrantedAtOpen: true, inputMonitoringGrantedNow: true))
+    }
+
+    func testHIDManagerPermissionTransitionsRequireReopenInBothDirections() {
+        XCTAssertFalse(BridgeClient.shouldReuseHIDManager(openResult: kIOReturnNotPermitted, inputMonitoringGrantedAtOpen: false, inputMonitoringGrantedNow: true))
+        XCTAssertFalse(BridgeClient.shouldReuseHIDManager(openResult: kIOReturnNotPermitted, inputMonitoringGrantedAtOpen: true, inputMonitoringGrantedNow: false))
+        XCTAssertFalse(BridgeClient.shouldReuseHIDManager(openResult: kIOReturnSuccess, inputMonitoringGrantedAtOpen: true, inputMonitoringGrantedNow: false))
+    }
+
+    func testHIDManagerLoggingTracksResolvedPermissionClassification() {
+        XCTAssertTrue(BridgeClient.shouldLogHIDManagerOpenFailure(openResult: kIOReturnNotPermitted, managerAccessDenied: false, lastOpenResult: nil, lastManagerAccessDenied: nil))
+        XCTAssertFalse(BridgeClient.shouldLogHIDManagerOpenFailure(openResult: kIOReturnNotPermitted, managerAccessDenied: false, lastOpenResult: kIOReturnNotPermitted, lastManagerAccessDenied: false))
+        XCTAssertTrue(BridgeClient.shouldLogHIDManagerOpenFailure(openResult: kIOReturnNotPermitted, managerAccessDenied: true, lastOpenResult: kIOReturnNotPermitted, lastManagerAccessDenied: false))
+        XCTAssertFalse(BridgeClient.shouldLogHIDManagerOpenFailure(openResult: kIOReturnSuccess, managerAccessDenied: false, lastOpenResult: kIOReturnNotPermitted, lastManagerAccessDenied: true))
+    }
+
+    func testEmptyDiscoveryReportsOnlyResolvedAccessDenial() {
+        let structuralRefusalIsDenied = BridgeClient.resolvedManagerAccessDenied(openResult: kIOReturnNotPermitted, inputMonitoringGranted: true)
+        let permissionRefusalIsDenied = BridgeClient.resolvedManagerAccessDenied(openResult: kIOReturnNotPermitted, inputMonitoringGranted: false)
+
+        XCTAssertFalse(BridgeClient.discoveryIsBlockedByHIDAccess(discoveredDeviceCount: 0, managerAccessDenied: structuralRefusalIsDenied))
+        XCTAssertTrue(BridgeClient.discoveryIsBlockedByHIDAccess(discoveredDeviceCount: 0, managerAccessDenied: permissionRefusalIsDenied))
+        XCTAssertFalse(BridgeClient.discoveryIsBlockedByHIDAccess(discoveredDeviceCount: 1, managerAccessDenied: true))
+    }
+
+    @MainActor func testUnsupportedClassificationIsStrictForBluetoothOnly() {
+        let appState = AppState()
+        let unsupportedUSB = MouseDevice(id: "usb-unsupported", vendor_id: 0x1532, product_id: 0x1234, product_name: "Razer USB Mystery Mouse", transport: .usb, path_b64: "", serial: nil, firmware: nil)
+
+        appState.deviceStore.devices = [unsupportedUSB]
+        appState.deviceStore.selectedDeviceID = unsupportedUSB.id
+
+        XCTAssertTrue(appState.deviceStore.selectedDeviceIsUnsupportedUSB)
+        XCTAssertFalse(appState.deviceStore.selectedDeviceIsStrictlyUnsupported)
+
+        let unsupportedBluetooth = MouseDevice(id: "bt-unsupported", vendor_id: 0x068E, product_id: 0x9999, product_name: "Razer BT Mystery Mouse", transport: .bluetooth, path_b64: "", serial: nil, firmware: nil)
+
+        appState.deviceStore.devices = [unsupportedBluetooth]
+        appState.deviceStore.selectedDeviceID = unsupportedBluetooth.id
+
+        XCTAssertFalse(appState.deviceStore.selectedDeviceIsUnsupportedUSB)
+        XCTAssertTrue(appState.deviceStore.selectedDeviceIsStrictlyUnsupported)
+    }
+}
+
+/// Adds scoped helpers for `BridgeClient`.
+private extension BridgeClient {
+    func testConfigureUSBAccessFlags(hidAccessDenied: Bool, managerAccessDenied: Bool) {
+        self.hidAccessDenied = hidAccessDenied
+        self.managerAccessDenied = managerAccessDenied
+    }
+}

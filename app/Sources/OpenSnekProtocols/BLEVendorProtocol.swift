@@ -1,0 +1,562 @@
+import Foundation
+import OpenSnekCore
+
+/// Defines BLE vendor protocol values.
+public enum BLEVendorProtocol {
+    public static let serviceUUID = UUID(uuidString: "52401523-F97C-7F90-0E7F-6C6F4E36DB1C")!
+    public static let writeUUID = UUID(uuidString: "52401524-F97C-7F90-0E7F-6C6F4E36DB1C")!
+    public static let notifyUUID = UUID(uuidString: "52401525-F97C-7F90-0E7F-6C6F4E36DB1C")!
+    public static let onboardProfileMetadataLength = 0xFA
+    public static let onboardProfileMetadataChunkDataLength = 0x4C
+    public static let onboardProfileMetadataChunkOffsets = Array(stride(from: 0, to: onboardProfileMetadataLength, by: onboardProfileMetadataChunkDataLength))
+    private static let basiliskV3FamilyHorizontalScrollTurboRate: UInt8 = 0x14
+
+    /// Stores profile metadata chunk data.
+    public struct ProfileMetadataChunk: Equatable, Sendable {
+        public let offset: Int
+        public let data: [UInt8]
+
+        public init(offset: Int, data: [UInt8]) {
+            self.offset = offset
+            self.data = data
+        }
+    }
+
+    /// Captures DPI stage state.
+    public struct DpiStageSnapshot: Equatable, Sendable {
+        public let active: Int
+        public let count: Int
+        public let slots: [Int]
+        public let pairs: [DpiPair]
+        public let stageIDs: [UInt8]
+        public let marker: UInt8
+
+        public init(active: Int, count: Int, slots: [Int], pairs: [DpiPair], stageIDs: [UInt8] = [], marker: UInt8 = 0x03) {
+            self.active = active
+            self.count = count
+            self.slots = slots
+            self.pairs = pairs
+            self.stageIDs = stageIDs
+            self.marker = marker
+        }
+    }
+
+    /// Stores DPI stages read data.
+    public struct DpiStagesRead: Equatable, Sendable {
+        public let active: Int
+        public let count: Int
+        public let values: [Int]
+        public let pairs: [DpiPair]
+        public let marker: UInt8
+
+        public init(active: Int, count: Int, values: [Int], pairs: [DpiPair], marker: UInt8) {
+            self.active = active
+            self.count = count
+            self.values = values
+            self.pairs = pairs
+            self.marker = marker
+        }
+    }
+
+    /// Identifies BLE vendor protocol values.
+    public struct Key: Equatable, Sendable {
+        public let b0: UInt8
+        public let b1: UInt8
+        public let b2: UInt8
+        public let b3: UInt8
+
+        public init(b0: UInt8, b1: UInt8, b2: UInt8, b3: UInt8) {
+            self.b0 = b0
+            self.b1 = b1
+            self.b2 = b2
+            self.b3 = b3
+        }
+
+        public var bytes: [UInt8] { [b0, b1, b2, b3] }
+
+        // Captured read mapping also used by upstream tools/python/razer_ble.py.
+        public static let serialGet = Key(b0: 0x01, b1: 0x83, b2: 0x00, b3: 0x00)
+
+        public static let dpiStagesGet = Key(b0: 0x0B, b1: 0x84, b2: 0x01, b3: 0x00)
+        public static let dpiStagesSet = Key(b0: 0x0B, b1: 0x04, b2: 0x01, b3: 0x00)
+        public static let lightingZonesGet = Key(b0: 0x10, b1: 0x80, b2: 0x00, b3: 0x01)
+        public static let lightingGet = lightingBrightnessGet()
+        public static let lightingSet = lightingBrightnessSet()
+        public static let lightingModeSet = Key(b0: 0x10, b1: 0x03, b2: 0x00, b3: 0x00)
+        public static let lightingFrameGet = Key(b0: 0x10, b1: 0x84, b2: 0x00, b3: 0x00)
+        public static let lightingFrameSet = Key(b0: 0x10, b1: 0x04, b2: 0x00, b3: 0x00)
+        public static let powerTimeoutGet = Key(b0: 0x05, b1: 0x84, b2: 0x00, b3: 0x00)
+        public static let powerTimeoutSet = Key(b0: 0x05, b1: 0x04, b2: 0x00, b3: 0x00)
+        public static let batteryRaw = Key(b0: 0x05, b1: 0x81, b2: 0x00, b3: 0x01)
+        public static let batteryStatus = Key(b0: 0x05, b1: 0x80, b2: 0x00, b3: 0x01)
+
+        public static func buttonBind(slot: UInt8) -> Key { Key(b0: 0x08, b1: 0x04, b2: 0x01, b3: slot) }
+
+        public static func profileTargetsGet() -> Key { Key(b0: 0x03, b1: 0x80, b2: 0x00, b3: 0x00) }
+
+        public static func profileActiveTargetGet() -> Key { Key(b0: 0x03, b1: 0x82, b2: 0x00, b3: 0x00) }
+
+        public static func profileActiveTargetSet() -> Key { Key(b0: 0x03, b1: 0x02, b2: 0x00, b3: 0x00) }
+
+        public static func profileActiveTargetSetPayload(target: UInt8) -> Data { Data([target]) }
+
+        public static func profileMetadataGet(target: UInt8) -> Key { Key(b0: 0x03, b1: 0x84, b2: target, b3: 0x00) }
+
+        public static func profileMetadataSet(target: UInt8) -> Key { Key(b0: 0x03, b1: 0x04, b2: target, b3: 0x00) }
+
+        public static func profileTargetDelete(target: UInt8) -> Key { Key(b0: 0x03, b1: 0x06, b2: target, b3: 0x00) }
+
+        public static func profileTargetCommit(target: UInt8) -> Key { Key(b0: 0x03, b1: 0x05, b2: target, b3: 0x00) }
+
+        public static func profileTargetStatusGet(target: UInt8) -> Key { Key(b0: 0x01, b1: 0x8C, b2: target, b3: 0x00) }
+
+        public static func profileTargetPrepare(target: UInt8) -> Key { Key(b0: 0x08, b1: 0x05, b2: target, b3: 0x00) }
+
+        public static func profileTargetApply(target: UInt8) -> Key { Key(b0: 0x08, b1: 0x07, b2: target, b3: 0x00) }
+
+        public static func buttonBindGet(target: UInt8, slot: UInt8) -> Key { Key(b0: 0x08, b1: 0x84, b2: target, b3: slot) }
+
+        public static func buttonBindSet(target: UInt8, slot: UInt8) -> Key { Key(b0: 0x08, b1: 0x04, b2: target, b3: slot) }
+
+        public static func dpiScalarGet(target: UInt8) -> Key { Key(b0: 0x0B, b1: 0x81, b2: target, b3: 0x00) }
+
+        public static func dpiPairListGet(target: UInt8) -> Key { Key(b0: 0x0B, b1: 0x82, b2: target, b3: 0x00) }
+
+        public static func dpiStageTokenGet(target: UInt8) -> Key { Key(b0: 0x0B, b1: 0x83, b2: target, b3: 0x00) }
+
+        public static func dpiProjectionGet(target: UInt8) -> Key { Key(b0: 0x0B, b1: 0x84, b2: target, b3: 0x00) }
+
+        public static func storedDpiScalarSet(target: UInt8) -> Key { Key(b0: 0x0B, b1: 0x01, b2: target, b3: 0x00) }
+
+        public static func storedDpiStagesSet(target: UInt8) -> Key { Key(b0: 0x0B, b1: 0x04, b2: target, b3: 0x00) }
+
+        public static func storedLightingBrightnessSet(target: UInt8) -> Key { Key(b0: 0x10, b1: 0x05, b2: target, b3: 0x00) }
+
+        public static func profileLightingBrightnessGet(target: UInt8, ledID: UInt8) -> Key { Key(b0: 0x10, b1: 0x85, b2: target, b3: ledID) }
+
+        public static func profileLightingZoneStateGet(target: UInt8, ledID: UInt8) -> Key { Key(b0: 0x10, b1: 0x83, b2: target, b3: ledID) }
+
+        public static func profileLightingZoneStateSet(target: UInt8, ledID: UInt8) -> Key { Key(b0: 0x10, b1: 0x03, b2: target, b3: ledID) }
+
+        public static func lightingBrightnessGet(ledID: UInt8 = 0x01) -> Key { Key(b0: 0x10, b1: 0x85, b2: 0x01, b3: ledID) }
+
+        public static func lightingBrightnessSet(ledID: UInt8 = 0x00) -> Key { Key(b0: 0x10, b1: 0x05, b2: 0x01, b3: ledID) }
+
+        public static func lightingZoneStateGet(ledID: UInt8) -> Key { Key(b0: 0x10, b1: 0x83, b2: 0x00, b3: ledID) }
+
+        public static func lightingZoneStateSet(ledID: UInt8) -> Key { Key(b0: 0x10, b1: 0x03, b2: 0x00, b3: ledID) }
+    }
+
+    /// Stores notify header data.
+    public struct NotifyHeader: Equatable, Sendable {
+        public let req: UInt8
+        public let payloadLength: Int
+        public let status: UInt8
+
+        public init?(data: Data) {
+            guard data.count >= 8 else { return nil }
+            req = data[0]
+            payloadLength = Int(data[1])
+            status = data[7]
+        }
+    }
+
+    public static func buildReadHeader(req: UInt8, key: Key) -> Data { Data([req, 0x00, 0x00, 0x00] + key.bytes) }
+
+    public static func buildWriteHeader(req: UInt8, payloadLength: UInt8, key: Key) -> Data { Data([req, payloadLength, 0x00, 0x00] + key.bytes) }
+
+    public static func buildWriteFrames(req: UInt8, key: Key, payload: Data, maxPayloadFrameLength: Int = 20) -> [Data] {
+        let payloadLength = UInt8(max(0, min(255, payload.count)))
+        var frames = [buildWriteHeader(req: req, payloadLength: payloadLength, key: key)]
+        guard !payload.isEmpty else { return frames }
+
+        let chunkSize = max(1, maxPayloadFrameLength)
+        var offset = 0
+        while offset < payload.count {
+            let nextOffset = min(offset + chunkSize, payload.count)
+            frames.append(payload.subdata(in: offset..<nextOffset))
+            offset = nextOffset
+        }
+        return frames
+    }
+
+    public static func parsePayloadFrames(notifies: [Data], req: UInt8) -> Data? {
+        guard
+            let headerIndex = notifies.firstIndex(where: { frame in
+                guard let hdr = NotifyHeader(data: frame) else { return false }
+                return hdr.req == req && [0x02, 0x03, 0x05].contains(hdr.status)
+            }), let header = NotifyHeader(data: notifies[headerIndex]), header.status == 0x02
+        else { return nil }
+
+        let continuation: [Data]
+        if headerIndex + 1 < notifies.count { continuation = Array(notifies[(headerIndex + 1)...]).filter { !$0.isEmpty } } else { continuation = [] }
+
+        let payload: Data
+        if continuation.isEmpty, header.payloadLength > 0 { payload = Data(notifies[headerIndex].dropFirst(8)) } else { payload = continuation.reduce(into: Data()) { partialResult, frame in partialResult.append(frame) } }
+        if header.payloadLength == 0 { return Data() }
+        return payload.prefix(header.payloadLength)
+    }
+
+    public static func parseSerial(notifies: [Data], req: UInt8) -> String? {
+        guard let frame = notifies.first(where: { NotifyHeader(data: $0)?.req == req }),
+              let header = NotifyHeader(data: frame), header.status == 0x02,
+              let payload = parsePayloadFrames(notifies: notifies, req: req), payload.count == header.payloadLength else { return nil }
+        let bytes = payload.prefix { $0 != 0 }
+        guard !bytes.isEmpty, bytes.count <= 64, bytes.allSatisfy({ (0x20...0x7e).contains($0) }),
+              let serial = String(data: Data(bytes), encoding: .ascii) else { return nil }
+        return DevicePersistenceKeys.normalizedStableSerial(serial)
+    }
+
+    public static func parseProfileTargets(payload: Data, maxProfileID: Int = OnboardProfileLimits.maximumPersistentProfileID) -> [Int] {
+        let maxID = max(OnboardProfileLimits.minimumPersistentProfileID, min(Int(UInt8.max), maxProfileID))
+        return Array(
+            Set(
+                payload.compactMap { byte -> Int? in
+                    let value = Int(byte)
+                    guard value >= OnboardProfileLimits.minimumPersistentProfileID, value <= maxID else { return nil }
+                    return value
+                })
+        ).sorted()
+    }
+
+    public static func parseActiveTarget(payload: Data) -> Int? {
+        guard let first = payload.first, first <= 0x05 else { return nil }
+        return Int(first)
+    }
+
+    public static func buildProfileMetadata(identifier: UUID, name: String, owner: String) -> [UInt8] { USBHIDProtocol.buildOnboardProfileMetadata(identifier: identifier, name: name, owner: owner) }
+
+    public static func profileMetadataReadRequest(offset: Int, length: Int = onboardProfileMetadataChunkDataLength) -> Data {
+        let clampedOffset = max(0, min(0xFFFF, offset))
+        let remaining = max(0, onboardProfileMetadataLength - clampedOffset)
+        let clampedLength = max(0, min(0xFFFF, min(length, remaining)))
+        return Data([UInt8(clampedOffset & 0xFF), UInt8((clampedOffset >> 8) & 0xFF), UInt8(clampedLength & 0xFF), UInt8((clampedLength >> 8) & 0xFF)])
+    }
+
+    public static func profileMetadataWritePayload(offset: Int, metadata: [UInt8]) -> Data {
+        let clampedOffset = max(0, min(onboardProfileMetadataLength, offset))
+        let end = min(metadata.count, clampedOffset + onboardProfileMetadataChunkDataLength)
+        var payload = Data([UInt8(onboardProfileMetadataLength & 0xFF), UInt8((onboardProfileMetadataLength >> 8) & 0xFF), UInt8(clampedOffset & 0xFF), UInt8((clampedOffset >> 8) & 0xFF)])
+        if clampedOffset < end { payload.append(contentsOf: metadata[clampedOffset..<end]) }
+        if payload.count < 4 + onboardProfileMetadataChunkDataLength { payload.append(contentsOf: repeatElement(0x00, count: 4 + onboardProfileMetadataChunkDataLength - payload.count)) }
+        return payload
+    }
+
+    public static func profileMetadataChunk(from payload: Data, expectedOffset: Int? = nil) -> ProfileMetadataChunk? {
+        guard payload.count >= 2 else { return nil }
+        let offset = Int(payload[0]) | (Int(payload[1]) << 8)
+        if let expectedOffset, offset != expectedOffset { return nil }
+        return ProfileMetadataChunk(offset: offset, data: Array(payload.dropFirst(2)))
+    }
+
+    public static func mergeProfileMetadataChunks(_ chunks: [ProfileMetadataChunk]) -> [UInt8] {
+        var metadata = [UInt8](repeating: 0x00, count: onboardProfileMetadataLength)
+        for chunk in chunks.sorted(by: { $0.offset < $1.offset }) {
+            guard chunk.offset >= 0 else { continue }
+            let end = min(metadata.count, chunk.offset + chunk.data.count)
+            guard chunk.offset < end else { continue }
+            for index in chunk.offset..<end { metadata[index] = chunk.data[index - chunk.offset] }
+        }
+        return metadata
+    }
+
+    public static func parseProfileMetadata(_ bytes: [UInt8]) -> USBHIDProtocol.OnboardProfileMetadata { USBHIDProtocol.parseOnboardProfileMetadata(bytes) }
+
+    public static func extractBluetoothFunctionBlock(payload: Data, target: UInt8, slot: UInt8, profileID: DeviceProfileID? = nil) -> [UInt8]? {
+        let bytes = Array(payload)
+        if bytes.count >= 10, bytes[0] == target, bytes[1] == slot {
+            let candidate = [bytes[3], bytes[4], bytes[5], bytes[6], bytes[7], bytes[8], bytes[9]]
+            if ButtonBindingSupport.buttonBindingDraftFromUSBFunctionBlock(slot: Int(slot), functionBlock: candidate, profileID: profileID) != nil { return candidate }
+            return candidate
+        }
+        if bytes.count >= 9, bytes[0] == slot {
+            let tail = Array(bytes.dropFirst(2))
+            if tail.count >= 14 {
+                let evenLane = Array(tail.enumerated().compactMap { index, byte in index.isMultiple(of: 2) ? byte : nil }.prefix(7))
+                let oddLane = Array(tail.enumerated().compactMap { index, byte in index.isMultiple(of: 2) ? nil : byte }.prefix(7))
+                let lanes = [evenLane, oddLane]
+                if let parsed = lanes.first(where: { ButtonBindingSupport.buttonBindingDraftFromUSBFunctionBlock(slot: Int(slot), functionBlock: $0, profileID: profileID) != nil }) { return parsed }
+                return evenLane
+            }
+            if tail.count >= 7 {
+                let candidate = Array(tail.prefix(7))
+                if ButtonBindingSupport.buttonBindingDraftFromUSBFunctionBlock(slot: Int(slot), functionBlock: candidate, profileID: profileID) != nil { return candidate }
+                return candidate
+            }
+        }
+        return nil
+    }
+
+    public static func parseDpiStageSnapshot(blob: Data) -> DpiStageSnapshot? {
+        if blob.count >= 9 {
+            let activeRaw = Int(blob[0])
+            let declaredCount = DeviceProfiles.clampDpiStageCount(Int(blob[1]))
+            var slots: [Int] = []
+            var pairs: [DpiPair] = []
+            var stageIDs: [UInt8] = []
+            var marker: UInt8 = 0x03
+
+            for i in 0..<declaredCount {
+                let off = 2 + (i * 7)
+                guard off + 4 < blob.count else { break }
+                let x = Int(blob[off + 1]) | (Int(blob[off + 2]) << 8)
+                let y = Int(blob[off + 3]) | (Int(blob[off + 4]) << 8)
+                slots.append(x)
+                pairs.append(DpiPair(x: x, y: y))
+                stageIDs.append(blob[off])
+                if off + 6 < blob.count { marker = blob[off + 6] }
+            }
+
+            if slots.isEmpty { return nil }
+            while slots.count < declaredCount {
+                let fallback = pairs.last ?? DpiPair(x: slots.last ?? 800, y: slots.last ?? 800)
+                slots.append(fallback.x)
+                pairs.append(fallback)
+                stageIDs.append(stageIDs.last.map { $0 &+ 1 } ?? UInt8(stageIDs.count))
+            }
+            while slots.count < DeviceProfiles.maximumDpiStageCount {
+                let fallback = pairs.last ?? DpiPair(x: slots.last ?? 800, y: slots.last ?? 800)
+                slots.append(fallback.x)
+                pairs.append(fallback)
+                stageIDs.append(stageIDs.last.map { $0 &+ 1 } ?? UInt8(stageIDs.count))
+            }
+
+            let count = min(declaredCount, slots.count)
+            let visibleIDs = Array(stageIDs.prefix(count))
+            let active = resolveActiveStage(activeRaw: activeRaw, stageIDs: visibleIDs, count: count)
+            return DpiStageSnapshot(active: active, count: count, slots: Array(slots.prefix(DeviceProfiles.maximumDpiStageCount)), pairs: Array(pairs.prefix(DeviceProfiles.maximumDpiStageCount)), stageIDs: Array(stageIDs.prefix(DeviceProfiles.maximumDpiStageCount)), marker: marker)
+        }
+
+        if blob.count >= 7 {
+            let activeRaw = Int(blob[0])
+            let count = DeviceProfiles.clampDpiStageCount(Int(blob[1]))
+            let value = Int(blob[3]) | (Int(blob[4]) << 8)
+            let active = activeRaw >= 1 ? max(0, min(count - 1, activeRaw - 1)) : 0
+            let sid = blob.count > 2 ? blob[2] : 0
+            let pair = DpiPair(x: value, y: value)
+            return DpiStageSnapshot(
+                active: active, count: count, slots: Array(repeating: value, count: DeviceProfiles.maximumDpiStageCount), pairs: Array(repeating: pair, count: DeviceProfiles.maximumDpiStageCount), stageIDs: Array(repeating: sid, count: DeviceProfiles.maximumDpiStageCount), marker: 0x03)
+        }
+
+        return nil
+    }
+
+    public static func parseDpiStages(blob: Data) -> DpiStagesRead? {
+        guard let snapshot = parseDpiStageSnapshot(blob: blob) else { return nil }
+        return DpiStagesRead(active: snapshot.active, count: snapshot.count, values: Array(snapshot.slots.prefix(snapshot.count)), pairs: Array(snapshot.pairs.prefix(snapshot.count)), marker: snapshot.marker)
+    }
+
+    public static func parseDpiPairList(blob: Data) -> [DpiPair]? {
+        guard blob.count >= 4 else { return nil }
+        var pairs: [DpiPair] = []
+        var offset = 0
+        while offset + 3 < blob.count {
+            let x = Int(blob[offset]) | (Int(blob[offset + 1]) << 8)
+            let y = Int(blob[offset + 2]) | (Int(blob[offset + 3]) << 8)
+            pairs.append(DpiPair(x: x, y: y))
+            offset += 6
+        }
+        return pairs.isEmpty ? nil : pairs
+    }
+
+    public static func parseDpiScalarPair(blob: Data) -> DpiPair? { parseDpiPairList(blob: blob)?.first }
+
+    public static func retargetButtonPayload(_ payload: Data, target: UInt8, slot: UInt8? = nil) -> Data {
+        guard payload.count >= 2 else { return payload }
+        var bytes = Array(payload)
+        bytes[0] = target
+        if let slot { bytes[1] = slot }
+        return Data(bytes)
+    }
+
+    public static func mergedStageSlots(currentSlots: [Int], requestedCount: Int, requestedValues: [Int], profileID: DeviceProfileID? = nil) -> [Int] {
+        mergedStagePairs(currentPairs: currentSlots.map { DpiPair(x: $0, y: $0) }, requestedCount: requestedCount, requestedPairs: requestedValues.map { DpiPair(x: $0, y: $0) }, profileID: profileID).map(\.x)
+    }
+
+    public static func mergedStagePairs(currentPairs: [DpiPair], requestedCount: Int, requestedPairs: [DpiPair], profileID: DeviceProfileID? = nil) -> [DpiPair] {
+        let count = DeviceProfiles.clampDpiStageCount(requestedCount)
+        let clamped = requestedPairs.map { pair in DpiPair(x: DeviceProfiles.clampDPI(pair.x, profileID: profileID), y: DeviceProfiles.clampDPI(pair.y, profileID: profileID)) }
+        var pairs = Array(currentPairs.prefix(DeviceProfiles.maximumDpiStageCount))
+        if pairs.count < DeviceProfiles.maximumDpiStageCount { pairs += Array(repeating: clamped.first ?? DpiPair(x: 800, y: 800), count: DeviceProfiles.maximumDpiStageCount - pairs.count) }
+
+        if count == 1 {
+            let single = clamped.first ?? pairs[0]
+            return Array(repeating: single, count: DeviceProfiles.maximumDpiStageCount)
+        }
+
+        for i in 0..<count where i < clamped.count { pairs[i] = clamped[i] }
+        return Array(pairs.prefix(DeviceProfiles.maximumDpiStageCount))
+    }
+
+    public static func buildDpiStagePayload(active: Int, count: Int, slots: [Int], marker: UInt8, stageIDs: [UInt8]? = nil, profileID: DeviceProfileID? = nil) -> Data {
+        buildDpiStagePayload(active: active, count: count, pairs: slots.map { DpiPair(x: $0, y: $0) }, marker: marker, stageIDs: stageIDs, profileID: profileID)
+    }
+
+    public static func buildDpiStagePayload(active: Int, count: Int, pairs: [DpiPair], marker: UInt8, stageIDs: [UInt8]? = nil, profileID: DeviceProfileID? = nil) -> Data {
+        let clippedCount = DeviceProfiles.clampDpiStageCount(count)
+        let defaultStageIDs = (0..<DeviceProfiles.maximumDpiStageCount).map(UInt8.init)
+        var ids = Array((stageIDs ?? defaultStageIDs).prefix(DeviceProfiles.maximumDpiStageCount))
+        while ids.count < DeviceProfiles.maximumDpiStageCount { ids.append(ids.last.map { $0 &+ 1 } ?? UInt8(ids.count)) }
+        let activeIndex = max(0, min(clippedCount - 1, active))
+        var out = Data([ids[activeIndex], UInt8(clippedCount)])
+        let clamped = pairs.map { pair in DpiPair(x: DeviceProfiles.clampDPI(pair.x, profileID: profileID), y: DeviceProfiles.clampDPI(pair.y, profileID: profileID)) }
+
+        for i in 0..<5 {
+            let pair = clamped[min(i, max(0, clamped.count - 1))]
+            let xLo = UInt8(pair.x & 0xFF)
+            let xHi = UInt8((pair.x >> 8) & 0xFF)
+            let yLo = UInt8(pair.y & 0xFF)
+            let yHi = UInt8((pair.y >> 8) & 0xFF)
+            out.append(ids[i])
+            out.append(xLo)
+            out.append(xHi)
+            out.append(yLo)
+            out.append(yHi)
+            out.append(0x00)
+            out.append(i == 4 ? marker : 0x00)
+        }
+        out.append(0x00)
+        return out
+    }
+
+    public static func buildButtonPayload(slot: UInt8, kind: ButtonBindingKind, hidKey: UInt8?, hidModifiers: UInt8 = 0, turboEnabled: Bool = false, turboRate: UInt16? = nil, clutchDPI: Int? = nil, profileID: DeviceProfileID? = nil) -> Data {
+        let clampedTurboRate = max(UInt16(1), min(UInt16(0x00FF), turboRate ?? 0x008E))
+        if profileID?.isNagaFamily == true {
+            let draft = ButtonBindingDraft(kind: kind, hidKey: Int(hidKey ?? 0x04), hidModifiers: Int(hidModifiers), turboEnabled: turboEnabled, turboRate: Int(clampedTurboRate), clutchDPI: clutchDPI)
+            return buildRawFunctionBlockPayload(slot: slot, functionBlock: ButtonBindingSupport.usbFunctionBlockForWrite(slot: Int(slot), draft: draft, profileID: profileID))
+        }
+        func clutchBytes() -> (UInt8, UInt8) {
+            let clamped = UInt16(DeviceProfiles.clampDPI(clutchDPI ?? ButtonBindingSupport.defaultBasiliskDPIClutchDPI, profileID: profileID ?? .basiliskV3Pro))
+            return (UInt8((clamped >> 8) & 0xFF), UInt8(clamped & 0xFF))
+        }
+        if turboEnabled {
+            if kind == .keyboardSimple {
+                let key = hidKey ?? 0x04
+                return Data([0x01, slot, 0x00, 0x0D, 0x04, hidModifiers, key, 0x00, UInt8(clampedTurboRate & 0xFF), UInt8((clampedTurboRate >> 8) & 0xFF)])
+            }
+            if let buttonID = horizontalScrollButtonID(for: kind) { return buildRawFunctionBlockPayload(slot: slot, functionBlock: [0x0E, 0x03, buttonID, 0x00, UInt8(clampedTurboRate & 0xFF), 0x00, 0x00]) }
+            if let buttonID = mouseButtonID(for: kind) {
+                let index = UInt16(max(0, Int(buttonID) - 1))
+                let p0 = UInt16((index << 8) | 0x0003)
+                return Data([0x01, slot, 0x00, 0x0E, UInt8(p0 & 0xFF), UInt8((p0 >> 8) & 0xFF), UInt8(clampedTurboRate & 0xFF), UInt8((clampedTurboRate >> 8) & 0xFF), 0x00, 0x00])
+            }
+        }
+
+        switch kind {
+        case .default:
+            if slot == 0x60 { return Data([0x01, slot, 0x00, 0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00]) }
+            if let buttonID = defaultHorizontalScrollButtonID(forSlot: slot) { return buildRawFunctionBlockPayload(slot: slot, functionBlock: [0x0E, 0x03, buttonID, 0x00, basiliskV3FamilyHorizontalScrollTurboRate, 0x00, 0x00]) }
+            if let buttonID = defaultMouseButtonID(forSlot: slot) { return Data([0x01, slot, 0x00, 0x01, 0x01, buttonID, 0x00, 0x00, 0x00, 0x00]) }
+            return Data([0x01, slot, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+        case .dpiCycle: return Data([0x01, slot, 0x00, 0x06, 0x01, 0x06, 0x00, 0x00, 0x00, 0x00])
+        case .dpiClutch:
+            let (hi, lo) = clutchBytes()
+            return Data([0x01, slot, 0x00, 0x06, 0x05, 0x05, hi, lo, hi, lo])
+        case .leftClick: return Data([0x01, slot, 0x00, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00])
+        case .rightClick: return Data([0x01, slot, 0x00, 0x01, 0x01, 0x02, 0x00, 0x00, 0x00, 0x00])
+        case .middleClick: return Data([0x01, slot, 0x00, 0x01, 0x01, 0x03, 0x00, 0x00, 0x00, 0x00])
+        case .scrollUp: return Data([0x01, slot, 0x00, 0x01, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00])
+        case .scrollDown: return Data([0x01, slot, 0x00, 0x01, 0x01, 0x0A, 0x00, 0x00, 0x00, 0x00])
+        case .scrollLeft: return buildRawFunctionBlockPayload(slot: slot, functionBlock: [0x0E, 0x03, 0x68, 0x00, basiliskV3FamilyHorizontalScrollTurboRate, 0x00, 0x00])
+        case .scrollRight: return buildRawFunctionBlockPayload(slot: slot, functionBlock: [0x0E, 0x03, 0x69, 0x00, basiliskV3FamilyHorizontalScrollTurboRate, 0x00, 0x00])
+        case .mouseBack: return Data([0x01, slot, 0x00, 0x01, 0x01, 0x04, 0x00, 0x00, 0x00, 0x00])
+        case .mouseForward: return Data([0x01, slot, 0x00, 0x01, 0x01, 0x05, 0x00, 0x00, 0x00, 0x00])
+        case .keyboardSimple: return Data([0x01, slot, 0x00, 0x02, 0x02, hidModifiers, hidKey ?? 0x04, 0x00, 0x00, 0x00])
+        case .clearLayer: return Data([0x01, slot, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
+        }
+    }
+
+    public static func buildScrollLEDEffectArgs(effect: LightingEffectPatch, ledID: UInt8 = 0x01) -> [UInt8] {
+        switch effect.kind {
+        case .off: return [0x01, ledID, 0x00, 0x00, 0x00, 0x00]
+        case .staticColor: return [0x01, ledID, 0x01, 0x00, 0x00, 0x01, UInt8(effect.primary.r), UInt8(effect.primary.g), UInt8(effect.primary.b)]
+        case .spectrum: return [0x01, ledID, 0x03, 0x00, 0x00, 0x00]
+        case .wave: return [0x01, ledID, 0x04, UInt8(effect.waveDirection.rawValue), 0x28, 0x00]
+        case .reactive: return [0x01, ledID, 0x05, 0x00, UInt8(max(1, min(4, effect.reactiveSpeed))), 0x01, UInt8(effect.primary.r), UInt8(effect.primary.g), UInt8(effect.primary.b)]
+        case .pulseRandom: return [0x01, ledID, 0x02, 0x00, 0x00, 0x00]
+        case .pulseSingle: return [0x01, ledID, 0x02, 0x01, 0x00, 0x01, UInt8(effect.primary.r), UInt8(effect.primary.g), UInt8(effect.primary.b)]
+        case .pulseDual: return [0x01, ledID, 0x02, 0x02, 0x00, 0x02, UInt8(effect.primary.r), UInt8(effect.primary.g), UInt8(effect.primary.b), UInt8(effect.secondary.r), UInt8(effect.secondary.g), UInt8(effect.secondary.b)]
+        }
+    }
+
+    /// Naga V3 Pro BLE zone-state effects omit USB's storage/LED prefix and pad to ten bytes.
+    /// Off is an effect write, not brightness zero, so returning to Static preserves brightness.
+    public static func buildBluetoothZoneEffectPayload(effect: LightingEffectPatch) -> Data {
+        let effectBytes = Array(buildScrollLEDEffectArgs(effect: effect).dropFirst(2))
+        let minimumPayloadLength = 10
+        return Data(effectBytes + Array(repeating: 0, count: max(0, minimumPayloadLength - effectBytes.count)))
+    }
+
+    public static func parseLightingLEDIDs(blob: Data) -> [UInt8]? {
+        guard !blob.isEmpty else { return nil }
+        var seen: Set<UInt8> = []
+        var ids: [UInt8] = []
+        for value in blob where !seen.contains(value) {
+            seen.insert(value)
+            ids.append(value)
+        }
+        return ids.isEmpty ? nil : ids
+    }
+
+    public static func buildV3ProLightingZoneStatePayload(r: Int, g: Int, b: Int) -> Data { Data([0x01, 0x00, 0x00, 0x01, UInt8(max(0, min(255, r))), UInt8(max(0, min(255, g))), UInt8(max(0, min(255, b))), 0x00, 0x00, 0x00]) }
+
+    public static func parseV3ProLightingZoneStatePayload(_ payload: Data) -> RGBPatch? {
+        guard payload.count >= 10 else { return nil }
+        guard payload[0] == 0x01, payload[1] == 0x00, payload[2] == 0x00, payload[3] == 0x01 else { return nil }
+        return RGBPatch(r: Int(payload[4]), g: Int(payload[5]), b: Int(payload[6]))
+    }
+
+    public static func resolveActiveStage(activeRaw: Int, stageIDs: [UInt8], count: Int) -> Int {
+        guard count > 0 else { return 0 }
+        if let mapped = stageIDs.firstIndex(of: UInt8(activeRaw & 0xFF)) { return mapped }
+        if activeRaw >= 1, activeRaw <= count { return activeRaw - 1 }
+        return max(0, min(count - 1, activeRaw))
+    }
+
+    public static func mouseButtonID(for kind: ButtonBindingKind) -> UInt8? {
+        switch kind {
+        case .leftClick: return 0x01
+        case .rightClick: return 0x02
+        case .middleClick: return 0x03
+        case .mouseBack: return 0x04
+        case .mouseForward: return 0x05
+        case .scrollUp: return 0x09
+        case .scrollDown: return 0x0A
+        case .scrollLeft: return 0x68
+        case .scrollRight: return 0x69
+        default: return nil
+        }
+    }
+
+    public static func defaultMouseButtonID(forSlot slot: UInt8) -> UInt8? {
+        switch slot {
+        case 1: return 0x01
+        case 2: return 0x02
+        case 3: return 0x03
+        case 4: return 0x04
+        case 5: return 0x05
+        case 9: return 0x09
+        case 10: return 0x0A
+        default: return nil
+        }
+    }
+
+    private static func buildRawFunctionBlockPayload(slot: UInt8, functionBlock: [UInt8]) -> Data { Data([0x01, slot, 0x00] + functionBlock) }
+
+    private static func horizontalScrollButtonID(for kind: ButtonBindingKind) -> UInt8? {
+        switch kind {
+        case .scrollLeft: return 0x68
+        case .scrollRight: return 0x69
+        default: return nil
+        }
+    }
+
+    private static func defaultHorizontalScrollButtonID(forSlot slot: UInt8) -> UInt8? {
+        switch slot {
+        case 0x34: return 0x68
+        case 0x35: return 0x69
+        default: return nil
+        }
+    }
+
+}
