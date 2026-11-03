@@ -25,6 +25,10 @@ import AppKit
     static func applyCurrentActivationPolicy() {
         guard !MouseControlApp.runningUnitTests, let application = NSApp else { return }
         let policy = launchActivationPolicy(launchRole: .current, backgroundOnly: BackgroundServiceCoordinator.shared.backgroundOnly)
+        // SwiftUI needs a regular launch to create its initial WindowGroup. Once a
+        // main window exists, switching to accessory keeps that window usable.
+        if !OpenSnekProcessRole.current.isService, policy == .accessory,
+           !application.windows.contains(where: { $0.canBecomeMain }) { return }
         guard application.activationPolicy() != policy else { return }
         application.setActivationPolicy(policy)
         IconStore.shared.apply()
@@ -32,7 +36,7 @@ import AppKit
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         OpenSnekAppearance.apply()
-        NSApp.setActivationPolicy(Self.launchActivationPolicy(launchRole: OpenSnekProcessRole.current, backgroundOnly: BackgroundServiceCoordinator.shared.backgroundOnly))
+        NSApp.setActivationPolicy(Self.launchActivationPolicy(launchRole: OpenSnekProcessRole.current))
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -53,6 +57,7 @@ import AppKit
                 WindowChromeConfigurator.configure($0)
                 $0.makeKeyAndOrderFront(nil)
             }
+            Self.applyCurrentActivationPolicy()
             self.acknowledgeDevelopmentLaunch(attemptsRemaining: 100)
         }
     }
