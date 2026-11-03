@@ -15,6 +15,8 @@ struct SettingsView: View {
     @AppStorage(DeveloperRuntimeOptions.settingStorageEnabledDefaultsKey) private var developerSettingStorageEnabled = true
     @State private var showsDiagnosticsSheet = false
     @State private var showsLocalStorageResetConfirmation = false
+    @AppStorage(BackgroundServiceCoordinator.backgroundOnlyDefaultsKey) private var backgroundOnly = false
+    @State private var changingBackgroundMode = false
 
     private var selectedLevel: Binding<AppLogLevel> {
         Binding(
@@ -80,7 +82,19 @@ struct SettingsView: View {
 
     private var generalSection: some View {
         Section("General") {
-            Toggle("Show menu bar icon", isOn: Binding(get: { runtimeStore.backgroundServiceEnabled }, set: { newValue in Task { await runtimeStore.setBackgroundServiceEnabled(newValue) } }))
+            Toggle("仅后台运行（隐藏 Dock 图标）", isOn: Binding(get: { backgroundOnly }, set: { enabled in
+                changingBackgroundMode = true
+                Task { @MainActor in
+                    defer { changingBackgroundMode = false }
+                    if enabled && !runtimeStore.backgroundServiceEnabled { await runtimeStore.setBackgroundServiceEnabled(true) }
+                    guard !enabled || runtimeStore.backgroundServiceEnabled else { return }
+                    BackgroundServiceCoordinator.shared.setBackgroundOnly(enabled)
+                    backgroundOnly = enabled
+                    AppLifecycleDelegate.applyCurrentActivationPolicy()
+                }
+            })).disabled(changingBackgroundMode)
+            Text("开启后保留顶部菜单栏入口，关闭设置窗口后继续在后台运行。").font(.caption).foregroundStyle(.secondary)
+            Toggle("Show menu bar icon", isOn: Binding(get: { runtimeStore.backgroundServiceEnabled }, set: { newValue in Task { await runtimeStore.setBackgroundServiceEnabled(newValue) } })).disabled(backgroundOnly || changingBackgroundMode)
             Toggle("Start at login", isOn: Binding(get: { runtimeStore.launchAtStartupEnabled }, set: { runtimeStore.setLaunchAtStartupEnabled($0) })).disabled(!runtimeStore.backgroundServiceEnabled)
             if let message = runtimeStore.compactStatusMessage ?? runtimeStore.serviceStatusMessage { Text(localized(message)).font(.system(size: 12, weight: .bold, design: .default)).foregroundStyle(.secondary) }
         }

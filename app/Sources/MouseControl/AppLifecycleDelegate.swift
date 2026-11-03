@@ -20,11 +20,19 @@ import AppKit
         return hasVisibleWindows ? .noop : .reopenWindows
     }
 
-    nonisolated static func launchActivationPolicy(launchRole: OpenSnekProcessRole) -> NSApplication.ActivationPolicy { launchRole.isService ? .accessory : .regular }
+    nonisolated static func launchActivationPolicy(launchRole: OpenSnekProcessRole, backgroundOnly: Bool = false) -> NSApplication.ActivationPolicy { launchRole.isService || backgroundOnly ? .accessory : .regular }
+
+    static func applyCurrentActivationPolicy() {
+        guard !MouseControlApp.runningUnitTests, let application = NSApp else { return }
+        let policy = launchActivationPolicy(launchRole: .current, backgroundOnly: BackgroundServiceCoordinator.shared.backgroundOnly)
+        guard application.activationPolicy() != policy else { return }
+        application.setActivationPolicy(policy)
+        IconStore.shared.apply()
+    }
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         OpenSnekAppearance.apply()
-        NSApp.setActivationPolicy(Self.launchActivationPolicy(launchRole: OpenSnekProcessRole.current))
+        NSApp.setActivationPolicy(Self.launchActivationPolicy(launchRole: OpenSnekProcessRole.current, backgroundOnly: BackgroundServiceCoordinator.shared.backgroundOnly))
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -36,7 +44,7 @@ import AppKit
 
         if OpenSnekProcessRole.current.isService { return }
 
-        NSApp.setActivationPolicy(Self.launchActivationPolicy(launchRole: .app))
+        Self.applyCurrentActivationPolicy()
         NSApp.activate(ignoringOtherApps: true)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {

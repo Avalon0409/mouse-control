@@ -15,6 +15,8 @@ translations.update({
     'Back Button':'后退键','Forward Button':'前进键','Red':'红','Green':'绿','Blue':'蓝','Cyan':'青','Yellow':'黄',
 })
 chinese_to_english.update({
+    '仅后台运行（隐藏 Dock 图标）':'Run in background only (hide Dock icon)',
+    '开启后保留顶部菜单栏入口，关闭设置窗口后继续在后台运行。':'Keep the menu bar entry and continue running in the background after closing settings.',
     '修改后自动应用到鼠标；输入数值后按回车确认。':'Changes apply to the mouse automatically. Press Return after entering a value.','保存为配置':'Save as profile','保存当前鼠标配置':'Save current mouse settings','配置名称':'Profile name','保存到此 Mac 的配置库，可在配置菜单中重新应用。':'Save to this Mac’s profile library. Apply it again from the profile menu.','取消':'Cancel','保存':'Save','当前设置已保存到本地配置库。':'Current settings saved to the local profile library.','为此应用单独设置滚轮手感':'Use custom wheel settings for this application','外观':'Appearance','独立滚动':'Independent scrolling','已选择':'Selected','未选择':'Not selected',
     '应用图标与菜单栏同步切换，下次启动继续使用。':'Application and menu bar icons change together and are remembered.',
     '开发设置':'Developer settings','提醒阈值：%lld%%':'Notify below: %lld%%',

@@ -36,6 +36,7 @@ struct NativeBatterySummary: Codable, Identifiable, Equatable {
     }
 
     private func tick() async {
+        AppLifecycleDelegate.applyCurrentActivationPolicy()
         LanguageStore.shared.reload()
         IconStore.shared.reload()
         let store = FeatureStore.shared

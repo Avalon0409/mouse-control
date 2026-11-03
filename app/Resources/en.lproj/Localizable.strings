@@ -258,6 +258,7 @@
 "Your settings" = "Your settings";
 "Zones" = "Zones";
 "为此应用单独设置滚轮手感" = "Use custom wheel settings for this application";
+"仅后台运行（隐藏 Dock 图标）" = "Run in background only (hide Dock icon)";
 "传统" = "Classic";
 "低电量通知" = "Low-battery notifications";
 "低电量通知已授权" = "Low-battery notifications allowed";
@@ -303,6 +304,7 @@
 "应用与菜单栏" = "Application & menu bar";
 "应用图标与菜单栏同步切换，下次启动继续使用。" = "Application and menu bar icons change together and are remembered.";
 "开发设置" = "Developer settings";
+"开启后保留顶部菜单栏入口，关闭设置窗口后继续在后台运行。" = "Keep the menu bar entry and continue running in the background after closing settings.";
 "开启后滚动鼠标或触控板，即可识别来源；也可以复制原 Scroll Reverser 设置。" = "Enable scrolling, then scroll with your mouse or trackpad to identify sources. You can also copy Scroll Reverser settings.";
 "开启独立滚动设置" = "Enable independent scroll settings";
 "开启辅助功能权限" = "Allow accessibility access";

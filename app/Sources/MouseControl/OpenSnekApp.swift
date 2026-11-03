@@ -25,6 +25,9 @@ import SwiftUI
     init() {
         isUnitTestRun = Self.runningUnitTests
         let launchRole = OpenSnekProcessRole.current
+        if !isUnitTestRun, BackgroundServiceCoordinator.shared.backgroundOnly {
+            BackgroundServiceCoordinator.shared.setBackgroundServiceEnabled(true)
+        }
         let isUITestRun: Bool
         #if DEBUG
             isUITestRun = OpenSnekUITestSupport.isEnabled

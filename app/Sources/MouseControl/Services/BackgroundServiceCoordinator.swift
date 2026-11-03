@@ -10,6 +10,7 @@ import Network
     let softwareUpdateSession = SoftwareUpdateSession()
 
     nonisolated static let backgroundServiceEnabledDefaultsKey = "backgroundServiceEnabled"
+    nonisolated static let backgroundOnlyDefaultsKey = "mouseControl.backgroundOnly"
     nonisolated static let launchAtStartupDefaultsKey = "launchServiceAtStartup"
     nonisolated static let launchAtStartupDidChangeNotification = Notification.Name("local.mousecontrol.MouseControl.launchAtStartupDidChange")
     nonisolated static let endpointDefaultsKey = "backgroundServiceEndpoint"
@@ -40,6 +41,7 @@ import Network
     }
 
     var backgroundServiceEnabled: Bool { defaults.bool(forKey: Self.backgroundServiceEnabledDefaultsKey) }
+    var backgroundOnly: Bool { defaults.bool(forKey: Self.backgroundOnlyDefaultsKey) }
 
     var launchAtStartupEnabled: Bool { defaults.bool(forKey: Self.launchAtStartupDefaultsKey) }
 
@@ -69,7 +71,15 @@ import Network
         return await serviceHost.requestOpenSettingsForConnectedClients()
     }
 
-    func setBackgroundServiceEnabled(_ enabled: Bool) { defaults.set(enabled, forKey: Self.backgroundServiceEnabledDefaultsKey) }
+    func setBackgroundServiceEnabled(_ enabled: Bool) {
+        defaults.set(enabled, forKey: Self.backgroundServiceEnabledDefaultsKey)
+        if !enabled { defaults.set(false, forKey: Self.backgroundOnlyDefaultsKey) }
+    }
+
+    func setBackgroundOnly(_ enabled: Bool) {
+        if enabled { setBackgroundServiceEnabled(true) }
+        defaults.set(enabled, forKey: Self.backgroundOnlyDefaultsKey)
+    }
 
     func setLaunchAtStartupEnabled(_ enabled: Bool) throws {
         defaults.set(enabled, forKey: Self.launchAtStartupDefaultsKey)
@@ -243,13 +253,14 @@ import Network
         let runningApplications = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier)
         guard
             let preferred = Self.preferredReusableApplication(
-                in: runningApplications.map { RunningAppSnapshot(processIdentifier: $0.processIdentifier, activationPolicy: $0.activationPolicy, isActive: $0.isActive, isTerminated: $0.isTerminated) }, excluding: ProcessInfo.processInfo.processIdentifier)
+                in: runningApplications.map { RunningAppSnapshot(processIdentifier: $0.processIdentifier, activationPolicy: $0.activationPolicy, isActive: $0.isActive, isTerminated: $0.isTerminated) }, excluding: ProcessInfo.processInfo.processIdentifier,
+                serviceProcessIdentifier: serviceProcessIdentifier, includeAccessory: backgroundOnly)
         else { return nil }
         return runningApplications.first { $0.processIdentifier == preferred.processIdentifier }
     }
 
-    nonisolated static func preferredReusableApplication(in runningApplications: [RunningAppSnapshot], excluding currentProcessIdentifier: pid_t) -> RunningAppSnapshot? {
-        runningApplications.filter { $0.processIdentifier != currentProcessIdentifier && !$0.isTerminated && $0.activationPolicy == .regular }.sorted { lhs, rhs in
+    nonisolated static func preferredReusableApplication(in runningApplications: [RunningAppSnapshot], excluding currentProcessIdentifier: pid_t, serviceProcessIdentifier: pid_t? = nil, includeAccessory: Bool = false) -> RunningAppSnapshot? {
+        runningApplications.filter { $0.processIdentifier != currentProcessIdentifier && $0.processIdentifier != serviceProcessIdentifier && !$0.isTerminated && ($0.activationPolicy == .regular || (includeAccessory && $0.activationPolicy == .accessory)) }.sorted { lhs, rhs in
             if lhs.isActive != rhs.isActive { return lhs.isActive && !rhs.isActive }
             return lhs.processIdentifier < rhs.processIdentifier
         }.first

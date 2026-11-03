@@ -4,6 +4,42 @@ import XCTest
 
 /// Exercises background service coordinator behavior.
 final class BackgroundServiceCoordinatorTests: XCTestCase {
+    @MainActor func testBackgroundOnlyPersistsAndKeepsMenuBarAvailable() {
+        let suite = "BackgroundOnly.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let coordinator = BackgroundServiceCoordinator(defaults: defaults)
+        coordinator.setBackgroundServiceEnabled(false)
+        coordinator.setBackgroundOnly(true)
+        let restarted = BackgroundServiceCoordinator(defaults: UserDefaults(suiteName: suite)!)
+        XCTAssertTrue(restarted.backgroundOnly)
+        XCTAssertTrue(restarted.backgroundServiceEnabled)
+        coordinator.setBackgroundOnly(false)
+        XCTAssertFalse(coordinator.backgroundOnly)
+        XCTAssertTrue(coordinator.backgroundServiceEnabled)
+    }
+
+    @MainActor func testDisablingMenuBarLeavesBackgroundOnlyMode() {
+        let suite = "BackgroundOnly.Disable.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let coordinator = BackgroundServiceCoordinator(defaults: defaults)
+        coordinator.setBackgroundOnly(true)
+        coordinator.setBackgroundServiceEnabled(false)
+        XCTAssertFalse(coordinator.backgroundOnly)
+        XCTAssertFalse(coordinator.backgroundServiceEnabled)
+    }
+
+    func testMenuBarReusesAccessoryWindowClientAndExcludesBackgroundService() {
+        let applications: [BackgroundServiceCoordinator.RunningAppSnapshot] = [
+            .init(processIdentifier: 101, activationPolicy: .accessory, isActive: true, isTerminated: false),
+            .init(processIdentifier: 102, activationPolicy: .accessory, isActive: false, isTerminated: false),
+            .init(processIdentifier: 103, activationPolicy: .accessory, isActive: false, isTerminated: true)
+        ]
+        let match = BackgroundServiceCoordinator.preferredReusableApplication(in: applications, excluding: 999, serviceProcessIdentifier: 101, includeAccessory: true)
+        XCTAssertEqual(match?.processIdentifier, 102)
+        XCTAssertNil(BackgroundServiceCoordinator.preferredReusableApplication(in: applications, excluding: 999))
+    }
     func testFreshInstallDefaultsEnableMenuBarIcon() async {
         let suiteName = UUID().uuidString
         let defaults = UserDefaults(suiteName: suiteName)!
